@@ -1,0 +1,15 @@
+# Baseline heads and classical regressors (strategy/02 rows 2-6)
+paths_config: configs/paths.yaml
+
+classical:
+  kinds: [xgboost, gp]
+  seed: 0
+
+mdn_independent:
+  dim: 128
+  hidden_dim: 256
+  n_components: 5
+  dropout: 0.15
+  n_alloy_classes: 14
+
+# AR ablations reuse configs/flow_head.yaml with token_head: gaussian | mdn

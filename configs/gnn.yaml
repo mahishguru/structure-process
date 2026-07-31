@@ -1,0 +1,30 @@
+# GNN pipeline: RVE generation + graph building + encoder settings
+paths_config: configs/paths.yaml
+
+# RVE generation (per-image at the 150 um scale, from per-image grain stats
+# + per-condition experimental ODF; see
+# src/icme_mg/pipelines/gnn/generate_rves.py)
+rve_root: data/gnn/rves
+staging_root: data/gnn/staging_perimage
+stats_scale: 150
+generation_workers: 8
+# Reuse MTEX angle conversions from the earlier per-condition staging run:
+odf_cache_seed: data/gnn/staging/odf
+# PipelineRunner path is hardcoded inside the Sampling repo's
+# 04_generate_rves.py (verified: DREAM3D-6.5.171 bin/PipelineRunner).
+
+# Graph building
+build_synthetic: true
+build_experimental: false
+scales: [150]
+min_grain_px: 5
+
+# GNN encoder (trained jointly with the flow head)
+gnn_encoder:
+  hidden_dim: 128
+  num_layers: 4
+  heads: 4
+  pool_tokens: 8       # super-node tokens for the flow head cross-attention
+  dropout: 0.1
+  node_dropout: 0.05   # augmentation (0.15 over-regularized: run 3)
+  edge_dropout: 0.05

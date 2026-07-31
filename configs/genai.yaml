@@ -1,0 +1,14 @@
+# GenAI latent extraction (ViT-FMDiT-1280 encoder)
+paths_config: configs/paths.yaml
+
+# The encoder was trained on orientation-codec encoded RGB images, so the
+# corpus is rendered from the SAME synthetic RVEs as the GNN pipeline:
+#   scripts/generate_rves.py      -> data/gnn/rves/{cid}/rve/*.dream3d
+#   scripts/render_rve_images.py  -> data/genai/images/{cid}__{i}.png
+#   scripts/extract_genai_latents.py -> data/genai/latents.npz
+rve_root: data/gnn/rves
+class_means: /media/guru/Elements/backup_11_2026/Worspace_Mahish/Phd/Database/synthetic_data/png/class_means.json
+image_dir: data/genai/images
+
+batch_size: 16
+device: cpu   # CUDA driver too old for the installed torch build

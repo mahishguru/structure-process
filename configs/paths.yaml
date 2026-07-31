@@ -1,0 +1,28 @@
+# Central path configuration. All builders read this file.
+
+# External data (absolute paths, machine-specific)
+database_root: /media/guru/Elements/backup_11_2026/Worspace_Mahish/Phd/Database/database_24_06
+training_data_root: /media/guru/Elements/backup_11_2026/Worspace_Mahish/Phd/Database/training_data
+labels_xlsx: data_labels.xlsx
+
+genai_repo: /home/guru/Worspace_Mahish/Phd/02_Microstrucure_Reconstruction/2D_reconstruction/GenAI/encoder-decoder-micro-reconstruction
+genai_checkpoint: data/vit-fmdit-1280/checkpoint_epoch_040.pth
+sampling_repo: /home/guru/Worspace_Mahish/Phd/02_Microstrucure_Reconstruction/2D_reconstruction/Sampling
+sampling_python: /home/guru/Worspace_Mahish/Phd/02_Microstrucure_Reconstruction/2D_reconstruction/Sampling/sampling/bin/python
+characterization_repo: /home/guru/Worspace_Mahish/Phd/01_Microstructure_Characterization
+synthetic_data_root: /media/guru/Elements/backup_11_2026/Worspace_Mahish/Phd/Database/synthetic_data
+matlab_bin: /usr/local/MATLAB/R2024a/bin/matlab
+mtex_root: /home/guru/Documents/MTEX/mtex-5.11.2
+
+# Repo-local outputs
+data_root: data
+
+# Label policy
+include_heat_treated: false
+elements: [Al, Zn, Mn, Ce, Gd, Ca, Nd, Y]
+
+# Split policy
+loco_folds: 5
+split_seed: 0
+val_fraction: 0.15   # of training conditions, per fold
+include_loao: false   # archival extrapolation study, not part of the main protocol

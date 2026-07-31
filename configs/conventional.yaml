@@ -1,0 +1,16 @@
+# Conventional descriptor dataset build (per-image, Acta best combination
+# + grain-statistics histograms)
+paths_config: configs/paths.yaml
+
+# One sample per experimental image; features come from the pre-reduced
+# training_data arrays:
+#   3pt PCA (120) + gram Isomap (200) + AR hist (29) + eq-diameter hist (29)
+#   + GSH Isomap (60, condition-level) = 438-D
+# All four scales; images filtered to the RVE manifests so the corpus matches
+# the GenAI and GNN pipelines exactly.
+scales: [90, 100, 120, 150]
+rve_manifest_root: data/gnn/rves
+
+# Historical filenames retained so existing runs remain reproducible. These are
+# five alloy-stratified random folds over whole conditions.
+splits: [loco_fold0, loco_fold1, loco_fold2, loco_fold3, loco_fold4]

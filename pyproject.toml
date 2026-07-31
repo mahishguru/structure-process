@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "icme_mg"
+version = "0.1.0"
+description = "Inverse composition-process linkages for extruded Mg alloys (NeurIPS AI4Mat)"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "openpyxl",
+    "scikit-learn",
+    "scipy",
+    "pyyaml",
+    "torch>=2.1.0",
+    "tqdm",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+genai = [
+    "open_clip_torch>=2.20.0",
+    "Pillow>=10.0.0",
+]
+gnn = [
+    "torch_geometric",
+    "h5py",
+    "networkx",
+    "opencv-python",
+    "scikit-image",
+]
+baselines = [
+    "xgboost",
+]
+dev = [
+    "pytest",
+    "xgboost",
+    "h5py",
+    "networkx",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

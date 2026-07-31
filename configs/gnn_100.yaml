@@ -1,0 +1,11 @@
+# RVE generation at the 100 um scale (per-image; codec images for GenAI).
+# Same rve_root as the 150 run: file stems contain the scale, no collisions.
+paths_config: configs/paths.yaml
+
+rve_root: data/gnn/rves
+staging_root: data/gnn/staging_perimage_100
+stats_scale: 100
+generation_workers: 8
+# Shared per-condition ODF cache (already populated by the 150 run):
+odf_cache_root: data/gnn/staging_perimage/odf_cache
+odf_cache_seed: data/gnn/staging/odf

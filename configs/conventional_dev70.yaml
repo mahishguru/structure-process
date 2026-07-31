@@ -1,0 +1,5 @@
+# Conventional build restricted to the dev70 split (see conventional.yaml)
+paths_config: configs/paths.yaml
+scales: [90, 100, 120, 150]
+rve_manifest_root: data/gnn/rves
+splits: [dev70]

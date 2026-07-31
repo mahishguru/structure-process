@@ -1,0 +1,45 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Environments
+.venv/
+venv/
+env/
+
+# Data artifacts (regenerate via scripts/)
+data/
+!data/README.md
+checkpoints/
+runs/
+wandb/
+catboost_info/
+*.pth
+*.pt
+*.ckpt
+*.dream3d
+*.h5
+*.hdf5
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+.~lock.*
+
+# LaTeX build
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls

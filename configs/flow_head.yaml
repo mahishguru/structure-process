@@ -1,0 +1,37 @@
+# Flow-transformer head + training recipe (strategy/01, frozen spec v1)
+paths_config: configs/paths.yaml
+
+head:
+  dim: 128
+  layers: 4
+  heads: 4
+  ffn_hidden: 256
+  dropout: 0.15
+  flow_bins: 8
+  flow_hidden: 128
+  n_alloy_classes: 14
+  cond_dropout: 0.1
+  token_head: spline        # spline | gaussian | mdn (AR ablations)
+
+adapter:
+  conventional: {n_tokens: 8}
+  genai: {token_dim: 80, n_tokens: 16}
+  gnn: {pool_tokens: 8}     # encoder settings live in configs/gnn.yaml
+
+training:
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  epochs: 200
+  batch_size: 64
+  samples_per_condition: 8  # balanced sampler
+  aux_weight: 0.3
+  aux_anneal_frac: 0.5
+  ema_decay: 0.999
+  grad_clip: 1.0
+  patience: 25
+  seed: 0
+  device: cpu               # set cuda when available
+
+inference:
+  n_samples: 256
+  shortlist_k: 5
