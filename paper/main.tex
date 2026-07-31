@@ -40,8 +40,9 @@ statistical descriptors carry the most provenance information for decisions,
 while frozen generative-encoder latents win joint likelihood. Second, the
 literature-default continuous density head is the wrong output type for this
 task: alloy compositions live on a small discrete lattice, and a probabilistic
-14-way classifier fused with retrieval halves the element error of the flow
-(present-element WAPE 44.8\% to 21.4\%) and nearly doubles alloy
+14-way classifier fused with retrieval, condition balancing, and
+validation-selected prior correction reduces the element error of the flow by
+57\% (present-element WAPE 44.8\% to 19.1\%) and nearly doubles alloy
 identification (top-1 0.31 to 0.58), while its distribution over nominal
 compositions is the natural, calibratable uncertainty statement. Third, we
 show why the split unit is decisive in this repeated-image dataset: random
@@ -64,10 +65,11 @@ windows); need joint, calibrated densities.}
 \textbf{Contributions.}
 (i) A unified benchmark: three descriptor families, one shared probabilistic
 head, identical splits and metrics on 108 extrusion conditions of 14 Mg alloys.
-(ii) A systematic head study showing that typed discrete prediction
-(classification over the composition lattice fused with retrieval) dominates
-continuous density estimation for recipe recovery in the scarce-data regime,
-with the fused class distribution as the composition uncertainty statement.
+(ii) A systematic head study showing that discrete composition prediction
+(condition-balanced classification over the composition lattice fused with
+retrieval and validation-selected prior correction) dominates continuous
+density estimation for recipe recovery in the scarce-data regime, with the
+fused class distribution as the composition uncertainty statement.
 (iii) A split-unit audit showing that image-random evaluation is a memorization
 upper bound, and a leakage-safe benchmark using stratified random folds over
 whole processing conditions.
@@ -90,11 +92,14 @@ discipline and the global-reduction limitation.}
 \label{sec:method}
 
 \subsection{Descriptor pipelines}
-\todo{Conventional: 2-pt PCA(100), 3-pt PCA(120), Gram Isomap(200), GSH
-Isomap(60), grain histograms; concatenated across magnifications.
-GenAI: frozen ViT encoder latents, 16 tokens x 80-D.
-GNN: grain-adjacency graphs (DREAM.3D RVEs and binarized experimental masks),
-GATv2 encoder with multi-seed attention pooling.}
+\todo{Conventional: one 438-D vector per image, comprising 3-point PCA (120),
+Gram Isomap (200), aspect-ratio and equivalent-diameter histograms (29 each),
+and condition-level GSH Isomap features (60). Images from the 90, 100, 120,
+and 150\,\textmu m fields of view are repeated observations, not concatenated
+feature blocks. GenAI: frozen ViT encoder latents, 16 tokens $\times$ 80-D.
+GNN: grain-adjacency graphs from DREAM.3D RVEs, encoded by GATv2 with
+multi-seed attention pooling; the main comparison uses the 90\,\textmu m
+graphs.}
 
 \subsection{Autoregressive flow-transformer head}
 % From strategy/01: 10 label tokens, causal decoder d=128, 4 layers,
@@ -108,6 +113,36 @@ p(\mathbf{y} \mid \mathbf{c}) \;=\; \prod_{k=1}^{10}
 p\!\left(y_k \,\middle|\, y_{<k}, \mathbf{c}\right), \qquad
 p(y_e \mid \cdot) = (1-\pi_e)\,\delta_0(y_e) + \pi_e\, f_e(y_e \mid \cdot).
 \end{equation}
+
+\subsection{Condition-balanced discrete composition head}
+The proposed composition head treats the 14 nominal alloy compositions as a
+discrete lattice. During CatBoost training, image $i$ from condition $c$
+receives weight $1/n_c$, normalized to unit mean, so every processing
+condition contributes equal total loss despite having 15--108 images. A
+second posterior is obtained from cosine $k$-nearest-neighbor retrieval in
+training-standardized descriptor space, with $k=5$, similarity temperature
+0.05, and the same condition-balanced vote weights. Their image-level class
+posteriors are fused as
+\begin{equation}
+  p_{\mathrm{fuse}}(a\mid x) = \tfrac{1}{2}p_{\mathrm{CB}}(a\mid x)
+  + \tfrac{1}{2}p_{\mathrm{kNN}}(a\mid x),
+\end{equation}
+To reduce long-tail bias, let $N_a$ be the number of unique training
+conditions for alloy $a$. Before condition-level pooling, we remove a
+validation-selected power of this empirical prior from each image posterior,
+\begin{equation}
+  p_{\tau}(a\mid x) =
+  \frac{p_{\mathrm{fuse}}(a\mid x) / N_a^{\tau}}
+       {\sum_b p_{\mathrm{fuse}}(b\mid x) / N_b^{\tau}},
+  \qquad \tau\in\{0,0.25,0.5,0.75,1\}.
+\end{equation}
+The corrected probabilities are then averaged over all images of the query
+condition. Each outer fold selects $\tau$ using only validation-condition
+WAPE, with MAE as the tie-breaker, and evaluates the selected rule once on
+untouched test conditions. The point recipe is the nominal composition at
+$\arg\max_a p_{\tau}(a\mid x)$; the full 14-way distribution is retained for
+uncertainty analysis. The model receives only microstructure and texture
+descriptors as inputs.
 
 \section{Experiments}
 \label{sec:experiments}
