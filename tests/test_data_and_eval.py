@@ -13,7 +13,7 @@ from icme_mg.evaluation.calibration import pit_values, quantile_ece
 from icme_mg.evaluation.metrics import (aggregate_per_condition, alloy_topk,
                                         per_label_metrics, presence_f1)
 from icme_mg.training.datasets import BalancedConditionSampler
-from icme_mg.training.splits import build_loco_splits
+from icme_mg.training.splits import build_random_split
 
 ROOT = Path(__file__).resolve().parents[1]
 LABELS = ROOT / "data" / "labels" / "labels.csv"
@@ -27,12 +27,24 @@ requires_data = pytest.mark.skipif(not LABELS.exists(),
 class TestLabelsCSV:
     def test_columns_and_ranges(self):
         df = pd.read_csv(LABELS)
-        for col in ["condition_id", "alloy", "base_alloy"] + LABEL_ORDER:
+        for col in ["condition_id", "alloy", "base_alloy",
+                    "extrusion_ratio_type"] + LABEL_ORDER:
             assert col in df.columns
         assert df["condition_id"].is_unique
         assert (df[ELEMENTS] >= 0).all().all()
         assert df["T_ext"].between(150, 550).all()
         assert (df["v_ext"] > 0).all()
+
+    def test_extrusion_ratio_types(self):
+        df = pd.read_csv(LABELS)
+        is_mg_gd = (df["base_alloy"].str.startswith("Mg-")
+                    & df["base_alloy"].str.contains("Gd"))
+        assert set(df["extrusion_ratio_type"]) == {
+            "standard", "mg_gd_series"}
+        assert (df.loc[is_mg_gd, "extrusion_ratio_type"]
+                == "mg_gd_series").all()
+        assert (df.loc[~is_mg_gd, "extrusion_ratio_type"]
+                == "standard").all()
 
     def test_expected_counts(self):
         df = pd.read_csv(LABELS)
@@ -45,24 +57,22 @@ class TestSplits:
     def test_primary_split_files_valid(self):
         df = pd.read_csv(LABELS)
         all_ids = set(df["condition_id"])
-        files = sorted(SPLITS.glob("loco_fold*.json"))
-        assert len(files) == 5
-        for f in files:
-            s = json.loads(f.read_text())
-            tr, va, te = set(s["train"]), set(s["val"]), set(s["test"])
-            assert tr | va | te == all_ids
-            assert not (tr & va or tr & te or va & te)
+        s = json.loads((SPLITS / "random_seed0.json").read_text())
+        tr, va, te = set(s["train"]), set(s["val"]), set(s["test"])
+        assert tr | va | te == all_ids
+        assert not (tr & va or tr & te or va & te)
+        assert s["seed"] == 0
 
     def test_grouped_random_protocol(self):
         df = pd.read_csv(LABELS)
-        splits = build_loco_splits(df, k=5, val_fraction=0.15, seed=0)
-        assert set(splits) == {f"loco_fold{i}" for i in range(5)}
-        assert all(split["protocol"] == "random_grouped"
-                   for split in splits.values())
-        for split in splits.values():
-            train_alloys = set(df.loc[
-                df["condition_id"].isin(split["train"]), "base_alloy"])
-            assert train_alloys == set(df["base_alloy"])
+        splits = build_random_split(
+            df, val_fraction=0.15, test_fraction=0.15, seed=0)
+        assert set(splits) == {"random_seed0"}
+        split = splits["random_seed0"]
+        assert split["protocol"] == "alloy_stratified_random_condition_split"
+        train_alloys = set(df.loc[
+            df["condition_id"].isin(split["train"]), "base_alloy"])
+        assert train_alloys == set(df["base_alloy"])
 
 
 class TestSampler:

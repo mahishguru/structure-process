@@ -44,7 +44,7 @@ pip install -e ".[dev]"
 # 1. Build labels (composition + process parameters per condition)
 python scripts/build_labels.py --config configs/paths.yaml
 
-# 2. Build five frozen random folds over conditions, stratified by alloy
+# 2. Build one frozen random condition split (seed 0), stratified by alloy
 python scripts/build_splits.py --config configs/paths.yaml
 
 # 3. Assemble descriptor datasets
@@ -53,8 +53,8 @@ python scripts/extract_genai_latents.py --config configs/genai.yaml   # needs ch
 python scripts/build_graphs.py --config configs/gnn.yaml
 
 # 4. Train
-python scripts/train.py --config configs/flow_head.yaml --pipeline conventional --split loco_fold0
-python scripts/train_baselines.py --config configs/baselines.yaml --split loco_fold0 --kind xgboost
+python scripts/train.py --config configs/flow_head.yaml --pipeline conventional --split random_seed0
+python scripts/train_baselines.py --config configs/baselines.yaml --split random_seed0 --kind xgboost
 
 # 5. Evaluate / aggregate
 python scripts/evaluate.py --run-dir runs/<run>
@@ -67,16 +67,25 @@ python scripts/random_split_benchmark.py
 python scripts/logit_adjusted_fusion.py
 ```
 
-The historical `loco_fold*` filenames contain alloy-stratified random folds
-over whole conditions. Images from one condition never cross partitions. A
-random split over individual images gives perfect composition prediction because
-all test conditions also occur in training; it is retained only as a leakage
-diagnostic in `runs/summary_random_image_fuse.json`.
+Run the conditioned composition/process head comparison for Conventional,
+GenAI, and GNN with the single random split:
 
-The composition head reaches 19.1% present-element WAPE under this grouped
-protocol. It gives every condition equal training mass, fuses CatBoost with
-cosine kNN, and selects the long-tail prior-correction strength on validation
-conditions before evaluating each untouched test fold.
+```bash
+setsid env PYTHON=.venv/bin/python \
+  bash scripts/run_cross_pipeline_random_seed0.sh \
+  > runs/cross_pipeline_random_seed0_bootstrap.log 2>&1 < /dev/null &
+```
+
+The resumable chain builds labels and the split, overlaps Conventional dataset
+preparation with GNN encoder training, and then runs the three GPU-heavy head
+benchmarks sequentially. Progress is written to
+`runs/cross_pipeline_random_seed0_chain.log`.
+
+The primary protocol is `random_seed0`: one alloy-stratified random split over
+whole conditions. Images from one condition never cross partitions. There is no
+leave-one-condition-out or leave-one-alloy-out evaluation. A random split over
+individual images remains only as a leakage diagnostic because repeated images
+would place the same condition labels in both training and test sets.
 
 ## Prediction targets
 

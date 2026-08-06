@@ -7,6 +7,7 @@ Sources:
 
 Output columns:
     condition_id, alloy, base_alloy, heat_treated, alloy_class_idx,
+    extrusion_ratio_type,
     Al, Zn, Mn, Ce, Gd, Ca, Nd, Y  (wt%),
     T_ext (deg C), v_ext (mm/s)
 """
@@ -33,6 +34,13 @@ _XLSX_ELEMENTS = {"Al": "Al", "Zn": "Zn", "Mn": "Mn", "Ce": "Ce",
                   "Gd": "Gd", "Ca": "Ca", "Nd": "Nd", "Y": "Y"}
 
 _COND_RE = re.compile(r"^(?P<T>\d+(?:\.\d+)?)_(?P<v>\d+(?:\.\d+)?)$")
+
+
+def extrusion_ratio_type(base_alloy: str) -> str:
+    """Return the known two-level extrusion-ratio category."""
+    if base_alloy.startswith("Mg-") and "Gd" in base_alloy:
+        return "mg_gd_series"
+    return "standard"
 
 
 def read_composition_table(xlsx_path: str | Path) -> pd.DataFrame:
@@ -112,9 +120,11 @@ def build_labels(database_root: str | Path, labels_xlsx: str | Path,
     # Deterministic alloy class index over base alloys present (for aux classifier)
     classes = sorted(df["base_alloy"].unique())
     df["alloy_class_idx"] = df["base_alloy"].map({c: i for i, c in enumerate(classes)})
+    df["extrusion_ratio_type"] = df["base_alloy"].map(extrusion_ratio_type)
 
     cols = (["condition_id", "alloy", "base_alloy", "heat_treated",
-             "alloy_class_idx"] + ELEMENTS + ["T_ext", "v_ext"])
+             "alloy_class_idx", "extrusion_ratio_type"]
+            + ELEMENTS + ["T_ext", "v_ext"])
     df = df[cols].sort_values("condition_id").reset_index(drop=True)
 
     # Sanity checks

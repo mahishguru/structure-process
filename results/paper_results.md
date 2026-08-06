@@ -1,72 +1,215 @@
 # Final Paper Results (source of truth)
 
+PROTOCOL: the paper reports ONE frozen alloy-stratified random split over whole
+conditions (seed 0, 72/18/18 conditions). Table 3 is the only set of numbers
+that appears in paper/main.tex. The earlier random condition-grouped 5-fold CV
+tables were superseded and removed; their raw summaries remain under runs/ and
+results/archive/.
+
 Story: inverse structure->recipe on scarce data. Three findings:
-(1) representation comparison under a shared probabilistic head (conventional
-descriptors carry the most provenance information); (2) continuous density
-estimation is the wrong output type for a discrete composition lattice; typed
-discrete prediction (classification + retrieval fusion) halves the error; (3)
-random image splitting is fully leaked because repeated images of every test
-condition occur in training, so the study uses stratified random folds over
-whole conditions.
+(1) the two halves of a recipe favour different representations (conventional
+descriptors identify the alloy, GNN embeddings predict the extrusion window and
+carry the only near-calibrated process uncertainty); (2) composition is a
+discrete 14-alloy lattice, so a condition-balanced classifier fused with
+retrieval beats direct continuous regression on present-element WAPE (24.1% vs
+39.6%) and additionally names the alloy; (3) random image splitting is fully
+leaked because repeated images of every test condition occur in training, so
+the study assigns whole conditions to the frozen split.
 
-The final fusion gives each processing condition equal total training weight
-and removes a validation-selected power of the empirical alloy-frequency
-prior. This matches the condition-level estimand despite the observed 15-108
-images per condition and reduces bias against alloys represented by only four
-conditions.
+The final fusion gives each processing condition equal total training weight.
+This matches the condition-level estimand despite the observed 15-108 images
+per condition and reduces bias against alloys represented by only four
+conditions. The additional prior-power correction is NOT used in the headline
+result: on the seed-0 split it degrades WAPE from 24.1% to 47.7%, i.e. tau
+cannot be selected reliably from 18 validation conditions.
 
-Flow-AR is kept in the paper in two roles only: the shared head for the
-representation comparison (Table 1) and the continuous-density baseline in the
-head study (Table 2). It is not the proposed method.
+Flow-AR is dropped from the paper: it has no seed-0 counterpart, so no
+flow-versus-lattice claim is made.
 
-## Table 1: Representation comparison (random condition-grouped 5-fold CV, shared flow-AR head)
+## Stored artifacts (every table and figure is rebuildable without retraining)
 
-| pipeline | joint NLL | presence F1 | top-1 | top-3 | ECE | element MAE |
-|---|---|---|---|---|---|---|
-| Conventional | 2.460 +/- 2.826 | **0.648 +/- 0.132** | **0.31** | **0.46** | **0.299** | **0.478** |
-| GenAI latents | **-1.150 +/- 1.744** | 0.553 +/- 0.073 | 0.20 | 0.34 | 0.322 | 0.550 |
-| GNN (90 um only) | 0.553 +/- 0.479 | 0.394 +/- 0.162 | 0.16 | 0.28 | 0.320 | 0.709 |
+Aggregate metrics alone were not enough: adding MAPE once forced a full re-fit.
+The benchmark therefore also writes RAW test predictions, so any new metric is
+a recomputation instead of a re-run.
 
-Message: generative latents win density modeling; conventional descriptors win
-every decision metric; all flows are overconfident (cov90 0.18-0.37 vs 0.90).
+| artifact | content |
+|---|---|
+| runs/predictions_cross_pipeline_{pipeline}_random_seed0.npz | raw per-image test predictions: 14-way class probabilities for the 7 probabilistic composition heads, 8-element vectors for the 2 regression heads, (T_ext, v_ext) for the 4 image-level process heads, and condition-level GP mean AND predictive sigma; plus the image condition ids needed to join to labels |
+| runs/summary_cross_pipeline_heads_{pipeline}_random_seed0.json | aggregate metrics as computed at run time |
+| results/tables/composition_heads.csv | tidy (pipeline, head) x (WAPE, MAE, top-1, top-3, class NLL) -> Table 3a |
+| results/tables/composition_per_element.csv | tidy (pipeline, head, element) x (MAE, present-WAPE) -> per-element figures |
+| results/tables/process_heads.csv | tidy (pipeline, head, target) x (MAE, MAPE, WAPE, R2, NLL, coverage90) -> Table 3b |
 
-## Table 1b: Representation comparison under the SAME winning head
-(fusion = CatBoost cls + kNN, identical code path for all three; GNN uses
-embeddings extracted from the trained per-fold GATv2 encoders, mean-pooled
-tokens; genai uses flattened 16x80 latents. Random condition-grouped 5-fold CV.
-source: runs/summary_unified_{conventional,genai,gnn}_loco.json)
+Commands:
+- `python scripts/metrics_from_predictions.py --out FILE` recomputes every
+  metric from the npz files, fitting nothing.
+- `python scripts/export_paper_tables.py` regenerates the CSVs and prints the
+  markdown for Tables 3a/3b.
 
-| pipeline | el. WAPE (fuse) | el. MAE | top-1 | top-3 | class NLL | T WAPE |
-|---|---|---|---|---|---|---|
-| Conventional | **21.7%** | **0.292** | **0.54** | **0.68** | **1.66** | 13.1% |
-| GenAI latents | 57.5% | 0.485 | 0.29 | 0.50 | 2.44 | 16.1% |
-| GNN (90 um) | 57.2% | 0.503 | 0.27 | 0.44 | 2.69 | 14.1% |
+Verified: recomputing from the conventional npz reproduces all 227 metric
+scalars in the summary JSON exactly (zero mismatches), so the prediction store
+is a sufficient statistic for the reported numbers. Storing the GP sigma is
+what keeps NLL and coverage recomputable.
 
-Message: the representation ranking is HEAD-INVARIANT. Conventional wins under
-both the flow head and the discrete fusion head; the head-study conclusion is
-not an artifact of the conventional pipeline. (Per-head detail: kNN/cat/fuse
-all available per pipeline in the summary files.)
+## Table 3: Cross-pipeline conditioned head benchmark (single random split, seed 0) - THE PAPER TABLES
 
-## Table 2: Head study (conventional features, random condition-grouped CV) - the core table
+ONE alloy-stratified random split over whole conditions (seed 0),
+train/val/test = 72/18/18 conditions (2909/729/710 images), no fold averaging.
+Every entry is a single-split point estimate on 18 test conditions, so top-1
+moves in steps of 0.056 and head-to-head gaps below ~0.15 are not resolvable.
 
-| head | element WAPE | element MAE | top-1 | top-3 | T_ext WAPE |
-|---|---|---|---|---|---|
-| Flow-AR (MAP decode) | 44.8% | 0.478 | 0.31 | 0.46 | 14.8% |
-| Flow-AR + lattice-snap decode | 45.1% | 0.412 | 0.30 | 0.49 | 14.0% |
-| kNN retrieval (k=5) | 34.3% | 0.374 | 0.48 | 0.61 | 13.1% |
-| XGBoost 14-way classifier | 36.6% | 0.346 | 0.40 | 0.66 | 13.1% |
-| CatBoost 14-way classifier | 25.7% | 0.322 | 0.50 | 0.68 | 13.1% |
-| FT-Transformer | 30.2% | 0.396 | 0.46 | 0.62 | **12.1%** |
-| AR level chain (alloy-scored) | 35.4% | 0.325 | 0.45 | 0.62 | 15.0% |
-| CatBoost + kNN fusion | 21.7% | 0.292 | 0.54 | **0.68** | 13.1% |
-| Condition-balanced CatBoost + kNN fusion | 21.4% | 0.244 | **0.58** | **0.68** | 12.8% |
-| **Prior-adjusted condition-balanced fusion** | **19.1%** | **0.221** | **0.58** | **0.68** | 12.8% |
-| AR level chain + kNN fusion | 26.0% | **0.273** | 0.51 | 0.66 | 15.0% |
+Input contract (see paper/dataset.md): the two tasks are symmetric. Composition
+heads see representation + KNOWN T_ext and log(v_ext) + extrusion_ratio_type
+one-hot; process heads see representation + KNOWN element wt% +
+extrusion_ratio_type one-hot. Each task is conditioned on the half of the
+condition label that the other one predicts.
+(source: runs/summary_cross_pipeline_heads_{conventional,genai,gnn}_random_seed0.json)
 
-Message: composition on a 14-alloy lattice is a classification problem;
-fusing a condition-balanced GBDT classifier with condition-balanced retrieval
-and validation-selected long-tail correction reduces the flow's element WAPE
-by 57% while nearly doubling alloy identification.
+### Table 3a: Composition given known process parameters (element WAPE /
+element MAE / alloy top-1)
+
+| head | conv WAPE | conv MAE | conv top-1 | genai WAPE | genai MAE | genai top-1 | gnn WAPE | gnn MAE | gnn top-1 |
+|---|---|---|---|---|---|---|---|---|---|
+| kNN retrieval | 31.3% | 0.433 | 0.389 | 40.9% | 0.527 | 0.333 | 38.8% | 0.291 | 0.222 |
+| XGBoost classifier | 51.6% | 0.392 | 0.333 | 37.5% | 0.275 | 0.222 | 37.0% | 0.245 | 0.222 |
+| CatBoost classifier | 24.8% | 0.284 | 0.444 | 39.4% | 0.300 | 0.222 | 38.0% | 0.262 | 0.222 |
+| FT-Transformer | 36.3% | 0.301 | 0.444 | 51.8% | 0.346 | 0.222 | 51.5% | 0.332 | 0.167 |
+| CatBoost + kNN fusion | 25.3% | 0.307 | 0.444 | 39.3% | 0.297 | 0.222 | 38.0% | 0.262 | 0.222 |
+| Condition-balanced fusion | **24.1%** | 0.248 | **0.500** | 39.3% | 0.297 | 0.222 | 37.5% | 0.261 | 0.222 |
+| Prior-adjusted balanced fusion | 47.7% | 0.297 | 0.389 | 38.6% | 0.334 | 0.222 | 36.7% | 0.305 | 0.222 |
+| XGBoost regression | 39.6% | **0.232** | - | 47.5% | 0.257 | - | **35.5%** | 0.244 | - |
+| CatBoost regression | 46.3% | 0.290 | - | 50.4% | 0.273 | - | 38.6% | 0.251 | - |
+
+Top-3 and class NLL are in the JSON. Best top-3 per pipeline: conventional
+0.667 (FT-Transformer), genai 0.556 (CatBoost classifier), gnn 0.556
+(XGB/CatBoost classifier). Best class NLL: 2.05 conventional, 2.50 genai, 2.56
+gnn (FT-Transformer in all three).
+
+### Table 3b: Process given known composition (MAE / MAPE / R2 per target)
+
+T_ext MAE is in C, v_ext MAE in mm/s. Both targets are strictly positive
+(T_ext 200-500 C, v_ext 0.5-7.5 mm/s), so MAPE is well defined, but the two
+targets have very different MAPE floors: a constant train-mean predictor scores
+14.5% on T_ext and 136.5% on v_ext, because v_ext spans 1.18 decades against
+0.40 for T_ext. Compare MAPE down a column, never across the two targets.
+(full precision in results/tables/process_heads.csv)
+
+| head | conv T MAE | conv T MAPE | conv T R2 | conv v MAE | conv v MAPE | conv v R2 | genai T MAE | genai T MAPE | genai T R2 | genai v MAE | genai v MAPE | genai v R2 | gnn T MAE | gnn T MAPE | gnn T R2 | gnn v MAE | gnn v MAPE | gnn v R2 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| kNN retrieval | 36.2 | 9.7% | **0.483** | 0.90 | **39.5%** | **0.628** | 51.9 | 13.9% | -0.001 | 1.05 | 42.6% | 0.362 | 32.6 | 9.4% | 0.460 | 0.94 | **30.6%** | 0.498 |
+| XGBoost | 37.0 | 10.0% | 0.225 | **0.83** | 69.0% | 0.439 | 40.3 | 11.7% | 0.275 | 1.11 | 58.5% | 0.436 | 34.5 | 10.1% | 0.384 | 0.93 | 43.0% | **0.575** |
+| CatBoost | **35.2** | **9.1%** | 0.466 | 1.10 | 56.5% | 0.373 | 38.2 | **11.1%** | 0.274 | 1.07 | 53.3% | 0.459 | 32.6 | 9.7% | 0.405 | 0.96 | 41.6% | 0.545 |
+| FT-Transformer | 38.5 | 10.4% | 0.244 | 1.13 | 45.0% | 0.312 | **38.1** | 11.3% | **0.363** | **0.93** | 35.8% | **0.563** | 37.0 | 10.8% | 0.315 | 1.00 | 45.6% | 0.516 |
+| Gaussian process | 42.9 | 12.0% | 0.230 | 1.06 | 52.0% | 0.364 | 43.5 | 12.3% | 0.113 | **0.93** | **29.4%** | 0.388 | **32.0** | **9.2%** | **0.524** | **0.91** | 36.5% | 0.540 |
+
+GP 90% coverage (target 0.90): T_ext 0.778 conventional / 0.722 genai /
+**0.944** gnn; v_ext 0.889 conventional / 0.889 genai / **0.944** gnn.
+
+Message (stated at the strength the split supports): conventional descriptors
+remain the best composition representation (24.1% WAPE, top-1 0.500 under the
+condition-balanced fusion), but the margin over
+the other two shrank once Task A was conditioned on the known process
+parameters, because genai and gnn gained far more from that conditioning than
+conventional did. GNN embeddings remain the most RELIABLE process
+representation. Every GNN head lands in T_ext R2 0.315-0.524 and v_ext R2
+0.498-0.575, the tightest band of the three; conventional is wider (T_ext
+0.225-0.483, v_ext 0.312-0.628) and genai is the weakest on T_ext (down to
+-0.001). The GNN also holds the best single process result on T_ext (GP: MAE
+32.0 C, MAPE 9.2%, R2 0.524) and the best calibration (cov90 0.944 on both
+targets). Conventional still owns the single best v_ext R2 (0.628, kNN). With
+18 test conditions the head rankings inside a pipeline are noise; the
+cross-pipeline pattern is the reportable finding.
+
+## Task A conditioning (2026-08-06)
+
+Task A now receives the known extrusion parameters, mirroring Task B: the
+composition heads see representation + standardized (T_ext, log v_ext) +
+extrusion-ratio one-hot. Input widths went 440 -> 442 conventional, 1,282 ->
+1,284 genai, 130 -> 132 gnn. Process-head inputs and results are unchanged
+(bit-identical apart from ~1e-13 CatBoost GPU reduction noise), which is the
+control for the change.
+
+Element WAPE before -> after:
+
+| head | conventional | genai | gnn |
+|---|---|---|---|
+| kNN | 31.3 -> 31.3 | 49.1 -> 40.9 | 51.8 -> 38.8 |
+| XGB classifier | 51.6 -> 51.6 | 46.1 -> 37.5 | 55.1 -> 37.0 |
+| CatBoost classifier | 24.8 -> 24.8 | 52.4 -> 39.4 | 58.2 -> 38.0 |
+| FT-Transformer | 42.2 -> 36.3 | 70.1 -> 51.8 | 60.1 -> 51.5 |
+| CatBoost + kNN | 25.3 -> 25.3 | 27.4 -> 39.3 | 52.5 -> 38.0 |
+| Balanced fusion | 24.1 -> 24.1 | 33.5 -> 39.3 | 59.5 -> 37.5 |
+| Prior-adjusted | 47.7 -> 47.7 | 33.5 -> 38.6 | 58.3 -> 36.7 |
+| XGB regression | 40.7 -> 39.6 | 73.8 -> 47.5 | 60.5 -> 35.5 |
+| CatBoost regression | 45.7 -> 46.3 | 70.8 -> 50.4 | 61.7 -> 38.6 |
+
+Three observations worth keeping:
+
+1. The gain is inversely proportional to how good the representation already
+   was. The gnn and genai heads, which were near 50-70% WAPE, converge to a
+   tight 35-52% band; the conventional tree and kNN heads do not move at all.
+2. The conventional tree/kNN heads are NOT frozen: their probabilities do
+   change (kNN maxdiff 0.386, CatBoost 0.079, XGB 0.053). Element WAPE and
+   top-1 for a classification head are step functions of 18 condition-level
+   argmax decisions, and none of those flipped. The FT-Transformer flipped 5
+   of 18, which is why it was the only conventional classifier that moved.
+3. The trees barely use the new columns (XGB gain share 0.01% for T_ext and
+   0.01% for log v_ext; CatBoost 0.003 and 0.100 against 28.5 for the
+   ratio one-hot, its single most important feature). The labels explain it:
+   the expected number of base alloys still consistent with the conditioning
+   is 6.85 of 14 given the ratio type alone, 4.74 given (T_ext, v_ext) alone,
+   and 4.57 given all three. The nine Mg-Gd alloys share one 350/450 C and
+   0.5/1/2 mm/s grid, so the process parameters separate FAMILIES, which the
+   ratio one-hot already did, and almost never isolate an alloy.
+
+Side effect: alloy top-1 fell for genai and gnn (0.389 -> 0.222, 0.278 ->
+0.222) while element WAPE improved sharply. The heads now make compositionally
+CLOSER mistakes, picking the wrong alloy inside the right family, which the
+element metrics reward and top-1 does not. Report WAPE and MAE as the primary
+composition metrics and treat top-1 as secondary on 18 conditions.
+
+## Process-head corrections (2026-08-04)
+
+The labels were audited first and are clean: 108 unique conditions, the
+condition_id encodes `<alloy>_extruded_<T>_<v>` and agrees with the T_ext and
+v_ext columns in all 108 rows, no nulls, no duplicates. The bad v_ext numbers
+came from three head-side defects, all now fixed in
+scripts/cross_pipeline_heads.py:
+
+1. CatBoost fitted both targets with `MultiRMSE` on RAW units. var(T_ext)=5963
+   against var(v_ext)=5.64, so v_ext received 0.09% of the squared-error
+   budget. Targets are now standardized before the joint objective.
+2. v_ext is a log-scale quantity (grid 0.5, 0.6, 0.75, 1, 1.4, 2, 2.4, 2.8, 5,
+   5.5, 6, 7.5; successive ratios 1.1-1.8). Squared error on the raw scale
+   shrank predictions toward the mean, which is worst exactly where the MAPE
+   denominator is smallest. All process heads now learn log(v_ext) and invert.
+3. The process heads inherited `balanced=True` condition weighting from the
+   composition classifier, which hurt them badly (XGB v_ext R2 -0.349 balanced
+   against +0.103 unbalanced). Condition balancing is now used only by the
+   composition heads, where it was designed.
+
+Net effect on the conventional pipeline: v_ext MAPE 129.6% -> 69.0% (XGB),
+120.0% -> 56.5% (CatBoost), 105.7% -> 52.0% (GP); no head has a negative R2 any
+more (worst was -0.338). T_ext also improved (CatBoost MAE 41.2 -> 35.2 C). The
+GP is now better calibrated AND sharper on v_ext: coverage 0.889/0.889/0.944
+with NLL 2.03 -> 1.39, 1.99 -> 1.22, 1.80 -> 1.17.
+
+A fourth, separate defect was reproducibility: `PCA(n_components=32)` inside
+the GP head crosses sklearn's `svd_solver="auto"` threshold on the genai
+latents (72 x 1290, so max(shape) > 500) and silently selected the randomized
+solver with no seed. Genai GP T_ext MAE drifted 43.5 / 46.2 / 44.1 across three
+otherwise identical runs, while conventional (72 x 448) and gnn (72 x 138) fell
+back to the exact solver and were stable. PCA now takes `random_state=0`; two
+consecutive genai GP fits agree to 0.0.
+
+Note for the GP: v_ext is now modelled as lognormal, so the stored sigma is a
+log-space standard deviation, the 90% interval is multiplicative, and the
+reported NLL carries the log Jacobian so it remains a density in mm/s.
+
+Normalization alone would NOT have been enough: an affine rescaling of a
+single-target model is a no-op (XGB v_ext MAPE 119.1% raw against 119.2%
+standardized). Only the nonlinear log transform and the joint-objective
+standardization change the fit.
 
 ## Split-unit diagnostic
 
@@ -79,28 +222,30 @@ alloy-stratified folds.
 
 ## Calibration and uncertainty (text/small table)
 
-- Composition UQ = the fused 14-way distribution over nominal compositions:
-  class NLL 1.66 (vs 1.95 CatBoost alone, 5.08 kNN alone);
-  mean |confidence - accuracy| 0.32 -> temperature scaling / conformal sets.
+- Composition UQ = the fused 14-way distribution over nominal compositions.
+  Seed-0 conventional: class NLL 2.14 condition-balanced fusion vs 2.40
+  CatBoost alone and 6.04 kNN alone.
+  Best seed-0 NLL is 2.05 from the FT-Transformer, which is
+  simultaneously among the worst on WAPE -> temperature scaling / conformal
+  sets.
 - Process UQ WINNER: exact GP regression (RBF+White kernel, condition-level,
-  PCA-32 features) is essentially calibrated out of the box:
-  T_ext 90% coverage 0.858 conventional / 0.819 genai / 0.840 gnn
-  (target 0.90), T WAPE 13.3-16.4%. NGBoost coverage 0.44, CatBoost
-  RMSEWithUncertainty 0.07: both severely overconfident. GP is the process
-  head. n~86 training conditions is exactly the GP regime.
+  PCA-32 features), with v_ext modelled as lognormal. On the seed-0 split,
+  conditioned on known composition, T_ext 90% coverage is 0.778 conventional /
+  0.722 genai / 0.944 gnn (target 0.90) and v_ext coverage is 0.889 / 0.889 /
+  0.944; the GNN GP is the only near-nominal head on BOTH targets. NGBoost
+  coverage 0.44, CatBoost RMSEWithUncertainty 0.07: both severely
+  overconfident. GP is the process head. n~72-86 training conditions is exactly
+  the GP regime.
 - GP classifier over the alloy lattice is weak (top-1 0.17-0.31): condition
   pooling discards the multi-image evidence that boosting exploits; GBDT
   fusion stays the composition head.
-- GMM/MDN + AR heads are the flow-AR family already benchmarked (Table 2):
-  continuous mixtures share the flow's failure mode (mass off-lattice), so
-  the lattice argument covers them.
-- Flow-AR calibration: ECE ~0.30, cov90 0.18-0.37 in all pipelines
-  (motivates the discrete UQ pivot).
+- GMM/MDN and autoregressive flow heads share the flow's failure mode (mass
+  off-lattice), so the lattice argument covers them. They have no seed-0
+  counterpart and are not reported.
 
 ## Cut from the paper (kept in results/archive/ for reference)
 
-- proto_mix / level_mix lattice heads and dev70 screening (level_mix appears
-  indirectly: lattice-snap decode row retains the idea).
+- proto_mix / level_mix lattice heads and dev70 screening.
 - Hurdle-aware decoders (posterior mean / present-conditioned mean/median):
   all within 1% WAPE of MAP, no signal.
 - Cross-pipeline ensembles (60.7%), random forest (59.5%), kNN on genai
@@ -113,10 +258,8 @@ alloy-stratified folds.
 
 | table | source |
 |---|---|
-| Table 1 | runs/summary_loco.json (gnn), runs/summary_loco_{conventional,genai}.json |
-| Table 2 | runs/summary_tabular_*_loco.json, including summary_tabular_fuse_balanced_loco.json; runs/summary_logit_adjusted_fusion.json; runs/summary_knn_loco.json; runs/summary_snap_loco_conventional.json; runs/summary_chain_loco.json |
-| Table 1b + GP UQ | runs/summary_unified_{conventional,genai,gnn}_loco.json |
+| Table 3 | runs/summary_cross_pipeline_heads_{conventional,genai,gnn}_random_seed0.json; raw predictions runs/predictions_cross_pipeline_*_random_seed0.npz; tidy values results/tables/*.csv; scripts/cross_pipeline_heads.py; chain scripts/run_cross_pipeline_random_seed0.sh; input/output contract in paper/dataset.md |
 | split diagnostic | runs/summary_random_image_fuse.json |
 | scripts | scripts/{tabular_heads,logit_adjusted_fusion,knn_retrieval,chain_head,snap_decode,unified_heads}.py |
-| gnn embeddings | data/gnn/embeddings/loco_fold*.npz (cached from trained encoders) |
+| gnn embeddings | data/gnn/embeddings/random_seed0.npz (cached from the trained encoder) |
 | full detail | results/archive/{ablation_tables,prediction_head_ablation}.md |

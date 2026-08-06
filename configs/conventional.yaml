@@ -11,6 +11,5 @@ paths_config: configs/paths.yaml
 scales: [90, 100, 120, 150]
 rve_manifest_root: data/gnn/rves
 
-# Historical filenames retained so existing runs remain reproducible. These are
-# five alloy-stratified random folds over whole conditions.
-splits: [loco_fold0, loco_fold1, loco_fold2, loco_fold3, loco_fold4]
+# One frozen alloy-stratified random condition split.
+splits: [random_seed0]

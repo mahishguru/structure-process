@@ -34,21 +34,22 @@ Closing the inverse loop of integrated computational materials engineering
 requires answering the question a forward simulation cannot: which chemistry
 and processing route produced an observed microstructure. We study this
 structure-to-recipe problem on 108 as-extruded conditions spanning 14
-magnesium alloys and make three findings. First, benchmarking three
-representation families under a shared autoregressive flow head, conventional
-statistical descriptors carry the most provenance information for decisions,
-while frozen generative-encoder latents win joint likelihood. Second, the
-literature-default continuous density head is the wrong output type for this
-task: alloy compositions live on a small discrete lattice, and a probabilistic
-14-way classifier fused with retrieval, condition balancing, and
-validation-selected prior correction reduces the element error of the flow by
-57\% (present-element WAPE 44.8\% to 19.1\%) and nearly doubles alloy
-identification (top-1 0.31 to 0.58), while its distribution over nominal
-compositions is the natural, calibratable uncertainty statement. Third, we
+magnesium alloys and make three findings. First, on a frozen
+alloy-stratified random split over whole conditions, the two halves of a
+recipe favour different representations: conventional statistical descriptors
+identify the alloy best, whereas graph embeddings of the grain structure
+predict the extrusion window best, are the most stable across heads, and give
+the only near-calibrated process uncertainty. Second, the literature-default
+continuous output is the wrong type for chemistry: alloy compositions live on
+a small discrete lattice, and a probabilistic 14-way classifier fused with
+retrieval and condition balancing cuts the present-element WAPE of direct
+continuous regression from 40.7\% to 24.1\% at equal element MAE, while
+additionally returning alloy identity and a distribution over nominal
+compositions as the natural, calibratable uncertainty statement. Third, we
 show why the split unit is decisive in this repeated-image dataset: random
 image splitting gives 100\% alloy accuracy and zero composition error because
 every test condition is also represented in training. We therefore estimate
-generalization using alloy-stratified random folds over whole conditions.
+generalization by assigning whole conditions to the frozen split.
 \end{abstract}
 
 \section{Introduction}
@@ -63,16 +64,18 @@ windows); need joint, calibrated densities.}
 \todo{Paragraph 3: contributions list.}
 
 \textbf{Contributions.}
-(i) A unified benchmark: three descriptor families, one shared probabilistic
-head, identical splits and metrics on 108 extrusion conditions of 14 Mg alloys.
+(i) A unified benchmark: three descriptor families, identical heads, metrics
+and splits on 108 extrusion conditions of 14 Mg alloys, over the two halves of
+a recipe, namely composition from structure and the extrusion window given the
+identified composition.
 (ii) A systematic head study showing that discrete composition prediction
 (condition-balanced classification over the composition lattice fused with
-retrieval and validation-selected prior correction) dominates continuous
-density estimation for recipe recovery in the scarce-data regime, with the
-fused class distribution as the composition uncertainty statement.
+retrieval) dominates direct continuous regression for recipe recovery in the
+scarce-data regime, with the fused class distribution as the composition
+uncertainty statement.
 (iii) A split-unit audit showing that image-random evaluation is a memorization
-upper bound, and a leakage-safe benchmark using stratified random folds over
-whole processing conditions.
+upper bound, and a leakage-safe benchmark that assigns whole processing
+conditions to a frozen alloy-stratified split.
 
 \section{Related work}
 \label{sec:related}
@@ -85,7 +88,8 @@ grain graphs; prior forward work on this dataset (Acta Materialia 2025).}
 % From strategy/03: 108 as-extruded conditions, 14 base alloys, labels =
 % 8 element concentrations (wt.%) + extrusion temperature + ram speed.
 \todo{Describe database, optical micrographs at four magnifications, XRD
-texture; labels table; alloy-stratified random condition folds; leakage
+texture; labels table; the two-level extrusion-ratio encoding; the frozen
+alloy-stratified random condition split; leakage
 discipline and the global-reduction limitation.}
 
 \section{Method}
@@ -137,9 +141,11 @@ validation-selected power of this empirical prior from each image posterior,
   \qquad \tau\in\{0,0.25,0.5,0.75,1\}.
 \end{equation}
 The corrected probabilities are then averaged over all images of the query
-condition. Each outer fold selects $\tau$ using only validation-condition
-WAPE, with MAE as the tie-breaker, and evaluates the selected rule once on
-untouched test conditions. The point recipe is the nominal composition at
+condition. The exponent $\tau$ is selected on the validation conditions only,
+by WAPE with MAE as the tie-breaker, and the selected rule is evaluated once
+on the untouched test conditions; Table~\ref{tab:heads} shows that this
+selection is not reliable at the present validation size. The point recipe is
+the nominal composition at
 $\arg\max_a p_{\tau}(a\mid x)$; the full 14-way distribution is retained for
 uncertainty analysis. The model receives only microstructure and texture
 descriptors as inputs.
@@ -148,114 +154,140 @@ descriptors as inputs.
 \label{sec:experiments}
 
 \subsection{Setup}
-\todo{Metrics: present-element WAPE, element MAE, joint NLL (physical units),
-quantile ECE, presence F1, top-k alloy identification. Present-only WAPE =
-sum of absolute errors over sum of true values, per fold, macro-averaged;
-pointwise MAPE is unusable because trace-level targets explode the ratio.
-All heads share identical folds and per-condition aggregation.}
-
-\subsection{Which representation carries provenance information?}
-\begin{table}[t]
-  \caption{Random condition-grouped generalization by representation family
-  under the shared flow-AR head (5 folds, mean $\pm$ 95\% CI where shown).
-  Generative latents
-  win joint likelihood; conventional descriptors win every decision and
-  calibration metric. All flows are overconfident (90\% coverage
-  0.18--0.37).}
-  \label{tab:main}
-  \centering
-  \begin{tabular}{lcccccc}
-    \toprule
-    Pipeline & NLL $\downarrow$ & Pres.\ F1 $\uparrow$ &
-    Top-1 $\uparrow$ & Top-3 $\uparrow$ & ECE $\downarrow$ &
-    El.\ MAE $\downarrow$ \\
-    \midrule
-    Conventional & $2.46$ & $\mathbf{0.65}$ & $\mathbf{0.31}$ &
-    $\mathbf{0.46}$ & $\mathbf{0.30}$ & $\mathbf{0.48}$ \\
-    GenAI latents & $\mathbf{-1.15}$ & $0.55$ & $0.20$ & $0.34$ & $0.32$ &
-    $0.55$ \\
-    GNN (90\,\textmu m) & $0.55$ & $0.39$ & $0.16$ & $0.28$ & $0.32$ &
-    $0.71$ \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\begin{table}[t]
-  \caption{The representation ranking is head-invariant. The same
-  classification{+}retrieval fusion head (identical code path) applied to
-  all three families: conventional features, flattened generative latents,
-  and embeddings extracted from the trained per-fold graph encoders (5 random
-  condition-grouped folds).}
-  \label{tab:invariant}
-  \centering
-  \begin{tabular}{lccccc}
-    \toprule
-    Pipeline & El.\ WAPE $\downarrow$ & El.\ MAE $\downarrow$ &
-    Top-1 $\uparrow$ & Top-3 $\uparrow$ & Class NLL $\downarrow$ \\
-    \midrule
-    Conventional & $\mathbf{21.7\%}$ & $\mathbf{0.292}$ &
-    $\mathbf{0.54}$ & $\mathbf{0.68}$ & $\mathbf{1.66}$ \\
-    GenAI latents & 57.5\% & 0.485 & 0.29 & 0.50 & 2.44 \\
-    GNN (90\,\textmu m) & 57.2\% & 0.503 & 0.27 & 0.44 & 2.69 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+\todo{Metrics: present-element WAPE, element MAE, class NLL, top-$k$ alloy
+identification for composition; MAE, WAPE, $R^2$ and 90\% coverage for the
+extrusion window. Present-only WAPE = sum of absolute errors over sum of true
+values; pointwise MAPE is unusable because trace-level targets explode the
+ratio.}
+All experiments use one frozen alloy-stratified random split of the 108 whole
+conditions (seed 0) into 72 training, 18 validation and 18 test conditions
+(2{,}909/729/710 images), with no condition shared between parts. All heads
+see identical splits and identical per-condition aggregation. Composition
+heads receive the representation and a two-level encoding of the extrusion
+ratio; process heads additionally receive the known element weight fractions.
+Because the estimate is a single split over 18 test conditions, top-$k$ moves
+in steps of $1/18$ and small head-to-head differences are not resolvable; we
+report them for completeness but claim only the effects that survive this
+resolution.
 
 \subsection{The head study: recipes live on a lattice}
 \begin{table}[t]
-  \caption{Head study on conventional features (5 random condition-grouped
-  folds). Composition
-  is a 14-alloy lattice: classification and retrieval dominate continuous
-  density estimation. Validation-selected correction of the empirical alloy
-  prior reduces bias against sparsely represented alloys.}
+  \caption{Head study on conventional descriptors, frozen seed-0 split.
+  The last two rows regress the eight element fractions directly and cannot
+  name an alloy. Treating composition as a discrete lattice wins on WAPE and
+  on identification, while element MAE is essentially tied with continuous
+  regression.}
   \label{tab:heads}
   \centering
   \begin{tabular}{lccccc}
     \toprule
     Head & El.\ WAPE $\downarrow$ & El.\ MAE $\downarrow$ &
-    Top-1 $\uparrow$ & Top-3 $\uparrow$ & $T$ WAPE $\downarrow$ \\
+    Top-1 $\uparrow$ & Top-3 $\uparrow$ & Class NLL $\downarrow$ \\
     \midrule
-    Flow-AR (MAP)            & 44.8\% & 0.478 & 0.31 & 0.46 & 14.8\% \\
-    Flow-AR + lattice snap   & 45.1\% & 0.412 & 0.30 & 0.49 & 14.0\% \\
-    kNN retrieval ($k{=}5$)  & 34.3\% & 0.374 & 0.48 & 0.61 & 13.1\% \\
-    XGBoost classifier       & 36.6\% & 0.346 & 0.40 & 0.66 & 13.1\% \\
-    CatBoost classifier      & 25.7\% & 0.322 & 0.50 & 0.68 & 13.1\% \\
-    FT-Transformer           & 30.2\% & 0.396 & 0.46 & 0.62 &
-    $\mathbf{12.1\%}$ \\
-    AR level chain           & 35.4\% & 0.325 & 0.45 & 0.62 & 15.0\% \\
-    CatBoost{+}kNN fusion    & 21.7\% & 0.292 &
-    0.54 & 0.68 & 13.1\% \\
-    Condition-balanced fusion & 21.4\% & 0.244 &
-    $\mathbf{0.58}$ & $\mathbf{0.68}$ & 12.8\% \\
-    Prior-adjusted balanced fusion & $\mathbf{19.1\%}$ & $\mathbf{0.221}$ &
-    $\mathbf{0.58}$ & $\mathbf{0.68}$ & 12.8\% \\
-    AR chain{+}kNN fusion    & 26.0\% & 0.273 & 0.51 & 0.66 &
-    15.0\% \\
+    kNN retrieval ($k{=}5$)  & 31.3\% & 0.433 & 0.39 & 0.50 & 6.04 \\
+    XGBoost classifier       & 51.6\% & 0.392 & 0.33 & 0.56 & 3.87 \\
+    CatBoost classifier      & 24.8\% & 0.284 & 0.44 & 0.61 & 2.40 \\
+    FT-Transformer           & 42.2\% & 0.266 & 0.44 &
+    $\mathbf{0.67}$ & 2.31 \\
+    CatBoost{+}kNN fusion    & 25.3\% & 0.307 & 0.44 & 0.56 & 2.29 \\
+    Condition-balanced fusion & $\mathbf{24.1\%}$ & 0.248 &
+    $\mathbf{0.50}$ & 0.56 & 2.14 \\
+    Prior-adjusted balanced fusion & 47.7\% & 0.297 & 0.39 & 0.56 &
+    $\mathbf{2.07}$ \\
+    XGBoost regression       & 40.7\% & $\mathbf{0.240}$ & -- & -- & -- \\
+    CatBoost regression      & 45.7\% & 0.290 & -- & -- & -- \\
     \bottomrule
   \end{tabular}
 \end{table}
-\todo{One paragraph: composition-as-classification argument; fused 14-way
-distribution as UQ (class NLL 1.66 vs 1.95/5.08; conformal recalibration);
-process parameters via exact GP regression (RBF{+}White kernel on pooled
-condition features): 90\% coverage 0.86/0.82/0.84 across the three
-representations, i.e.\ calibrated out of the box, vs NGBoost 0.44 and
-CatBoost-uncertainty 0.07. At $n\approx 86$ training conditions the GP is
-exactly in its regime; GMM/MDN{+}AR alternatives are the flow family of
-Table~\ref{tab:heads} and inherit its off-lattice failure mode.}
+The eight element fractions are not free coordinates: they take only 14 joint
+values, so a head that scores those values directly is solving an easier and
+better-posed problem than one that regresses each fraction. On the frozen
+split the condition-balanced fusion reaches 24.1\% present-element WAPE
+against 40.7\% for the best direct regression, and it additionally names the
+alloy, which the regressors cannot. Element MAE does not separate the two
+families (0.248 versus 0.240): the gain is concentrated in the elements that
+are actually present, which is what WAPE measures and what a recipe needs.
+The retained 14-way distribution is the composition uncertainty statement
+(class NLL 2.07--2.14 for the fused heads versus 6.04 for retrieval alone).
+Two negative results are worth recording. The validation-selected prior
+correction, which helped under repeated resampling, does not survive on a
+single split: it degrades WAPE to 47.7\% while still giving the best NLL, so
+$\tau$ cannot be selected reliably from 18 validation conditions. The
+FT-Transformer attains the best top-3 and a competitive MAE but a poor WAPE,
+consistent with it spreading mass over chemically similar alloys.
+\todo{Add conformal recalibration of the fused distribution.}
+
+\subsection{Which representation carries provenance information?}
+Predicting a recipe has two halves that are not symmetric. The alloy must be
+identified from structure alone, whereas the extrusion parameters are only
+useful once the material is known, so the process heads are conditioned on the
+known element weight fractions in addition to the representation. Both halves
+also receive a two-level encoding of the extrusion ratio, which separates the
+Mg--Gd series from the remaining alloys. Table~\ref{tab:cross} evaluates the
+same head twice across all three pipelines on the frozen seed-0 split: the
+condition-balanced fusion for composition and the exact GP for the process
+window.
+
+\begin{table}[t]
+  \caption{Cross-pipeline comparison on the frozen alloy-stratified random
+  split (seed 0; 72/18/18 conditions). Composition uses the
+  condition-balanced CatBoost{+}kNN fusion; the process window uses the exact
+  GP and is conditioned on the known composition, so $T$ errors are not
+  comparable to Table~\ref{tab:heads}. Single split over 18 test conditions.}
+  \label{tab:cross}
+  \centering
+  \begin{tabular}{lcccccc}
+    \toprule
+    & \multicolumn{3}{c}{Composition} &
+    \multicolumn{3}{c}{Process $\mid$ composition} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    Representation & El.\ MAE $\downarrow$ & Top-1 $\uparrow$ &
+    El.\ WAPE $\downarrow$ &
+    $T$ MAE $\downarrow$ & $T$ $R^2$ $\uparrow$ & cov$_{90}$ \\
+    \midrule
+    Conventional & $\mathbf{0.248}$ & $\mathbf{0.50}$ & $\mathbf{24.1\%}$ &
+    42.9 & 0.230 & 0.78 \\
+    GenAI latents & 0.266 & 0.39 & 33.5\% & 43.5 & 0.113 & 0.72 \\
+    GNN (90\,\textmu m) & 0.403 & 0.22 & 59.5\% &
+    $\mathbf{32.0}$ & $\mathbf{0.524}$ & $\mathbf{0.94}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The two halves rank the representations differently. Conventional descriptors
+are the strongest composition representation under the head that won
+Table~\ref{tab:heads}. For the process window the GNN
+embeddings are both the most accurate and the only near-calibrated option, and
+they are markedly more stable across heads: every GNN head lands between 0.315
+and 0.524 in $T$ $R^2$ and between 0.498 and 0.575 in $v$ $R^2$, the tightest
+band of the three representations, while the conventional descriptors spread
+from 0.225 to 0.483 in $T$ $R^2$ and the GenAI latents fall to $-0.001$. A
+graph over grains appears to retain the
+deformation-rate information that the aggregated descriptor histograms
+average away. With 18 test conditions the ordering of heads within a pipeline
+is inside the noise, so only the cross-pipeline pattern is claimed.
+
+The extrusion speed is learned in log space: its values follow a near
+geometric grid spanning $1.18$ decades against $0.40$ for the temperature, so a
+squared error on the raw scale shrinks the slow conditions toward the mean.
+The GP therefore treats $v$ as lognormal, which gives a multiplicative
+$90\%$ interval and $90\%$ coverage of $0.94$ on both targets for the GNN,
+against $0.72$--$0.78$ on $T$ for the other two representations.
 
 \subsection{Why the split unit matters}
-Random five-fold splitting of the 4,348 individual images produces 100\%
+Random splitting of the 4,348 individual images produces 100\%
 alloy top-1 accuracy and zero composition WAPE with the same
 CatBoost{+}kNN head. This is not evidence of generalization: every test
-condition also occurs in its training fold, so composition and process labels
-can be recovered by matching repeated observations. All headline results
-therefore use alloy-stratified random folds over the 108 whole conditions,
-with no condition shared across train, validation, and test.
+condition also occurs in training, so composition and process labels can be
+recovered by matching repeated observations. All new headline experiments
+therefore use one frozen alloy-stratified random split over the 108 whole
+conditions (seed 0), with no condition shared across train, validation, and
+test.
 
 \subsection{Ablations and analysis}
-\todo{Calibration reliability of the fused classifier vs flow; descriptor-block
-importance; posterior visualizations for ambiguous conditions. Full 22-variant
-head/decoder ablation in the appendix (results/archive).}
+\todo{Calibration reliability of the fused classifier; descriptor-block
+importance; posterior visualizations for ambiguous conditions. Full head and
+decoder ablation in the appendix (results/archive).}
 
 \section{Discussion and limitations}
 \label{sec:discussion}
@@ -277,11 +309,14 @@ full design loop with the forward models.}
 \appendix
 
 \section{Architecture and training details}
-\todo{Full hyperparameters from configs/flow\_head.yaml; parameter counts;
-normalization and dequantization details with Jacobian bookkeeping.}
+\todo{Full head hyperparameters; parameter counts; standardization details.
+The FT-Transformer emits one token per input feature, so the 1{,}282-D
+generative latents are trained with gradient accumulation to bound attention
+memory at a fixed effective batch of 256.}
 
 \section{Additional results}
-\todo{Per-label metric tables (A1-A7 from strategy/02); PIT histograms;
-per-fold variance.}
+\todo{Per-label metric tables (A1-A7 from strategy/02); the full head grid for
+all three pipelines (Table 3 of results/paper\_results.md); sensitivity of the
+conclusions to the split seed.}
 
 \end{document}

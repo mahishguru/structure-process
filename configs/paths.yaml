@@ -22,7 +22,6 @@ include_heat_treated: false
 elements: [Al, Zn, Mn, Ce, Gd, Ca, Nd, Y]
 
 # Split policy
-loco_folds: 5
 split_seed: 0
-val_fraction: 0.15   # of training conditions, per fold
-include_loao: false   # archival extrapolation study, not part of the main protocol
+val_fraction: 0.15   # of all conditions, alloy-stratified
+test_fraction: 0.15  # of all conditions, alloy-stratified

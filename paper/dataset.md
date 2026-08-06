@@ -1,0 +1,134 @@
+# Dataset and Prediction Tasks
+
+## Dataset unit and protocol
+
+The canonical label table is `data/labels/labels.csv`. It contains 108 unique
+processing conditions from 14 base alloys. Each image or graph is linked to one
+condition through `condition_id`; labels are constant within that condition.
+
+The primary evaluation uses one frozen alloy-stratified random split over whole
+conditions (`data/splits/random_seed0.json`). The random seed is 0. Images or
+graphs from one condition never cross train, validation, and test partitions.
+There is no leave-one-condition-out or leave-one-alloy-out evaluation in this
+protocol. Predictions are aggregated to condition level before metrics are
+calculated.
+
+## Structure representations
+
+The same two prediction tasks are evaluated with three alternative structure
+representations:
+
+| Pipeline | Per-sample representation | Current dimension |
+|---|---|---:|
+| Conventional | Reduced microstructure and texture descriptors | 438 |
+| GenAI | Flattened `16 x 80` ViT-FMDiT latent tokens | 1,280 |
+| GNN | Mean-pooled trained GATv2 graph tokens at 90 um | 128 |
+
+The representation standardizer is fitted on the training partition and then
+applied to validation and test data.
+
+`AZ31_extruded_500_6` has no ODF/RVE-derived sample and is absent from the
+training partition of ALL THREE representations, so every pipeline trains on 71
+of the 72 assigned training conditions. It is not a validation or test
+condition in `random_seed0`; validation and test coverage remains 18/18 for all
+three pipelines. Every result artifact records expected, observed, and missing
+condition coverage.
+
+Sample counts per partition differ between pipelines because RVE graphs exist
+for only a subset of the images:
+
+| Pipeline | Train images | Val images | Test images |
+|---|---:|---:|---:|
+| Conventional | 2,909 | 729 | 710 |
+| GenAI | 2,909 | 729 | 710 |
+| GNN | 1,209 | 317 | 302 |
+
+The GNN therefore sees roughly 42% of the per-image evidence available to the
+other two pipelines at identical condition coverage. Metrics are aggregated per
+condition, so the comparison remains condition-level fair, but this imbalance
+should be kept in mind when reading composition results.
+
+## Shared extrusion-ratio metadata
+
+The available sources identify two extrusion-ratio categories but do not store
+an authoritative physical ratio value. The canonical categorical field is
+`extrusion_ratio_type`:
+
+| Category | Base alloys |
+|---|---|
+| `mg_gd_series` | All Mg-Gd and Mg-Gd-Mn alloys |
+| `standard` | AZ31, ME21, Z1, ZNd10, and ZX10 |
+
+Models receive this field as a two-column one-hot encoding in the fixed order
+`[standard, mg_gd_series]`. Both columns are retained to make the two known
+processing routes explicit.
+
+## Task A: alloy-composition characterization
+
+This task estimates material identity and composition from observed structure
+when the processing route is known. Task A and Task B are deliberately
+symmetric: each is conditioned on the half of the condition label that the
+other one predicts, so neither head has to disentangle composition effects from
+processing effects on its own.
+
+**Inputs**
+
+- One of the three structure representations.
+- Known extrusion parameters: `T_ext` and `v_ext`. `v_ext` enters as
+  `log(v_ext)` because it spans 1.2 decades on a near-geometric grid, while
+  `T_ext` stays linear over its 0.4 decades. Both are then standardized with
+  training-partition statistics.
+- Two-column extrusion-ratio encoding.
+
+The resulting input dimensions are 442 for Conventional, 1,284 for GenAI, and
+132 for GNN.
+
+**Outputs**
+
+- Eight element concentrations in wt%: `Al`, `Zn`, `Mn`, `Ce`, `Gd`, `Ca`,
+  `Nd`, and `Y`.
+- Classification heads additionally predict one of the 14 base-alloy classes;
+  its nominal composition is used for the element estimate.
+
+Classification metrics are present-element WAPE, element MAE, alloy top-1,
+alloy top-3, and class NLL. Direct regression heads report present-element WAPE
+and element MAE. Per-element MAE and present-only WAPE are always retained.
+
+## Task B: process-parameter characterization
+
+This task estimates processing parameters after the material composition is
+known. The known composition is therefore an input, not a prediction target or
+test-label leak under this deployment definition. The same argument applies in
+reverse to the known extrusion parameters in Task A.
+
+**Inputs**
+
+- One of the three structure representations.
+- Known concentrations of the eight elements in the fixed order above.
+- Two-column extrusion-ratio encoding.
+
+The known composition is standardized using training-partition statistics.
+The resulting input dimensions are 448 for Conventional, 1,290 for GenAI, and
+138 for GNN.
+
+**Outputs**
+
+- `T_ext`: extrusion temperature in degrees Celsius.
+- `v_ext`: extrusion ram velocity in mm/s. All heads learn `log(v_ext)` and
+  invert the prediction; the Gaussian process therefore models `v_ext` as
+  lognormal, so its interval is multiplicative and its NLL carries the log
+  Jacobian.
+
+Both outputs are evaluated with MAE, WAPE, and R2. Gaussian-process heads also
+report predictive NLL and empirical 90% interval coverage.
+
+## Benchmark interpretation
+
+Only heads trained with the task-specific conditioned inputs above appear in
+the cross-pipeline comparison. Existing Flow-AR prediction files were trained
+before these conditioning rules and are excluded rather than presented as
+like-for-like conditioned results.
+
+Validation conditions select any data-dependent correction, including the
+composition prior-adjustment exponent. Test conditions are used only once for
+the reported fold metrics.
