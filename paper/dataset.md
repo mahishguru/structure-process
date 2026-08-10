@@ -94,6 +94,10 @@ Classification metrics are present-element WAPE, element MAE, alloy top-1,
 alloy top-3, and class NLL. Direct regression heads report present-element WAPE
 and element MAE. Per-element MAE and present-only WAPE are always retained.
 
+Composition heads see no alloy identifier at input and are trained with
+condition balancing, so every processing condition carries equal total weight
+and alloys represented by only four conditions are not swamped.
+
 ## Task B: process-parameter characterization
 
 This task estimates processing parameters after the material composition is
@@ -119,16 +123,38 @@ The resulting input dimensions are 448 for Conventional, 1,290 for GenAI, and
   lognormal, so its interval is multiplicative and its NLL carries the log
   Jacobian.
 
-Both outputs are evaluated with MAE, WAPE, and R2. Gaussian-process heads also
-report predictive NLL and empirical 90% interval coverage.
+Both outputs are evaluated with MAE, WAPE, MAPE, and R2. Gaussian-process heads
+also report predictive NLL and empirical 90% interval coverage. The two targets
+have very different MAPE floors, since a constant train-mean predictor scores
+14.5% on `T_ext` and 136.5% on `v_ext`, so MAPE is comparable down a column and
+never across the two targets.
+
+Unlike the composition heads, the process heads are trained UNBALANCED.
+Condition balancing was designed for the 14-class composition problem and
+measurably hurts process regression.
+
+## Evaluation notes
+
+The test partition holds 18 conditions, so alloy top-1 moves in steps of 0.056
+and head-to-head gaps below roughly 0.15 are not resolvable. Element WAPE and
+top-1 for a classification head are step functions of those 18 condition-level
+argmax decisions, which means a head can change its probabilities substantially
+and still report an identical metric. Rankings inside one pipeline are treated
+as noise; only cross-pipeline patterns are claimed.
+
+Every run stores the raw per-image test predictions next to the aggregate
+metrics, including the condition-level Gaussian-process mean and predictive
+sigma, so a newly requested metric is a recomputation rather than a re-fit.
 
 ## Benchmark interpretation
 
 Only heads trained with the task-specific conditioned inputs above appear in
-the cross-pipeline comparison. Existing Flow-AR prediction files were trained
-before these conditioning rules and are excluded rather than presented as
-like-for-like conditioned results.
+the cross-pipeline comparison: kNN retrieval, XGBoost, CatBoost, an
+FT-Transformer, fusion variants on the composition side, and an exact Gaussian
+process on the process side. The earlier Flow-AR family has no seed-0
+counterpart and is dropped rather than presented as a like-for-like conditioned
+result.
 
 Validation conditions select any data-dependent correction, including the
-composition prior-adjustment exponent. Test conditions are used only once for
-the reported fold metrics.
+composition prior-adjustment exponent. Test conditions are used once, for the
+reported split metrics.

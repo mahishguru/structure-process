@@ -223,8 +223,8 @@ alloy-stratified folds.
 ## Calibration and uncertainty (text/small table)
 
 - Composition UQ = the fused 14-way distribution over nominal compositions.
-  Seed-0 conventional: class NLL 2.14 condition-balanced fusion vs 2.40
-  CatBoost alone and 6.04 kNN alone.
+  Seed-0 conventional: class NLL 2.12 condition-balanced fusion vs 2.41
+  CatBoost alone and 6.02 kNN alone.
   Best seed-0 NLL is 2.05 from the FT-Transformer, which is
   simultaneously among the worst on WAPE -> temperature scaling / conformal
   sets.
