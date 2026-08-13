@@ -125,13 +125,55 @@ def markdown(summaries: dict) -> str:
     return "\n".join(lines)
 
 
+def _render_table_block(summaries: dict, table: str) -> list[str]:
+    """Render the header+separator+data rows for one table (no ### title)."""
+    full = markdown(summaries).splitlines()
+    start = full.index(f"### {table}") + 2
+    rows = []
+    for ln in full[start:]:
+        if ln.startswith("### ") or (rows and not ln.startswith("|")):
+            break
+        if ln.startswith("|"):
+            rows.append(ln)
+    return rows
+
+
+def update_paper_results(summaries: dict,
+                         md_path: Path = Path("results/paper_results.md")
+                         ) -> None:
+    """Replace the Table 3a and 3b row blocks in paper_results.md in place.
+
+    Only the header/separator/data lines are swapped, so the file always shows
+    the current run's values. Any bold emphasis added by hand is dropped.
+    """
+    text = md_path.read_text()
+    for table in ("Table 3a", "Table 3b"):
+        head_end = text.index("\n", text.index(f"### {table}"))
+        block_start = text.index("| head |", head_end)
+        i = block_start
+        while True:
+            nl = text.find("\n", i)
+            if nl == -1 or not text[nl + 1:].startswith("|"):
+                block_end = nl
+                break
+            i = nl + 1
+        new_rows = "\n".join(_render_table_block(summaries, table))
+        text = text[:block_start] + new_rows + text[block_end:]
+    md_path.write_text(text)
+    print(f"updated Table 3a/3b rows in {md_path}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--split", default="random_seed0")
     parser.add_argument("--out-dir", default="results/tables")
+    parser.add_argument("--update-results", action="store_true",
+                        help="also rewrite Table 3a/3b in results/paper_results.md")
     args = parser.parse_args()
     summaries = load(args.split)
     export(summaries, Path(args.out_dir))
+    if args.update_results:
+        update_paper_results(summaries)
     print()
     print(markdown(summaries))
 

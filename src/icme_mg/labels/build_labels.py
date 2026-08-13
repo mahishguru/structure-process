@@ -31,7 +31,7 @@ _XLSX_NAME_FIXES = {
 
 # xlsx element columns of interest (xlsx header -> canonical element symbol)
 _XLSX_ELEMENTS = {"Al": "Al", "Zn": "Zn", "Mn": "Mn", "Ce": "Ce",
-                  "Gd": "Gd", "Ca": "Ca", "Nd": "Nd", "Y": "Y"}
+                  "Gd": "Gd", "Ca": "Ca", "Nd": "Nd"}
 
 _COND_RE = re.compile(r"^(?P<T>\d+(?:\.\d+)?)_(?P<v>\d+(?:\.\d+)?)$")
 

@@ -81,7 +81,7 @@ def presence_f1(true_present: np.ndarray, pred_present: np.ndarray) -> dict:
 def alloy_topk(y_pred: np.ndarray, nominal: np.ndarray, alloy_names: list[str],
                true_alloys: list[str], ks: tuple[int, ...] = (1, 3)) -> dict:
     """Nearest nominal composition (z-scored element-space distance).
-    nominal: (A, 8) per-alloy compositions in ELEMENTS order."""
+    nominal: (A, len(ELEMENTS)) per-alloy compositions in ELEMENTS order."""
     mu, sd = nominal.mean(0), nominal.std(0) + 1e-8
     d = np.stack(
         [np.linalg.norm((y_pred[:, :N_ELEM] - mu) / sd - (a - mu) / sd, axis=1)

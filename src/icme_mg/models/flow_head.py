@@ -18,7 +18,7 @@ from icme_mg import ELEMENTS, LABEL_ORDER
 from .spline_flow import ConditionalSplineFlow
 
 N_TOKENS = len(LABEL_ORDER)          # 10
-N_ELEM = len(ELEMENTS)               # 8
+N_ELEM = len(ELEMENTS)               # 7
 
 
 class RMSNorm(nn.Module):

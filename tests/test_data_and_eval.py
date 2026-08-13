@@ -115,7 +115,7 @@ class TestMetrics:
 
     def test_alloy_topk_selfmatch(self):
         rng = np.random.default_rng(0)
-        nominal = rng.uniform(0, 5, (4, 8))
+        nominal = rng.uniform(0, 5, (4, len(ELEMENTS)))
         names = ["A", "B", "C", "D"]
         y = np.concatenate([nominal, rng.uniform(200, 400, (4, 2))], axis=1)
         res = alloy_topk(y, nominal, names, names)

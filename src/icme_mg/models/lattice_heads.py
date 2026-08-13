@@ -30,7 +30,7 @@ import torch.nn.functional as F
 from icme_mg import ELEMENTS, LABEL_ORDER
 
 N_TOKENS = len(LABEL_ORDER)     # 10
-N_ELEM = len(ELEMENTS)          # 8
+N_ELEM = len(ELEMENTS)          # 7
 LOG_2PI = float(np.log(2 * np.pi))
 
 

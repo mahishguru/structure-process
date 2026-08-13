@@ -6,6 +6,17 @@ The canonical label table is `data/labels/labels.csv`. It contains 108 unique
 processing conditions from 14 base alloys. Each image or graph is linked to one
 condition through `condition_id`; labels are constant within that condition.
 
+The composition space is reduced to seven informative elements: `Al`, `Zn`,
+`Mn`, `Ce`, `Gd`, `Ca`, and `Nd`. The source table `data_labels.xlsx` is
+kept in the same reduced form. The trace columns it once carried (`Cu`, `Ni`,
+`Si`, `Fe`, `Pr`) were dropped: `Cu` and `Ni` are constant ppm impurities that
+turn on and off with the whole Mg-Gd family, `Fe` scales with the Gd source,
+and `Si`/`Pr` appear only in ME21 at 0.01-0.015 wt%. `Y` is dropped for the
+same reason as `Si` and `Pr` (it marks ME21 alone at 0.04 wt%), and with `Y`
+gone the remaining seven elements still give all 14 alloys a unique nominal
+signature. None of the dropped columns distinguishes one alloy from another,
+and the retained seven reconstruct every nominal composition exactly.
+
 The primary evaluation uses one frozen alloy-stratified random split over whole
 conditions (`data/splits/random_seed0.json`). The random seed is 0. Images or
 graphs from one condition never cross train, validation, and test partitions.
@@ -85,8 +96,8 @@ The resulting input dimensions are 442 for Conventional, 1,284 for GenAI, and
 
 **Outputs**
 
-- Eight element concentrations in wt%: `Al`, `Zn`, `Mn`, `Ce`, `Gd`, `Ca`,
-  `Nd`, and `Y`.
+- Seven element concentrations in wt%: `Al`, `Zn`, `Mn`, `Ce`, `Gd`, `Ca`,
+  and `Nd`.
 - Classification heads additionally predict one of the 14 base-alloy classes;
   its nominal composition is used for the element estimate.
 
@@ -108,12 +119,12 @@ reverse to the known extrusion parameters in Task A.
 **Inputs**
 
 - One of the three structure representations.
-- Known concentrations of the eight elements in the fixed order above.
+- Known concentrations of the seven elements in the fixed order above.
 - Two-column extrusion-ratio encoding.
 
 The known composition is standardized using training-partition statistics.
-The resulting input dimensions are 448 for Conventional, 1,290 for GenAI, and
-138 for GNN.
+The resulting input dimensions are 447 for Conventional, 1,289 for GenAI, and
+137 for GNN.
 
 **Outputs**
 

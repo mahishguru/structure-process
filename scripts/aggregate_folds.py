@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 
-ELEMENTS = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd", "Y"]
+ELEMENTS = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd"]
 PROCESS = ["T_ext", "v_ext"]
 
 

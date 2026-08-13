@@ -29,7 +29,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd", "Y"]
+from icme_mg import ELEMENTS
+
+ELEM = list(ELEMENTS)
 labels = pd.read_csv("data/labels/labels.csv").set_index("condition_id")
 LB = labels[ELEM + ["T_ext", "v_ext"]]
 ALLOY = labels["alloy"]

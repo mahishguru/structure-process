@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd", "Y"]
+ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd"]
 K = 5
 TEMP = 0.05
 

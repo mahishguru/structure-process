@@ -288,23 +288,26 @@ def full_probabilities(model, features):
     return output
 
 
-def fit_catboost(X_train, train_conditions, balanced=False):
+def fit_catboost(X_train, train_conditions, balanced=False,
+                 iterations=500, depth=6, learning_rate=0.1):
     from catboost import CatBoostClassifier
 
     model = CatBoostClassifier(
-        loss_function="MultiClass", iterations=500, depth=6,
-        learning_rate=0.1, random_seed=0, verbose=0,
+        loss_function="MultiClass", iterations=iterations, depth=depth,
+        learning_rate=learning_rate, random_seed=0, verbose=0,
         task_type="GPU", devices="0")
     weights = condition_weights(train_conditions) if balanced else None
     model.fit(X_train, cls_targets(train_conditions), sample_weight=weights)
     return model
 
 
-def fit_xgb_classifier(X_train, train_conditions):
+def fit_xgb_classifier(X_train, train_conditions,
+                       n_estimators=300, max_depth=6, learning_rate=0.1):
     from xgboost import XGBClassifier
 
     model = XGBClassifier(
-        n_estimators=300, max_depth=6, learning_rate=0.1,
+        n_estimators=n_estimators, max_depth=max_depth,
+        learning_rate=learning_rate,
         tree_method="hist", device="cuda", n_jobs=-1, verbosity=0,
         random_state=0)
     model.fit(X_train, cls_targets(train_conditions))
@@ -353,7 +356,8 @@ def knn_outputs(X_train, X_query, train_conditions, balanced=False,
 
 
 def fit_xgb_regressors(X_train, train_conditions, columns,
-                       balanced=False, targets=None):
+                       balanced=False, targets=None,
+                       n_estimators=300, max_depth=6, learning_rate=0.1):
     from xgboost import XGBRegressor
 
     if targets is None:
@@ -362,7 +366,8 @@ def fit_xgb_regressors(X_train, train_conditions, columns,
     models = []
     for index in range(len(columns)):
         model = XGBRegressor(
-            n_estimators=300, max_depth=6, learning_rate=0.1,
+            n_estimators=n_estimators, max_depth=max_depth,
+            learning_rate=learning_rate,
             tree_method="hist", device="cuda", n_jobs=-1, verbosity=0,
             random_state=0)
         model.fit(X_train, targets[:, index], sample_weight=weights)
@@ -375,12 +380,13 @@ def predict_regressors(models, features):
 
 
 def fit_catboost_regressor(X_train, train_conditions, columns,
-                           balanced=False):
+                           balanced=False,
+                           iterations=500, depth=6, learning_rate=0.1):
     from catboost import CatBoostRegressor
 
     model = CatBoostRegressor(
-        loss_function="MultiRMSE", iterations=500, depth=6,
-        learning_rate=0.1, random_seed=0, verbose=0,
+        loss_function="MultiRMSE", iterations=iterations, depth=depth,
+        learning_rate=learning_rate, random_seed=0, verbose=0,
         boosting_type="Plain", task_type="GPU", devices="0")
     weights = condition_weights(train_conditions) if balanced else None
     model.fit(X_train, LB.loc[train_conditions, columns].to_numpy(float),
@@ -388,15 +394,16 @@ def fit_catboost_regressor(X_train, train_conditions, columns,
     return model
 
 
-def fit_catboost_process(X_train, train_conditions):
+def fit_catboost_process(X_train, train_conditions,
+                         iterations=500, depth=6, learning_rate=0.1):
     from catboost import CatBoostRegressor
 
     targets = process_targets(train_conditions)
     mean = targets.mean(axis=0)
     std = targets.std(axis=0) + 1e-8
     model = CatBoostRegressor(
-        loss_function="MultiRMSE", iterations=500, depth=6,
-        learning_rate=0.1, random_seed=0, verbose=0,
+        loss_function="MultiRMSE", iterations=iterations, depth=depth,
+        learning_rate=learning_rate, random_seed=0, verbose=0,
         boosting_type="Plain", task_type="GPU", devices="0")
     # MultiRMSE sums raw squared errors across targets, so unstandardized
     # targets would give v_ext 0.1% of the loss.
@@ -432,7 +439,7 @@ def ftt_micro_batch(n_features: int) -> int:
                                      // per_sample)))
 
 
-def fit_ftt_classifier(X_train, train_conditions):
+def fit_ftt_classifier(X_train, train_conditions, balanced=False):
     import torch
     import torch.nn.functional as functional
 
@@ -440,8 +447,11 @@ def fit_ftt_classifier(X_train, train_conditions):
     X_tensor = torch.as_tensor(X_train, dtype=torch.float32, device="cuda")
     classes = torch.as_tensor(
         cls_targets(train_conditions), dtype=torch.long, device="cuda")
+    # Base heads train unweighted; condition balancing lives in the balanced
+    # fusion variants only, so base-head comparisons are architecture-only.
     weights = torch.as_tensor(
-        condition_weights(train_conditions),
+        condition_weights(train_conditions) if balanced
+        else np.ones(len(train_conditions)),
         dtype=torch.float32, device="cuda")
     model = _make_ftt(X_train.shape[1], len(ALLOYS))
     optimizer = torch.optim.AdamW(
@@ -548,10 +558,14 @@ def fit_gp_process(X_train, train_conditions):
     for index in range(2):
         target_mean = targets[:, index].mean()
         target_std = targets[:, index].std() + 1e-8
+        # Anisotropic (ARD) RBF: per-dimension lengthscales let the GP learn
+        # which principal components matter instead of one shared scale.
         model = GaussianProcessRegressor(
-            kernel=ConstantKernel(1.0) * RBF(np.sqrt(reduced.shape[1]))
-            + WhiteKernel(0.1), normalize_y=False, alpha=1e-6,
-            random_state=0)
+            kernel=ConstantKernel(1.0) * RBF(
+                np.full(reduced.shape[1], np.sqrt(reduced.shape[1])),
+                length_scale_bounds=(1e-2, 1e3))
+            + WhiteKernel(0.1, noise_level_bounds=(1e-5, 1e1)),
+            normalize_y=False, alpha=1e-6, random_state=0)
         model.fit(reduced, (targets[:, index] - target_mean) / target_std)
         models.append(model)
         target_stats.append((target_mean, target_std))
@@ -583,7 +597,13 @@ def predict_gp_process(fitted, X_query, query_conditions):
                 + 0.5 * np.log(2 * np.pi)) + jacobian),
             "coverage90": float(np.mean(np.abs(z_score) < 1.6449)),
         }
-    return conditions, invert_process(prediction), sigma, uncertainty
+    raw_prediction = invert_process(prediction)
+    median_prediction = raw_prediction.copy()
+    # Smearing correction: exp(mu) is the lognormal median; the mean is
+    # exp(mu + sigma^2/2). Point metrics should compare against the mean.
+    raw_prediction[:, 1] = np.exp(prediction[:, 1]
+                                  + 0.5 * np.square(sigma[:, 1]))
+    return conditions, raw_prediction, sigma, uncertainty, median_prediction
 
 
 def condition_level_process_metrics(prediction, conditions):
@@ -602,6 +622,121 @@ def condition_level_process_metrics(prediction, conditions):
     return output
 
 
+XGB_GRID = (
+    {"n_estimators": 300, "max_depth": 6, "learning_rate": 0.1},
+    {"n_estimators": 600, "max_depth": 4, "learning_rate": 0.05},
+    {"n_estimators": 400, "max_depth": 8, "learning_rate": 0.05},
+)
+CAT_GRID = (
+    {"iterations": 500, "depth": 6, "learning_rate": 0.1},
+    {"iterations": 900, "depth": 4, "learning_rate": 0.05},
+    {"iterations": 500, "depth": 8, "learning_rate": 0.05},
+)
+KNN_GRID = tuple(
+    (k, temperature)
+    for k in (1, 3, 5, 7)
+    for temperature in (0.01, 0.05, 0.1, 0.2))
+
+
+def _process_score(prediction_raw, conditions):
+    metrics = process_metrics(prediction_raw, conditions)
+    return metrics["v_ext"]["mape"] + metrics["T_ext"]["wape"]
+
+
+def tune_xgb_classifier(X_train, train_conditions, X_val, val_conditions):
+    best = None
+    for params in XGB_GRID:
+        model = fit_xgb_classifier(X_train, train_conditions, **params)
+        score = composition_metrics(full_probabilities(model, X_val),
+                                    val_conditions)["element_wape_present"]
+        if best is None or score < best[0]:
+            best = (score, params, model)
+    return best[2], dict(best[1])
+
+
+def tune_catboost_classifier(X_train, train_conditions, X_val, val_conditions):
+    best = None
+    for params in CAT_GRID:
+        model = fit_catboost(X_train, train_conditions, **params)
+        score = composition_metrics(full_probabilities(model, X_val),
+                                    val_conditions)["element_wape_present"]
+        if best is None or score < best[0]:
+            best = (score, params, model)
+    return best[2], dict(best[1])
+
+
+def tune_xgb_regressors(X_train, train_conditions, X_val, val_conditions,
+                        columns, targets=None):
+    best = None
+    for params in XGB_GRID:
+        models = fit_xgb_regressors(
+            X_train, train_conditions, columns, targets=targets, **params)
+        prediction = predict_regressors(models, X_val)
+        if targets is None:
+            score = regression_composition_metrics(
+                prediction, val_conditions)["element_wape_present"]
+        else:
+            score = _process_score(invert_process(prediction), val_conditions)
+        if best is None or score < best[0]:
+            best = (score, params, models)
+    return best[2], dict(best[1])
+
+
+def tune_catboost_regressor(X_train, train_conditions, X_val, val_conditions,
+                            columns):
+    best = None
+    for params in CAT_GRID:
+        model = fit_catboost_regressor(
+            X_train, train_conditions, columns, **params)
+        score = regression_composition_metrics(
+            np.asarray(model.predict(X_val)),
+            val_conditions)["element_wape_present"]
+        if best is None or score < best[0]:
+            best = (score, params, model)
+    return best[2], dict(best[1])
+
+
+def tune_catboost_process(X_train, train_conditions, X_val, val_conditions):
+    best = None
+    for params in CAT_GRID:
+        fitted = fit_catboost_process(X_train, train_conditions, **params)
+        score = _process_score(
+            predict_catboost_process(fitted, X_val), val_conditions)
+        if best is None or score < best[0]:
+            best = (score, params, fitted)
+    return best[2], dict(best[1])
+
+
+def tune_knn(X_train, train_conditions, X_val, val_conditions, task):
+    best = None
+    for k, temperature in KNN_GRID:
+        proba, process_prediction = knn_outputs(
+            X_train, X_val, train_conditions, k=k, temperature=temperature)
+        if task == "composition":
+            score = composition_metrics(
+                proba, val_conditions)["element_wape_present"]
+        else:
+            score = _process_score(
+                invert_process(process_prediction), val_conditions)
+        if best is None or score < best[0]:
+            best = (score, (k, temperature))
+    return best[1]
+
+
+def pca_compress_parts(parts, variance=0.95, cap=128):
+    """Reduce a wide representation for the FT-Transformer, which pays one
+    attention token per feature; fitted on train only."""
+    from sklearn.decomposition import PCA
+
+    train = parts[0][0]
+    probe = PCA(n_components=min(cap, train.shape[0] - 1, train.shape[1]),
+                random_state=0).fit(train)
+    n = int(np.searchsorted(
+        np.cumsum(probe.explained_variance_ratio_), variance) + 1)
+    pca = PCA(n_components=n, random_state=0).fit(train)
+    return tuple((pca.transform(x), c) for x, c in parts), n
+
+
 def run_split(pipeline: str, split: str):
     raw_parts = LOADERS[pipeline](split)
     coverage = representation_coverage(split, raw_parts)
@@ -613,34 +748,58 @@ def run_split(pipeline: str, split: str):
     composition_parts, process_parts = conditioned_inputs(raw_parts)
     (X_train, train_conditions), (X_val, val_conditions), (
         X_test, test_conditions) = composition_parts
-    (X_train_process, _), (_, _), (X_test_process, _) = process_parts
+    (X_train_process, _), (X_val_process, _), (X_test_process, _) = (
+        process_parts)
 
-    xgb_classifier = fit_xgb_classifier(X_train, train_conditions)
-    cat_classifier = fit_catboost(X_train, train_conditions)
+    # FT-Transformer pays one attention token per feature, so the 1284-wide
+    # genai input forces micro-batches of 32; compress it (FTT only) to the
+    # 95% variance dimension so it trains at the full batch like the others.
+    ftt_comp_parts, ftt_proc_parts = composition_parts, process_parts
+    ftt_components = None
+    if pipeline == "genai":
+        ftt_comp_parts, n_comp = pca_compress_parts(composition_parts)
+        ftt_proc_parts, n_proc = pca_compress_parts(process_parts)
+        ftt_components = {"composition": n_comp, "process": n_proc}
+    X_train_ftt, X_test_ftt = ftt_comp_parts[0][0], ftt_comp_parts[2][0]
+    X_train_ftt_proc, X_test_ftt_proc = (
+        ftt_proc_parts[0][0], ftt_proc_parts[2][0])
+
+    xgb_classifier, sel_xgb_cls = tune_xgb_classifier(
+        X_train, train_conditions, X_val, val_conditions)
+    cat_classifier, sel_cat_cls = tune_catboost_classifier(
+        X_train, train_conditions, X_val, val_conditions)
     balanced_classifier = fit_catboost(
-        X_train, train_conditions, balanced=True)
-    cat_element_regressor = fit_catboost_regressor(
-        X_train, train_conditions, ELEM)
-    cat_process_regressor = fit_catboost_process(
-        X_train_process, train_conditions)
-    xgb_element_regressors = fit_xgb_regressors(
-        X_train, train_conditions, ELEM)
-    xgb_process_regressors = fit_xgb_regressors(
-        X_train_process, train_conditions, PROCESS_COLUMNS,
-        targets=process_targets(train_conditions))
-    ftt_classifier = fit_ftt_classifier(X_train, train_conditions)
-    ftt_process = fit_ftt_process(X_train_process, train_conditions)
+        X_train, train_conditions, balanced=True, **sel_cat_cls)
+    cat_element_regressor, sel_cat_reg = tune_catboost_regressor(
+        X_train, train_conditions, X_val, val_conditions, ELEM)
+    cat_process_regressor, sel_cat_proc = tune_catboost_process(
+        X_train_process, train_conditions, X_val_process, val_conditions)
+    xgb_element_regressors, sel_xgb_reg = tune_xgb_regressors(
+        X_train, train_conditions, X_val, val_conditions, ELEM)
+    xgb_process_regressors, sel_xgb_proc = tune_xgb_regressors(
+        X_train_process, train_conditions, X_val_process, val_conditions,
+        PROCESS_COLUMNS, targets=process_targets(train_conditions))
+    knn_k, knn_temp = tune_knn(
+        X_train, train_conditions, X_val, val_conditions, "composition")
+    knn_kp, knn_tempp = tune_knn(
+        X_train_process, train_conditions, X_val_process, val_conditions,
+        "process")
+    ftt_classifier = fit_ftt_classifier(X_train_ftt, train_conditions)
+    ftt_process = fit_ftt_process(X_train_ftt_proc, train_conditions)
     gp = fit_gp_process(X_train_process, train_conditions)
 
     test_knn, _ = knn_outputs(
-        X_train, X_test, train_conditions)
+        X_train, X_test, train_conditions, k=knn_k, temperature=knn_temp)
     _, test_knn_process = knn_outputs(
-        X_train_process, X_test_process, train_conditions)
+        X_train_process, X_test_process, train_conditions,
+        k=knn_kp, temperature=knn_tempp)
     test_knn_process = invert_process(test_knn_process)
     val_balanced_knn, _ = knn_outputs(
-        X_train, X_val, train_conditions, balanced=True)
+        X_train, X_val, train_conditions, balanced=True,
+        k=knn_k, temperature=knn_temp)
     test_balanced_knn, _ = knn_outputs(
-        X_train, X_test, train_conditions, balanced=True)
+        X_train, X_test, train_conditions, balanced=True,
+        k=knn_k, temperature=knn_temp)
     test_cat = full_probabilities(cat_classifier, X_test)
     val_balanced_cat = full_probabilities(balanced_classifier, X_val)
     test_balanced_cat = full_probabilities(balanced_classifier, X_test)
@@ -657,8 +816,8 @@ def run_split(pipeline: str, split: str):
         key=lambda tau: (
             tau_reports[tau]["element_wape_present"],
             tau_reports[tau]["element_mae_macro"]))
-    test_ftt = predict_ftt_classifier(ftt_classifier, X_test)
-    test_ftt_process = predict_ftt_process(ftt_process, X_test_process)
+    test_ftt = predict_ftt_classifier(ftt_classifier, X_test_ftt)
+    test_ftt_process = predict_ftt_process(ftt_process, X_test_ftt_proc)
 
     cat_element_regression = np.asarray(
         cat_element_regressor.predict(X_test))
@@ -690,7 +849,7 @@ def run_split(pipeline: str, split: str):
             cat_element_regression, test_conditions),
     }
 
-    gp_conditions, gp_prediction, gp_sigma, gp_uncertainty = \
+    gp_conditions, gp_prediction, gp_sigma, gp_uncertainty, gp_median = \
         predict_gp_process(gp, X_test_process, test_conditions)
     gp_report = condition_level_process_metrics(gp_prediction, gp_conditions)
     for target in gp_report:
@@ -723,11 +882,23 @@ def run_split(pipeline: str, split: str):
         "process/gaussian_process/condition_ids":
             np.asarray(gp_conditions, dtype=object),
         "process/gaussian_process/mean": gp_prediction,
+        "process/gaussian_process/median": gp_median,
         "process/gaussian_process/sigma": gp_sigma,
     }
     report = {
         "split": split,
         "selected_tau": selected_tau,
+        "selected_hyperparameters": {
+            "xgb_classifier": sel_xgb_cls,
+            "catboost_classifier": sel_cat_cls,
+            "catboost_regression": sel_cat_reg,
+            "catboost_process": sel_cat_proc,
+            "xgb_regression": sel_xgb_reg,
+            "xgb_process": sel_xgb_proc,
+            "knn_composition": {"k": knn_k, "temperature": knn_temp},
+            "knn_process": {"k": knn_kp, "temperature": knn_tempp},
+            "ftt_pca_components": ftt_components,
+        },
         "input_dimensions": {
             "composition": int(X_train.shape[1]),
             "process": int(X_train_process.shape[1]),

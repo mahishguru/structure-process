@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd", "Y"]
+ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd"]
 
 labels = pd.read_csv("data/labels/labels.csv").set_index("condition_id")
 ALLOYS = sorted(labels["alloy"].unique())

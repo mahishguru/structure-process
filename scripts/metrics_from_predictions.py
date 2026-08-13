@@ -37,11 +37,16 @@ def recompute(path: Path) -> dict:
     gp_conditions = store["process/gaussian_process/condition_ids"].astype(str)
     gp_mean = store["process/gaussian_process/mean"]
     gp_sigma = store["process/gaussian_process/sigma"]
+    # Point metrics use the smeared lognormal mean; the density is evaluated
+    # at the median, which is the GP's predictive mean in transformed space.
+    gp_center = (store["process/gaussian_process/median"]
+                 if "process/gaussian_process/median" in store.files
+                 else gp_mean)
     gp_report = heads.condition_level_process_metrics(gp_mean, gp_conditions)
     # The GP is Gaussian in the transformed space (log for v_ext), so the
     # z-score and the density must be evaluated there.
     truth = heads.process_targets(list(gp_conditions))
-    transformed_mean = heads.transform_process(gp_mean)
+    transformed_mean = heads.transform_process(gp_center)
     for index, target in enumerate(heads.PROCESS_COLUMNS):
         z_score = (truth[:, index] - transformed_mean[:, index]) \
             / gp_sigma[:, index]

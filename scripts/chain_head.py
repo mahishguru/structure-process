@@ -30,7 +30,7 @@ import pandas as pd
 from catboost import CatBoostClassifier
 from xgboost import XGBRegressor
 
-ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd", "Y"]
+ELEM = ["Al", "Zn", "Mn", "Ce", "Gd", "Ca", "Nd"]
 labels = pd.read_csv("data/labels/labels.csv").set_index("condition_id")
 LB = labels[ELEM + ["T_ext", "v_ext"]]
 ALLOY = labels["alloy"]
