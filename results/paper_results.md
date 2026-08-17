@@ -8,20 +8,19 @@ results/archive/.
 
 Story: inverse structure->recipe on scarce data. Three findings:
 (1) the two halves of a recipe favour different representations (conventional
-descriptors identify the alloy, GNN embeddings predict the extrusion window and
-carry the only near-calibrated process uncertainty); (2) composition is a
-discrete 14-alloy lattice, so a condition-balanced classifier fused with
-retrieval beats direct continuous regression on present-element WAPE (24.1% vs
-39.6%) and additionally names the alloy; (3) random image splitting is fully
-leaked because repeated images of every test condition occur in training, so
-the study assigns whole conditions to the frozen split.
+descriptors identify the alloy, GNN embeddings predict the extrusion window);
+(2) composition is a discrete 14-alloy lattice, so the FT-Transformer and the
+fused classifier beat direct continuous regression on present-element WAPE
+(15.8% and 20.0% vs 41.8%) and additionally name the alloy; (3) random image
+splitting is fully leaked because repeated images of every test condition occur
+in training, so the study assigns whole conditions to the frozen split.
 
 The final fusion gives each processing condition equal total training weight.
 This matches the condition-level estimand despite the observed 15-108 images
 per condition and reduces bias against alloys represented by only four
 conditions. The additional prior-power correction is NOT used in the headline
-result: on the seed-0 split it degrades WAPE from 24.1% to 47.7%, i.e. tau
-cannot be selected reliably from 18 validation conditions.
+result: on the seed-0 split it degrades conventional WAPE from 20.0% to 43.6%,
+i.e. tau cannot be selected reliably from 18 validation conditions.
 
 Flow-AR is dropped from the paper: it has no seed-0 counterpart, so no
 flow-versus-lattice claim is made.
@@ -70,20 +69,21 @@ element MAE / alloy top-1)
 
 | head | conv WAPE | conv MAE | conv top-1 | genai WAPE | genai MAE | genai top-1 | gnn WAPE | gnn MAE | gnn top-1 |
 |---|---|---|---|---|---|---|---|---|---|
-| kNN retrieval | 35.8% | 0.494 | 0.389 | 42.0% | 0.601 | 0.333 | 44.3% | 0.333 | 0.222 |
-| XGBoost classifier | 54.2% | 0.448 | 0.333 | 42.8% | 0.314 | 0.222 | 42.2% | 0.280 | 0.222 |
-| CatBoost classifier | 28.3% | 0.325 | 0.444 | 45.0% | 0.342 | 0.222 | 43.5% | 0.300 | 0.222 |
-| FT-Transformer | 36.8% | 0.344 | 0.444 | 54.4% | 0.395 | 0.222 | 58.9% | 0.379 | 0.167 |
-| CatBoost + kNN fusion | 28.9% | 0.351 | 0.444 | 44.9% | 0.339 | 0.222 | 43.5% | 0.300 | 0.222 |
-| Condition-balanced fusion | 27.5% | 0.284 | 0.500 | 44.9% | 0.339 | 0.222 | 42.9% | 0.298 | 0.222 |
-| Prior-adjusted balanced fusion | 49.7% | 0.339 | 0.389 | 44.2% | 0.381 | 0.222 | 42.0% | 0.349 | 0.222 |
-| XGBoost regression | 40.5% | 0.265 | - | 49.0% | 0.293 | - | 39.7% | 0.279 | - |
-| CatBoost regression | 47.3% | 0.331 | - | 53.2% | 0.312 | - | 43.0% | 0.287 | - |
+| kNN retrieval | 23.7% | 0.410 | 0.444 | 24.5% | 0.467 | 0.444 | 44.1% | 0.363 | 0.222 |
+| XGBoost classifier | 45.8% | 0.436 | 0.444 | 42.7% | 0.290 | 0.222 | 45.0% | 0.351 | 0.222 |
+| CatBoost classifier | 42.1% | 0.265 | 0.500 | 59.5% | 0.348 | 0.167 | 45.6% | 0.369 | 0.222 |
+| FT-Transformer | 15.8% | 0.197 | 0.556 | 42.0% | 0.557 | 0.333 | 63.7% | 0.398 | 0.167 |
+| CatBoost + kNN fusion | 19.1% | 0.219 | 0.556 | 45.5% | 0.357 | 0.222 | 45.5% | 0.365 | 0.222 |
+| Condition-balanced fusion | 20.0% | 0.262 | 0.556 | 45.5% | 0.357 | 0.222 | 44.9% | 0.364 | 0.222 |
+| Prior-adjusted balanced fusion | 43.6% | 0.358 | 0.444 | 48.5% | 0.355 | 0.167 | 42.1% | 0.350 | 0.222 |
+| XGBoost regression | 59.2% | 0.270 | - | 51.6% | 0.318 | - | 44.1% | 0.307 | - |
+| CatBoost regression | 41.8% | 0.325 | - | 54.3% | 0.344 | - | 40.1% | 0.321 | - |
 
 Top-3 and class NLL are in the JSON. Best top-3 per pipeline: conventional
-0.667 (FT-Transformer), genai 0.556 (CatBoost classifier), gnn 0.556
-(XGB/CatBoost classifier). Best class NLL: 2.05 conventional, 2.50 genai, 2.56
-gnn (FT-Transformer in all three).
+0.722 (FT-Transformer), genai 0.722 (prior-adjusted balanced fusion), gnn 0.611
+(CatBoost classifier / prior-adjusted balanced fusion). Best class NLL: 1.79
+conventional (FT-Transformer), 2.10 genai and 2.56 gnn (prior-adjusted balanced
+fusion in both).
 
 ### Table 3b: Process given known composition (MAE / MAPE / R2 per target)
 
@@ -96,29 +96,25 @@ targets have very different MAPE floors: a constant train-mean predictor scores
 
 | head | conv T MAE | conv T MAPE | conv T R2 | conv v MAE | conv v MAPE | conv v R2 | genai T MAE | genai T MAPE | genai T R2 | genai v MAE | genai v MAPE | genai v R2 | gnn T MAE | gnn T MAPE | gnn T R2 | gnn v MAE | gnn v MAPE | gnn v R2 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| kNN retrieval | 36.2 | 9.7% | 0.483 | 0.90 | 39.6% | 0.630 | 52.0 | 13.9% | -0.008 | 1.07 | 43.7% | 0.347 | 32.6 | 9.4% | 0.460 | 0.94 | 30.6% | 0.498 |
-| XGBoost | 37.0 | 10.0% | 0.225 | 0.83 | 69.0% | 0.439 | 40.3 | 11.7% | 0.275 | 1.11 | 58.5% | 0.436 | 34.5 | 10.1% | 0.384 | 0.93 | 43.0% | 0.575 |
-| CatBoost | 35.3 | 9.1% | 0.466 | 1.10 | 56.3% | 0.371 | 38.2 | 11.1% | 0.274 | 1.07 | 53.3% | 0.459 | 32.6 | 9.7% | 0.405 | 0.96 | 41.6% | 0.545 |
-| FT-Transformer | 44.0 | 11.7% | 0.076 | 0.89 | 38.7% | 0.567 | 40.8 | 11.3% | 0.319 | 0.90 | 38.2% | 0.569 | 39.7 | 11.5% | 0.264 | 1.05 | 52.0% | 0.561 |
-| Gaussian process | 43.0 | 12.0% | 0.229 | 1.07 | 52.4% | 0.365 | 43.6 | 12.3% | 0.109 | 0.94 | 29.5% | 0.385 | 32.5 | 9.3% | 0.513 | 0.92 | 36.7% | 0.536 |
+| kNN retrieval | 41.4 | 11.2% | 0.460 | 1.14 | 50.5% | 0.539 | 58.4 | 15.5% | -0.040 | 1.38 | 64.9% | 0.235 | 34.5 | 9.9% | 0.525 | 0.96 | 36.8% | 0.525 |
+| XGBoost | 38.2 | 10.1% | 0.354 | 0.88 | 39.3% | 0.613 | 35.2 | 10.1% | 0.479 | 1.00 | 39.8% | 0.557 | 30.4 | 9.0% | 0.513 | 0.99 | 44.6% | 0.587 |
+| CatBoost | 40.6 | 10.3% | 0.358 | 1.07 | 43.2% | 0.367 | 33.6 | 9.5% | 0.515 | 1.00 | 39.8% | 0.552 | 29.0 | 8.5% | 0.579 | 0.90 | 36.7% | 0.606 |
+| FT-Transformer | 48.8 | 12.8% | 0.193 | 1.09 | 57.8% | 0.534 | 39.7 | 10.7% | 0.507 | 1.06 | 44.8% | 0.487 | 34.5 | 9.6% | 0.519 | 0.95 | 39.2% | 0.599 |
+| Gaussian process | 34.4 | 9.3% | 0.375 | 1.42 | 69.5% | 0.195 | 73.0 | 19.3% | -0.985 | 1.22 | 50.4% | 0.376 | 49.8 | 14.8% | -0.000 | 1.12 | 42.1% | 0.308 |
 
-GP 90% coverage (target 0.90): T_ext 0.778 conventional / 0.722 genai /
-0.944 gnn; v_ext 0.889 conventional / 0.889 genai / 0.944 gnn.
+GP 90% coverage (target 0.90): T_ext 0.833 conventional / 0.389 genai /
+0.667 gnn; v_ext 0.556 conventional / 0.444 genai / 0.889 gnn.
 
 Message (stated at the strength the split supports): conventional descriptors
-remain the best composition representation (24.1% WAPE, top-1 0.500 under the
-condition-balanced fusion), but the margin over
-the other two shrank once Task A was conditioned on the known process
-parameters, because genai and gnn gained far more from that conditioning than
-conventional did. GNN embeddings remain the most RELIABLE process
-representation. Every GNN head lands in T_ext R2 0.315-0.524 and v_ext R2
-0.498-0.575, the tightest band of the three; conventional is wider (T_ext
-0.225-0.483, v_ext 0.312-0.628) and genai is the weakest on T_ext (down to
--0.001). The GNN also holds the best single process result on T_ext (GP: MAE
-32.0 C, MAPE 9.2%, R2 0.524) and the best calibration (cov90 0.944 on both
-targets). Conventional still owns the single best v_ext R2 (0.628, kNN). With
-18 test conditions the head rankings inside a pipeline are noise; the
-cross-pipeline pattern is the reportable finding.
+are the strongest composition representation (FT-Transformer 15.8% WAPE, top-1
+0.556), and the tuned FT-Transformer now beats the fusion it used to trail.
+For the process window the picture split after re-balancing: the GNN heads are
+the most consistent on T_ext (R2 0.513-0.579 for the tuned trees) and hold the
+best v_ext calibration (GP cov90 0.889), while the conventional GP is the best
+single T_ext result (MAE 34.4 C, R2 0.375, cov90 0.833) but its v_ext coverage
+collapsed to 0.556. GenAI is the weakest on T_ext (GP R2 -0.985). With 18 test
+conditions the head rankings inside a pipeline are noise; the cross-pipeline
+pattern is the reportable finding.
 
 ## Task A conditioning (2026-08-06)
 
@@ -228,14 +224,15 @@ alloy-stratified folds.
   Best seed-0 NLL is 2.05 from the FT-Transformer, which is
   simultaneously among the worst on WAPE -> temperature scaling / conformal
   sets.
-- Process UQ WINNER: exact GP regression (RBF+White kernel, condition-level,
-  PCA-32 features), with v_ext modelled as lognormal. On the seed-0 split,
-  conditioned on known composition, T_ext 90% coverage is 0.778 conventional /
-  0.722 genai / 0.944 gnn (target 0.90) and v_ext coverage is 0.889 / 0.889 /
-  0.944; the GNN GP is the only near-nominal head on BOTH targets. NGBoost
-  coverage 0.44, CatBoost RMSEWithUncertainty 0.07: both severely
-  overconfident. GP is the process head. n~72-86 training conditions is exactly
-  the GP regime.
+- Process UQ: exact GP regression (ARD-RBF + White kernel, condition-level,
+  PCA-32 features), with v_ext modelled as lognormal and its point estimate
+  smearing-corrected. On the rebalanced seed-0 split, conditioned on known
+  composition, T_ext 90% coverage is 0.833 conventional / 0.389 genai / 0.667
+  gnn (target 0.90) and v_ext coverage is 0.556 / 0.444 / 0.889; the GNN GP is
+  the best-calibrated v_ext head and conventional the best-calibrated T_ext
+  head, but neither is near-nominal on both. NGBoost coverage 0.44, CatBoost
+  RMSEWithUncertainty 0.07: both severely overconfident. GP is the process head.
+  n~72-86 training conditions is exactly the GP regime.
 - GP classifier over the alloy lattice is weak (top-1 0.17-0.31): condition
   pooling discards the multi-image evidence that boosting exploits; GBDT
   fusion stays the composition head.
