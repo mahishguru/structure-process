@@ -34,7 +34,7 @@ That gap must close before any head is called a winner.
 
 ## 2. Protocol
 
-`loco_fold0..4` are condition-grouped 5-fold partitions (every test alloy
+`cv_fold0..4` are condition-grouped 5-fold partitions (every test alloy
 also appears in that fold's training set). This is the same estimand as
 `random_seed0`, with 5 folds instead of 1.
 
@@ -43,10 +43,9 @@ covered instead of 18, plus dispersion). Single-split seed-0 numbers move in ste
 0.056 on top-1 and cannot separate heads.
 
 **Decision: 5-fold cross-validation is the only reported protocol. It is
-called "5-fold cross-validation" in the paper and everywhere else; the
-leave-one-condition-out framing does not apply and is not mentioned.** The split
-files keep their `loco_fold*` names on disk (artifact keying), but the protocol
-label in all reports is `condition_grouped_5fold_cv`.
+called "5-fold cross-validation" in the paper and everywhere else.** The split
+files are named `cv_fold*` on disk and the protocol label in all reports is
+`condition_grouped_5fold_cv`.
 
 ## 3. Task A (composition given known process): head set
 

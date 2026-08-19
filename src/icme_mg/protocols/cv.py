@@ -1,10 +1,8 @@
 """Evaluation protocol: 5-fold condition-grouped cross-validation.
 
-The folds are the condition-grouped partitions in data/splits/loco_fold0..4
-(historical name; they are not leave-one-alloy-out: every test alloy also
-appears in that fold's train part). Reported in the paper as 5-fold
-cross-validation. Each fold provides train/val/test condition lists; val is
-used only for base-hyperparameter selection, test is touched once.
+The folds are the condition-grouped partitions in data/splits/cv_fold0..4.
+Each fold provides train/val/test condition lists; val is used only for
+base-hyperparameter selection, test is touched once.
 """
 
 from __future__ import annotations
@@ -13,7 +11,7 @@ import numpy as np
 
 from icme_mg.data import ALLOY
 
-CV_FOLDS = tuple(f"loco_fold{index}" for index in range(5))
+CV_FOLDS = tuple(f"cv_fold{index}" for index in range(5))
 
 
 def condition_stratified_splits(conditions, requested: int, seed: int):
