@@ -6,9 +6,13 @@ implementations.
 
 ## 1. The finding that drives every decision
 
-`element_wape_present` scores only elements that are actually present. A head that
-predicts every element as present scores well on it while being useless. Five of the
-eight winner rows do exactly that:
+`element_wape_present` is the paper's headline metric by design: in this
+campaign the alloy family is known once an optimized microstructure exists, so
+only the levels of the present elements must be predicted. It is still gameable
+in isolation - a head that predicts every element as present scores well on it
+while being useless. Five of the eight winner rows did exactly that, which is
+why every head now also reports all-element WAPE and false-positive rate as
+guard columns:
 
 | pipeline | head | folds | present WAPE | all WAPE | FP rate | top-1 |
 |---|---|---:|---:|---:|---:|---:|
@@ -30,17 +34,19 @@ That gap must close before any head is called a winner.
 
 ## 2. Protocol
 
-`loco_fold0..4` are **condition-grouped 5-fold, not leave-one-alloy-out**: every test
-alloy also appears in that fold's training set (13/11/13/13/14 test alloys, all leaked).
-This is the same estimand as `random_seed0`, with 5 folds instead of 1.
+`loco_fold0..4` are condition-grouped 5-fold partitions (every test alloy
+also appears in that fold's training set). This is the same estimand as
+`random_seed0`, with 5 folds instead of 1.
 
 Consequence: 5-fold is strictly the better report of the same claim (107 conditions
 covered instead of 18, plus dispersion). Single-split seed-0 numbers move in steps of
 0.056 on top-1 and cannot separate heads.
 
-**Decision: 5-fold condition-grouped CV is the headline protocol. Single-split
-seed-0 rows move to an appendix or are dropped.** The name `loco_fold*` is misleading
-and should be renamed `cv_fold*`.
+**Decision: 5-fold cross-validation is the only reported protocol. It is
+called "5-fold cross-validation" in the paper and everywhere else; the
+leave-one-condition-out framing does not apply and is not mentioned.** The split
+files keep their `loco_fold*` names on disk (artifact keying), but the protocol
+label in all reports is `condition_grouped_5fold_cv`.
 
 ## 3. Task A (composition given known process): head set
 
@@ -114,57 +120,65 @@ weakened.
    fresh fold seed (step 5 below) is what turns it from a diagnostic into a claim.
 3. **Obfuscated code.** `louam_genai_task_b_velocity_uncertainty_loco.py` and
    `louam_genai_wape_targeted_seed0.py` carry base85/zlib-compressed modules inlined as
-   string blobs. These cannot be reviewed or reproduced and must be unpacked into plain
-   source before use.
+   string blobs. Resolved by scope: neither head is in the selected sets, so the blobs
+   are not ported. They remain in the `winners`/`louam` branch history only.
 
 The GNN 5-fold rows keep the frozen seed-0 encoder rather than refitting it per fold.
 Accepted: they are reported as fixed-encoder diagnostics.
 
-## 8. Proposed layout
+## 7b. Inner-CV granularity fix (neurips-ai4mat)
 
-Current state: 43 scripts in `main`, 47 in `winners`, 6 of them `louam_*` prototypes
-with cross-imports and inlined blobs. The split between `scripts/` and `src/icme_mg/`
-is not principled.
+The original winner code capped stratified inner folds at the smallest alloy
+condition count. On the 5-fold partitions several Mg-Gd-Mn alloys have only two
+training conditions, collapsing the OOF selection to 2 inner folds with a 50%
+holdout. The branch now stratifies only when every alloy has at least the
+requested number of conditions, and otherwise falls back to unstratified
+condition-level KFold at full granularity (5 inner folds). Condition grouping,
+which is what OOF honesty requires, is preserved in both paths.
+
+## 8. Layout (executed on neurips-ai4mat)
 
 ```
 src/icme_mg/
-  data/          labels, splits, manifests
-  pipelines/     conventional | genai | gnn   (representation builders)
+  data/__init__.py        labels, lattice, split loaders, conditioning contracts
   heads/
-    composition/ knn, fusion, reranker
-    process/     trees, gp, grid_gp
-  evaluation/    metrics.py  (incl. all-WAPE + FP guards), calibration.py
-  protocols/     cv.py       (5-fold condition-grouped), seed0.py
+    composition/          knn.py, fusion.py, ftt.py, reranker.py
+    process/              trees.py, gp.py, grid_gp.py
+  evaluation/
+    head_metrics.py       all metrics incl. all-WAPE + FP guards, calibration
+    metrics.py            flow-head training metrics (pre-existing, untouched)
+  protocols/
+    cv.py                 5-fold CV driver constants, inner condition splits
 
 scripts/
-  build/         build_labels, build_splits, build_conventional, build_graphs
-  run/           run_cv.py, run_seed0.py
-  report/        export_tables.py, metrics_from_predictions.py
+  run/
+    run_cv.py             unified runner: folds x representations x head sets
+    aggregate_cv.py       folds -> results/tables/*_cv.csv
+  (pre-existing scripts remain for reference; the runner imports only
+  src/icme_mg, no cross-script imports)
 
 results/
-  tables/        generated CSVs only
-  paper_results.md
-runs/            raw predictions + summaries (gitignored)
-archive/         superseded prototypes, incl. louam_* originals
+  tables/                 generated CSVs only
+runs/cv/{fold}/{pipeline}/  report.json + predictions.npz (raw predictions, so
+                            any new metric is a recomputation, never a re-fit)
 ```
 
-Rules:
-- One head, one module under `heads/`, no cross-script imports between prototypes.
-- Every head exposes `fit(X, conditions, **params)` and `predict(model, X)`.
-- Metrics live only in `evaluation/`, never redefined per script.
-- `runs/` holds raw predictions so any new metric is a recomputation, never a re-fit.
-  That property already exists in `main` and must survive the move.
+Head interface: composition heads consume conditioned parts and produce alloy
+probabilities; process heads consume conditioned parts (trees, gp) or raw parts
+(grid_gp bags) and produce physical-unit (T_ext, v_ext). The reranker is one
+selection machinery with a representation-appropriate auxiliary: descriptor
+blocks for conventional, FT-Transformer for genai/gnn.
 
 ## 9. Order of work
 
-1. Port the guard metrics into `main`'s evaluation, re-export existing tables. Cheap,
-   and immediately shows which current numbers are inflated.
-2. Restore the 8-element lattice in main and re-run the tuned seed-0 heads, so both
-   branches share one label space before anything is merged.
-3. Rebuild the 5-fold runner so all three representations and all three Task A heads
-   run under one protocol, on 8 elements.
-4. Un-bundle the two obfuscated GenAI scripts.
-5. Re-run the reranker with a fresh fold seed. If it holds, it is the headline; if it
-   does not, the condition-balanced fusion stays.
-6. Repeat 3 and 5 for Task B.
-7. Reorganise into the layout above once the numbers are settled, not before.
+1. Port the guard metrics into evaluation. Done on neurips-ai4mat
+   (`evaluation/head_metrics.py`).
+2. Restore the 8-element lattice. Done: Y column added to labels.csv
+   (ME21 0.04, all others 0), source switched to the winners xlsx.
+3. Rebuild the 5-fold runner over all three representations and both head
+   sets. Done (`scripts/run/run_cv.py`, smoke-tested on fold 0).
+4. Obfuscated GenAI scripts: not needed, none of their heads are selected.
+5. Full re-run: 5 folds x 3 representations x all heads, fresh, no previous
+   results. Then `aggregate_cv.py` produces the paper tables.
+6. If the reranker holds across folds, it is the headline; if not, the
+   condition-balanced fusion stays.
