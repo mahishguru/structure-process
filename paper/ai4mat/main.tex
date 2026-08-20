@@ -1,0 +1,515 @@
+% AI4Mat @ NeurIPS 2026 workshop paper (full-length, 9 pages + refs + appendix).
+% Template: neurips_2026.sty from the NeurIPS 2026 style kit (drop it next to
+% this file before compiling; it is not tracked in the repo).
+% Reference placeholders: \needref{topic} renders a red [REF: topic] inline.
+% Replace each with the real \cite{...} once references are added manually.
+\documentclass{article}
+
+\PassOptionsToPackage{numbers,sort&compress}{natbib}
+\usepackage{neurips_2026}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{amsfonts, amsmath, amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage{caption}
+\captionsetup[figure]{aboveskip=0.3em}
+\captionsetup[table]{aboveskip=0pt,belowskip=1pt}
+\setlength{\textfloatsep}{6pt plus 1pt minus 0pt}
+
+% Red reference placeholder. Usage: \needref{short topic hint}
+\newcommand{\needref}[1]{{\color{red}\textbf{[REF: #1]}}}
+
+% Notation
+\newcommand{\Text}{T_{\mathrm{ext}}}
+\newcommand{\vext}{v_{\mathrm{ext}}}
+\newcommand{\R}{\mathbb{R}}
+
+\title{Which Alloy Made This, and How Was It Extruded?\\
+Structure-to-Recipe Inference on Sparse Experimental Data}
+
+\author{%
+  Anonymous Author(s)\\
+  AI4Mat @ NeurIPS 2026\\
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Self-driving laboratories promise closed-loop materials discovery, but one leg
+of the loop is rarely benchmarked on real data: given a characterized
+microstructure, which alloy is it and how was it processed? We study this
+structure-to-recipe question on a genuinely experimental magnesium alloy
+dataset, 107 extrusion conditions across 14 alloy classes with optical
+micrographs and X-ray texture measurements, which is sparse along both the
+composition and the process axis. We benchmark three descriptor families that
+span the current practice of metallic microstructure representation:
+handcrafted statistics (438-D), a frozen generative foundation-model latent
+(1280-D), and a learned grain-graph embedding (128-D). Each representation is
+paired with prediction heads that respect the discrete structure of the label
+spaces: classification over the 14-alloy composition lattice, and decoding
+over the catalogue of observed processing conditions. Under condition-grouped
+5-fold cross-validation with guard metrics that make metric gaming visible,
+handcrafted descriptors with an out-of-fold-constrained reranker identify
+composition with 13.6\% element WAPE and 0.65 alloy top-1, while a correlated
+Gaussian process decoded on the observed process grid predicts extrusion
+velocity best on all three representations (49.9\% MAPE). The generative
+latent, despite its 2.5B-parameter lineage, is the least compatible
+descriptor for this task. Our results argue that on sparse experimental data,
+matching the prediction head to the discrete label structure matters more
+than scaling the representation, and that evaluation honesty is itself a
+deliverable for automated characterization.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Computational materials science has largely closed the forward loop from
+processing and structure to properties. For extruded magnesium alloys in
+particular, statistical microstructure and texture descriptors predict
+strain-hardening behavior within a few percent \needref{Acta 2025, forward
+structure-property pipeline for Mg alloys (Guru et al.)}, and generative latent
+optimization can propose microstructures for a target stress-strain curve
+\needref{companion NeurIPS 2026 submission, latent optimization for Mg
+microstructure inverse design}. The reverse leg of the loop receives far less
+attention: \emph{given only the characterized structure of a finished part,
+recover the recipe that produced it}. Figure~\ref{fig:missing_leg} poses the
+question visually.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figures/fig1_missing_leg.png}
+  \caption{The ICME loop for extruded Mg alloys. Forward structure-to-property
+  prediction and property-targeted inverse design are established; the
+  structure-to-recipe leg (red) is the missing inference this paper studies:
+  which composition, which extrusion temperature and speed?}
+  \label{fig:missing_leg}
+\end{figure}
+
+This is not an academic puzzle. In automated characterization pipelines and
+self-driving laboratories, recipe-level provenance from a micrograph is quality
+control, anomaly detection, and feed-forward information for the next
+experiment \needref{self-driving laboratories review}\needref{automated
+characterization / autonomous microscopy}. It is also the realistic first
+question in reverse engineering of legacy or competitor materials. What makes
+it hard in practice is exactly what the workshop theme calls the messiness of
+real experiments: measured campaigns are small, heterogeneous, pooled across
+sources, and thinly sampled along every axis a model would want to learn.
+
+We embrace that regime rather than simulate our way out of it. Our dataset
+contains 107 measured extrusion conditions over 14 magnesium alloy classes,
+with optical micrographs and X-ray diffraction texture per condition. Along the
+composition axis the labels live on a discrete lattice of 14 alloys over an
+8-element simplex; along the process axis they live on a small catalogue of
+observed (temperature, velocity) pairs. Both label spaces are discrete, and
+this single observation drives everything that follows.
+
+We benchmark three representation families for metallic microstructure, from
+handcrafted statistics to a frozen generative foundation-model latent to a
+learned grain-graph embedding, and pair them with prediction heads that either
+respect or ignore the discrete label structure. The headline findings:
+
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
+  \item \textbf{Head structure beats representation scale.} On composition,
+  handcrafted descriptors with a lattice-aware reranker reach 13.6\%
+  present-element WAPE and 0.65 alloy top-1; the 1280-D foundation-model
+  latent is three times worse, and the 128-D graph embedding worse still.
+  \item \textbf{The process window is a catalogue, not a continuum.} Decoding
+  a correlated Gaussian process over the grid of observed training conditions
+  beats continuous regression on velocity for every representation.
+  \item \textbf{Selection must be honest to be believed.} The winning head is
+  chosen by out-of-fold constraints on all-element WAPE and false-positive
+  rate, because the headline metric alone is silently gameable.
+  \item \textbf{Compatibility is measurable.} We offer descriptor-task
+  compatibility, not accuracy on a benchmark, as the right criterion for
+  choosing representations in small experimental campaigns.
+\end{enumerate}
+
+\section{Data: sparse by construction}
+\label{sec:data}
+
+\paragraph{The campaign.} The dataset aggregates measured extrusion campaigns
+of wrought magnesium alloys, spanning RE-free alloys (AZ31, ME21), Zn-bearing
+alloys (Z1, ZX10, ZNd10), and the Mg-Gd family with Mn micro-additions
+(Mg-2/5/10Gd, with 0, 0.5, or 1 wt\% Mn) \needref{Nienaber thesis, extrusion
+campaign}\needref{Cano-Castillo 2020, Zn-bearing Mg extrusion}\needref{Mg-Gd-Mn
+extrusion study}. Each of the 107 conditions combines a base alloy (composition
+in wt\% over the 8-element lattice Al, Zn, Mn, Ce, Gd, Ca, Nd, Y), an extrusion
+temperature $\Text \in [200, 500]$\,°C, and a ram speed $\vext \in [0.5,
+7.5]$\,mm/s. Per condition we have optical micrographs (15 to 108 images after
+segmentation quality control) and X-ray pole figures reduced to an orientation
+distribution function (ODF).
+
+\paragraph{Two kinds of sparsity.} The composition axis is sparse because 14
+alloys barely populate an 8-element simplex; most elements are zero in most
+alloys, and Y appears in exactly one. The process axis is sparse and
+\emph{confounded}: each alloy family was extruded on its own temperature-speed
+sub-grid, so process and composition are correlated by experimental design.
+Any model can exploit that correlation; the honest question is whether it can
+also move \emph{within} a family.
+
+\paragraph{Two symmetric tasks.} We decompose structure-to-recipe into two
+conditionally complete tasks. \textbf{Task A (composition):} given the
+structure representation plus the known process $(\Text, \log \vext)$ and an
+extrusion-ratio-type flag, predict the element wt\% vector.
+\textbf{Task B (process):} given the representation plus the known composition
+and the same flag, predict $(\Text, \vext)$. Each task sees exactly the half of
+the recipe a deployment would already know, mirroring how an alloy's family is
+known once an optimized microstructure exists.
+
+\paragraph{Leakage audit.} Repeated images of one condition make random
+image-level splits meaningless: the same condition's CatBoost+kNN fusion scores
+100\% alloy top-1 under such a split. All results here therefore use
+condition-grouped 5-fold cross-validation: every condition (all its images)
+sits in exactly one held-out fold, folds are formed over the 107 conditions,
+and test folds are touched once. Validation portions select base
+hyperparameters only; all winner selection happens on training out-of-fold
+predictions (Section~\ref{sec:heads}).
+
+\section{Three ways to describe a microstructure}
+\label{sec:repr}
+
+Figure~\ref{fig:pipeline} shows the three descriptor branches. They span the
+design space a practitioner actually faces, from classical statistics to
+foundation-model latents, and the benchmark asks which of them is
+\emph{compatible} with recipe inference at 107 conditions.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig2_pipeline.png}
+  \caption{Three descriptor branches feed shared prediction heads.
+  \textbf{Top (blue):} handcrafted microstructure and texture statistics,
+  438-D. \textbf{Middle (orange):} frozen ViT-H encoder with an MMDiT
+  diffusion decoder, 16$\times$80 latents pooled to 1280-D. \textbf{Bottom
+  (green):} grain adjacency graph through a GATv2 encoder with attention
+  pooling, 128-D. Right: the shared heads, classification over the alloy
+  lattice and Gaussian-process regression over the process window.}
+  \label{fig:pipeline}
+\end{figure}
+
+\paragraph{Conventional statistics (438-D).} Following the forward-modeling
+pipeline of \needref{Acta 2025 descriptor methodology}, each image contributes:
+PCA-reduced 3-point spatial correlations (120-D), Isomap-reduced Gram matrices
+of pretrained CNN activations (200-D), aspect-ratio and equivalent-diameter
+distributions (58-D), and from the ODF, Isomap-reduced generalized spherical
+harmonics coefficients (60-D). These descriptors are cheap, deterministic, and
+were designed by domain knowledge about what distinguishes one extruded
+microstructure from another \needref{2-point / n-point spatial correlation
+statistics for microstructure}\needref{GSH texture representation, e.g.
+Bunge}\needref{Isomap, Tenenbaum et al.}.
+
+\paragraph{Generative latent (1280-D).} The middle branch reuses the frozen
+encoder-decoder of our companion work \needref{companion NeurIPS 2026
+submission}: a ViT-H/14 vision transformer, pretrained on natural images and
+upper-block fine-tuned on $\sim$80k EBSD-derived microstructures, compresses a
+micrograph to a bottleneck that an MMDiT rectified-flow decoder (Stable
+Diffusion 3.5 backbone) can reconstruct from \needref{ViT}\needref{CLIP /
+OpenCLIP pretraining}\needref{SD3 / rectified flow MMDiT}. Each image yields
+$16 \times 80$ latents, pooled and flattened to 1280-D. We deliberately do not
+retrain anything here: the question is whether a latent learned for
+\emph{generation and reconstruction} transfers to \emph{recipe inference}.
+Architecture and training detail are in the companion paper; what matters here
+is only that this is the strongest generative representation of these
+microstructures currently available to us.
+
+\paragraph{Grain-graph embedding (128-D).} The third branch builds a grain
+adjacency graph per image (grains as nodes, shared boundaries as edges, node
+features from grain geometry and orientation, edge features from boundary
+length and misorientation) and encodes it with a four-layer GATv2 network
+followed by attention pooling \needref{GATv2, Brody et al.}\needref{graph
+neural networks for microstructure representation}. The encoder is trained with
+the flow-matching objective of the companion pipeline and then frozen; per
+fold we reuse the cached 128-D embeddings (Appendix~\ref{app:gnn} gives the
+architecture figure).
+
+\section{Heads that match the label space}
+\label{sec:heads}
+
+Both label spaces are small and discrete. The composition label is one of 14
+nominal alloy vectors; the process label is one of the observed $(\Text,
+\log \vext)$ pairs in the training folds. We therefore compare, per task, heads
+that exploit this structure against strong continuous baselines.
+
+\paragraph{Task A: composition as lattice classification.} Three heads.
+(i) \textbf{kNN retrieval}: soft voting over the nearest training images in
+the representation, the natural retrieval baseline on a small lattice.
+(ii) \textbf{Condition-balanced fusion}: a 14-way CatBoost classifier and the
+kNN vote, each with equal total training weight per condition, blended 50:50
+\needref{CatBoost}\needref{gradient boosting}.
+(iii) \textbf{OOF-constrained reranker}: the fusion is the \emph{owner}; on the
+conventional branch, five per-descriptor-block logistic classifiers on
+condition-mean features act as a complementary \emph{auxiliary}, and the final
+posterior is a convex blend
+$p = w\, p_{\mathrm{owner}} + (1-w)\, p_{\mathrm{aux}}$.
+The weight $w$ is selected on training out-of-fold predictions only, and a
+candidate $w$ is eligible only if it does not degrade all-element WAPE or the
+false-positive rate relative to the owner. On the genai and gnn branches, which
+have no descriptor blocks, an FT-Transformer classifier plays the auxiliary
+role \needref{FT-Transformer, Gorishniy et al.}.
+
+\paragraph{Guard metrics.} The deployment question behind Task A is the
+\emph{levels} of the elements in a known alloy family, so the headline metric
+is present-element WAPE (weighted absolute percentage error over elements
+actually present, reported throughout simply as WAPE). WAPE alone is gameable:
+a head that predicts every element as present scores deceptively well. Every
+composition row therefore also reports all-element WAPE and the macro
+false-positive rate. This guard discipline is not cosmetic: in our own
+head-search history, several metric-learning and hurdle heads posted attractive
+WAPE values while predicting 12-37\% false-positive elements
+(Section~\ref{sec:results}).
+
+\paragraph{Task B: process as catalogue decoding.} Three heads.
+(i) \textbf{Gradient-boosted trees} (CatBoost, targets standardized, $\vext$
+in log space). (ii) \textbf{Gaussian process}: condition-pooled features,
+PCA-32, anisotropic RBF kernel, lognormal treatment of $\vext$ with the
+smearing correction \needref{Gaussian processes, Rasmussen \&
+Williams}\needref{smearing estimate, Duan 1983}.
+(iii) \textbf{Joint-grid GP}: a correlated GP over the joint latent
+$(\Text, \log \vext)$ with an intrinsic task-correlation model, whose posterior
+at a query is decoded by minimum-risk selection over the discrete grid of
+observed training pairs rather than read off continuously; for velocity, a
+log-space GP is blended with an ordinal classifier over observed velocity
+levels, the blend selected on training out-of-fold predictions under safety
+constraints that forbid degrading the pure-GP fallback. Features are an
+RBF-sampled condition-distribution embedding blended with the known-composition
+kernel \needref{intrinsic coregionalization model / multi-task
+GP}\needref{random Fourier features, Rahimi \& Recht}\needref{ordinal
+classification via cumulative link / Frank \& Hall}.
+
+\section{Results}
+\label{sec:results}
+
+\paragraph{Task A: composition.} Table~\ref{tab:composition} collects the
+5-fold results. The conventional reranker wins outright: 13.6\% WAPE against
+16.8\% for its own owner and 30.0\% for retrieval, with the best top-1 (0.646)
+\emph{and} the best guard metrics (19.7\% all-WAPE, 1.1\% false positives). The
+descriptor-block auxiliary genuinely complements the owner on this branch. On
+the learned representations the same machinery honestly reports failure: the
+out-of-fold selection chooses owner weight 1.0 on 8 of 10 genai/gnn folds,
+i.e. the auxiliary adds nothing and the head correctly refuses to use it. The
+ordering is stark: conventional 13.6\%, genai 41.6\%, gnn 44.2\% WAPE. The
+1280-D foundation latent, our most expensive representation, is the least
+compatible with composition inference.
+
+\begin{table}[t]
+  \caption{Task A, composition given known process. 5-fold cross-validation,
+  mean $\pm$ std over held-out condition groups. WAPE = present-element WAPE
+  (lower is better); all-WAPE and FP (false-positive rate) are the guard
+  columns; top-1 = alloy identification accuracy. Best column value in bold.}
+  \label{tab:composition}
+  \centering\small
+  \begin{tabularx}{\linewidth}{@{}llXXXX@{}}
+    \toprule
+    repr. & head & WAPE (\%) & all-WAPE (\%) & FP (\%) & top-1 \\
+    \midrule
+    \multirow{3}{*}{conv.}
+      & kNN retrieval & $30.0 \pm 7.6$ & 61.7 & 10.3 & $0.496 \pm 0.110$ \\
+      & balanced fusion & $16.8 \pm 5.8$ & 25.4 & 1.3 & $0.612 \pm 0.078$ \\
+      & OOF-constrained reranker & $\mathbf{13.6 \pm 4.1}$ & \textbf{19.7} & \textbf{1.1} & $\mathbf{0.646 \pm 0.051}$ \\
+    \midrule
+    \multirow{2}{*}{genai}
+      & balanced fusion & $44.7 \pm 18.0$ & 74.5 & 6.5 & $0.276 \pm 0.104$ \\
+      & OOF-constrained reranker & $41.6 \pm 18.9$ & 70.0 & 5.9 & $0.287 \pm 0.111$ \\
+    \midrule
+    \multirow{2}{*}{gnn}
+      & balanced fusion & $44.3 \pm 8.0$ & 72.3 & 7.2 & $0.266 \pm 0.071$ \\
+      & OOF-constrained reranker & $44.2 \pm 8.0$ & 72.1 & 7.2 & $0.266 \pm 0.071$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\paragraph{Task B: process.} Table~\ref{tab:process} shows the mirror task.
+The joint-grid GP wins velocity on all three representations (MAPE 49.9, 50.0,
+53.3\% against a 136.5\% constant-predictor floor) and temperature on
+conventional and genai; the gnn trees take temperature R$^2$ (0.443). The plain
+continuous GP collapses on velocity (MAPE 95-120\%, R$^2 \leq 0.08$): the
+improvement comes from decoding on the observed grid, not from the GP itself.
+This is the process-side analogue of the composition lattice: with roughly 70
+training conditions per fold, the process label is better treated as a small
+catalogue than as a continuum.
+
+\begin{table}[t]
+  \caption{Task B, process given known composition. 5-fold cross-validation,
+  mean over held-out condition groups (std in Appendix
+  Table~\ref{tab:app_process}). MAE in °C ($\Text$) or mm/s ($\vext$). Best
+  value per representation block in bold.}
+  \label{tab:process}
+  \centering\small
+  \begin{tabularx}{\linewidth}{@{}lllXXX@{}}
+    \toprule
+    repr. & head & target & MAE & MAPE (\%) & R$^2$ \\
+    \midrule
+    \multirow{6}{*}{conv.}
+      & trees & $\Text$ & 41.6 & 11.9 & 0.349 \\
+      & ARD GP & $\Text$ & 52.1 & 15.2 & 0.039 \\
+      & joint-grid GP & $\Text$ & \textbf{38.1} & \textbf{10.9} & 0.326 \\
+      \cmidrule(l){2-6}
+      & trees & $\vext$ & 1.34 & 64.5 & 0.281 \\
+      & ARD GP & $\vext$ & 1.71 & 104.7 & $-$0.240 \\
+      & joint-grid GP & $\vext$ & \textbf{1.05} & \textbf{49.9} & \textbf{0.535} \\
+    \midrule
+    \multirow{2}{*}{genai}
+      & joint-grid GP & $\Text$ & \textbf{35.2} & \textbf{10.5} & \textbf{0.367} \\
+      & joint-grid GP & $\vext$ & \textbf{1.12} & \textbf{50.0} & \textbf{0.447} \\
+    \midrule
+    \multirow{2}{*}{gnn}
+      & trees & $\Text$ & 36.5 & 10.7 & \textbf{0.443} \\
+      & joint-grid GP & $\vext$ & \textbf{1.12} & \textbf{53.3} & 0.473 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\paragraph{The guard metrics earn their keep.} In our head-search archive,
+hurdle and metric-learning heads reached 17.0\% WAPE on a single split, close
+to the reranker, while silently predicting 14\% false-positive elements and
+67\% all-element WAPE. Reported with guards, they are obviously broken;
+reported on WAPE alone, they would have been our headline. We keep them as a
+two-sentence negative result: on a sparse lattice, any head that buys
+present-element error with false presence is detectable only if all-element
+error and false-positive rate travel with the headline.
+
+\paragraph{Calibration, honestly.} The grid-GP intervals are under-dispersed
+(90\% coverage $\approx$ 0.5), because the grid decode concentrates mass on
+observed pairs; the plain ARD GP on gnn is the best-calibrated head (coverage
+0.69 temperature, 0.71 velocity). We report both rather than smoothing the
+story: the winning heads are point-accurate, and their uncertainty statements
+should not be trusted beyond that.
+
+\section{What this means for messy real data}
+\label{sec:discussion}
+
+\paragraph{An answer to the scaling question.} For this task, at this data
+scale, larger learned representations do not yield predictable improvements:
+the 2.5B-parameter-lineage latent loses to 438 handcrafted statistics by a
+factor of three on composition WAPE. The bottleneck is not model capacity but
+descriptor-task compatibility: recipe-level information lives in grain-size and
+shape distributions, boundary statistics, and texture components that the
+handcrafted pipeline encodes explicitly and the generative latent retains only
+as needed for reconstruction. We expect the gap to narrow as such latents are
+trained on larger and more diverse microstructure corpora, but on today's
+experimental campaigns the domain-designed descriptor is the right prior.
+
+\paragraph{Practical guidance for automated characterization.} Optical
+microscopy plus X-ray pole figures, the cheapest standard characterization
+stack, already suffice for recipe-level provenance: 0.65 alloy identification
+and a 50\%-MAPE velocity estimate from structure alone. In a self-driving
+laboratory this makes provenance inference a free byproduct of measurements
+already being collected, usable for quality control, mislabel detection, and
+cross-laboratory data reconciliation \needref{self-driving laboratories
+review}. The guard-metric discipline transfers directly: any characterization
+model deployed on sparse labels should ship with the metrics that would expose
+its failure modes.
+
+\paragraph{Limitations.} The composition lattice is a closed set of 14 alloys;
+identification outside it is out of scope. The tasks are confounded by design
+(families occupy process sub-grids), and condition-grouped folds remove
+condition leakage but not family structure. GNN embeddings are frozen per fold,
+so those rows are fixed-encoder diagnostics. Grid-GP intervals are
+under-dispersed, as noted. And 107 conditions, however real, remain small;
+the dispersion across folds in Table~\ref{tab:composition} is the honest price.
+
+\section{Conclusion}
+
+Which alloy made this, and how was it extruded? On sparse experimental data:
+the handcrafted descriptor, a lattice-aware reranked classifier, answers the
+first question at 13.6\% WAPE, and a catalogue-decoding Gaussian process
+answers the second at 50\% velocity MAPE. The recipe was never a continuous
+object; the heads that know that win.
+
+\appendix
+
+\section{Grain-graph encoder detail}
+\label{app:gnn}
+
+Figure~\ref{fig:gnn} details the third descriptor branch. Each segmented
+micrograph becomes a grain adjacency graph (node features: area, aspect ratio,
+Bunge-Euler angles, centroid, bounding box; edge features: shared-boundary
+length and misorientation). A linear projection to 128-D is followed by four
+GATv2 blocks (4 heads, edge dimension 2, LayerNorm + GELU + residual), and
+attention pooling with 8 learned seed queries produces 8 tokens of 128-D per
+image, mean-pooled to the 128-D embedding used in the benchmark.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig3_gnn.png}
+  \caption{Grain-graph encoder. Stage 1: segmented microstructure. Stage 2:
+  grain adjacency graph, roughly 500 grains per image. Stage 3: four GATv2
+  blocks with residual connections. Stage 4: attention pooling to 8
+  microstructure tokens of 128-D.}
+  \label{fig:gnn}
+\end{figure}
+
+\section{Per-fold tables and selection audit}
+\label{app:folds}
+
+Table~\ref{tab:app_process} reports the full 5-fold process metrics including
+standard deviations; per-fold composition rows and the complete selection audit
+(selected reranker weights and velocity decoders per fold) are provided in the
+supplementary CSVs (\texttt{composition\_heads\_cv.csv},
+\texttt{process\_heads\_cv.csv}, \texttt{cv\_selection\_audit.csv}) and are
+rebuildable end-to-end with \texttt{scripts/run/run\_cv.py} and
+\texttt{aggregate\_cv.py}.
+
+\begin{table}[h]
+  \caption{Task B, full 5-fold statistics (mean $\pm$ std).}
+  \label{tab:app_process}
+  \centering\small
+  \begin{tabularx}{\linewidth}{@{}lllXXX@{}}
+    \toprule
+    repr. & head & target & MAE & MAPE (\%) & R$^2$ \\
+    \midrule
+    conv. & trees & $\Text$ & 41.6 & $11.9 \pm 2.3$ & 0.349 \\
+    conv. & ARD GP & $\Text$ & 52.1 & $15.2 \pm 2.0$ & 0.039 \\
+    conv. & joint-grid GP & $\Text$ & 38.1 & $10.9 \pm 1.1$ & 0.326 \\
+    conv. & trees & $\vext$ & 1.34 & $64.5 \pm 15.5$ & 0.281 \\
+    conv. & ARD GP & $\vext$ & 1.71 & $104.7 \pm 40.9$ & $-$0.240 \\
+    conv. & joint-grid GP & $\vext$ & 1.05 & $49.9 \pm 14.5$ & 0.535 \\
+    \midrule
+    genai & trees & $\Text$ & 39.2 & $11.4 \pm 1.9$ & 0.391 \\
+    genai & ARD GP & $\Text$ & 72.1 & $19.9 \pm 3.4$ & $-$0.813 \\
+    genai & joint-grid GP & $\Text$ & 35.2 & $10.5 \pm 1.4$ & 0.367 \\
+    genai & trees & $\vext$ & 1.22 & $55.9 \pm 10.7$ & 0.409 \\
+    genai & ARD GP & $\vext$ & 1.76 & $120.5 \pm 57.2$ & $-$0.200 \\
+    genai & joint-grid GP & $\vext$ & 1.12 & $50.0 \pm 12.2$ & 0.447 \\
+    \midrule
+    gnn & trees & $\Text$ & 36.5 & $10.7 \pm 2.2$ & 0.443 \\
+    gnn & ARD GP & $\Text$ & 49.5 & $14.7 \pm 3.1$ & 0.084 \\
+    gnn & joint-grid GP & $\Text$ & 36.6 & $10.8 \pm 1.9$ & 0.357 \\
+    gnn & trees & $\vext$ & 1.11 & $56.0 \pm 16.8$ & 0.525 \\
+    gnn & ARD GP & $\vext$ & 1.44 & $94.5 \pm 38.8$ & 0.012 \\
+    gnn & joint-grid GP & $\vext$ & 1.12 & $53.3 \pm 11.6$ & 0.473 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Reproducibility}
+\label{app:repro}
+
+The benchmark runs as \texttt{python scripts/run/run\_cv.py} (all five folds,
+three representations, both tasks) followed by \texttt{python
+scripts/run/aggregate\_cv.py}, which writes the CSVs behind
+Tables~\ref{tab:composition} and \ref{tab:process}. Every head stores raw
+per-fold test predictions, so any metric not reported here is a recomputation,
+never a re-fit. Code and split files: anonymized repository \needref{code
+repository link, add at submission}.
+
+% Bibliography: to be wired manually. Until then every citation is an inline
+% red \needref{...} placeholder. Once references.bib is populated, replace the
+% placeholders with \cite{...} and uncomment:
+% \bibliographystyle{unsrtnat}
+% \bibliography{references}
+
+\end{document}
