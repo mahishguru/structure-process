@@ -26,12 +26,12 @@ representation does not help at this data scale.
 |---|---|---:|---|
 | 1 | Introduction | 1.25 | Fig 1 (missing leg). The question. Why provenance matters for automated characterization and QC in self-driving labs. Contributions list (4 bullets). |
 | 2 | Data: sparse by construction | 1.0 | 107 conditions, 14 alloys, 8-element lattice, OM + XRD texture. Sparsity along both axes; family-confounded process sub-grids. Two symmetric tasks A/B with known-other-half conditioning. Leakage audit: image-random split memorizes (100% top-1), condition-grouped 5-fold CV is the protocol. |
-| 3 | Three ways to describe a microstructure | 1.25 | Fig 2 (pipeline). Conventional 438-D statistics (3-point correlations, Gram matrices, size/shape, GSH texture). Vision embedding 1280-D, frozen ViT-H + MMDiT latent (2 paragraphs + Fig vision, pointer to companion paper, no architecture deep-dive). GNN 128-D grain-graph embedding (1 paragraph, Fig 3 detail in appendix). Frame as descriptor compatibility question. |
-| 4 | Heads that match the label space | 1.25 | Composition is classification over the 14-alloy lattice: kNN retrieval, condition-balanced CatBoost+kNN fusion, OOF-constrained reranker (blend owner with descriptor-block logistics, weight from training OOF under all-WAPE + FP guards). Process is catalogue decoding: trees and ARD GP baselines, joint correlated GP decoded on the observed (T, v) grid + OOF-constrained ordinal velocity. Metrics: WAPE (present-element), all-WAPE + FP guards, MAE/MAPE/R2, coverage90. |
-| 5 | Results | 1.75 | Table 1 (composition) + Table 2 (process). Finding 1: reranker wins composition on conventional, 13.6% WAPE, and only there. Finding 2: grid decode wins v_ext everywhere, T_ext on conv/vision. Finding 3: representation order is conventional >> vision ~ gnn for composition; process is split. Finding 4: guard metrics expose presence-gaming (one short paragraph, the LMNN/hurdle lesson). Calibration honesty paragraph. |
-| 6 | What this means for messy real data | 0.75 | Scaling answer for this task. Descriptor compatibility as the selection criterion. What a self-driving lab should measure first (cheap OM + XRD already suffice for recipe-level provenance). Limitations: 14 alloys closed set, under-dispersed grid-GP intervals, encoder frozen per fold. |
-| 7 | Conclusion | 0.25 | Restate the question and the answer in two sentences. |
-| A | Appendix | unlim | GNN detail (Fig 3), per-fold tables, selection audit, hyperparameters, leakage diagnostic, full guard-metric table. |
+| 3 | Three ways to describe a microstructure | 1.75 | Fig 2 (pipeline). Conventional 438-D statistics. Vision embedding 1280-D: ViT-H trunk + attention pooler to 16x80 spatial latents, frozen MMDiT decoder arm trained jointly under the 5-term composite loss (Eq. 1: flow-matching velocity + clean-latent rec + InfoNCE + VICReg + FFT) (Fig vision). GNN 128-D grain-graph embedding with the four-stage figure inline (Fig 3). |
+| 4 | Heads that match the label space | 1.25 | Composition = lattice classification (kNN, balanced fusion, OOF-constrained reranker); process = catalogue decoding (trees, ARD GP, joint-grid GP + ordinal velocity). Metrics with guard columns. Reference placeholders on all method heads. |
+| 5 | Results | 2.5 | Table 1 (composition) + Table 2 (process) + per-fold tables (Task A per-fold, Task B full stats) inline. Findings 1-4, guard-metric lesson, calibration honesty. |
+| 6 | What this means for messy real data | 0.75 | Scaling answer, descriptor compatibility, what to measure first, limitations. |
+| 7 | Conclusion | 0.25 | Restate the question and the answer. |
+| 8 | Reproducibility | 0.25 | run_cv.py / aggregate_cv.py, raw predictions stored. |
 
 ## Figure map
 
@@ -40,17 +40,17 @@ representation does not help at this data scale.
 | 1 | figures/fig1_missing_leg.png | S1, top | The loop with the missing leg; pose the question visually. |
 | 2 | figures/fig2_pipeline.png | S3 | Three descriptor branches into shared heads; lattice classification + GP regression. |
 | 3 | figures/fig_vision_embedding.png | S3 (vision embedding paragraph) | The vision-embedding branch: ViT-H encoder, MMDiT decoder, 16x80 latents to 1280-D. |
-| 4 | figures/fig3_gnn.png | App A | GNN four-stage detail: graph, GATv2 x4, attention pooling, 8 tokens x 128. |
+| 4 | figures/fig3_gnn.png | S3 (grain-graph paragraph, inline) | GNN four-stage detail: graph, GATv2 x4, attention pooling, 8 tokens x 128. |
 
 ## Table map
 
 | tab | source | content |
 |---|---|---|
-| 1 | composition_heads_cv.csv (mean_std rows) | 3 heads x 3 representations: WAPE +/- std, top-1, plus all-WAPE + FP for conventional block; winner bold |
-| 2 | process_heads_cv.csv (mean_std rows) | 3 heads x 3 representations x 2 targets: MAE, MAPE, R2; winner bold |
-| A1 | composition_heads_cv.csv (fold rows) | per-fold composition |
-| A2 | process_heads_cv.csv (fold rows) | per-fold process |
-| A3 | cv_selection_audit.csv | selected owner weights and velocity decoders per fold |
+| 1 | composition_heads_cv.csv (mean_std) | 3 heads x 3 representations: WAPE +/- std, top-1, plus all-WAPE + FP; winner bold |
+| 2 | process_heads_cv.csv (mean_std) | 3 heads x 3 representations x 2 targets: MAE, MAPE, R2; winner bold |
+| 3 | composition_heads_cv.csv (fold rows) | Task A per-fold WAPE / top-1 (in Results) |
+| 4 | process_heads_cv.csv (mean_std) | Task B full mean +/- std (in Results) |
+| (supp) | cv_selection_audit.csv | selected owner weights and velocity decoders per fold |
 
 ## Numbers lockbox (only these appear in the paper)
 

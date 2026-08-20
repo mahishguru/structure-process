@@ -1,4 +1,4 @@
-% AI4Mat @ NeurIPS 2026 workshop paper (full-length, 9 pages + refs + appendix).
+% AI4Mat @ NeurIPS 2026 workshop paper (full-length, 9 pages + refs).
 % Template: neurips_2026.sty from the NeurIPS 2026 style kit (drop it next to
 % this file before compiling; it is not tracked in the repo).
 % Reference placeholders: \needref{topic} renders a red [REF: topic] inline.
@@ -216,14 +216,40 @@ Bunge}\needref{Isomap, Tenenbaum et al.}.
 
 \paragraph{Vision embedding (1280-D).} The middle branch reuses the frozen
 encoder-decoder of our companion work \needref{companion NeurIPS 2026
-submission}: a ViT-H/14 vision transformer, pretrained on natural images and
-upper-block fine-tuned on $\sim$80k EBSD-derived microstructures, compresses a
-micrograph to a bottleneck that an MMDiT rectified-flow decoder (Stable
-Diffusion 3.5 backbone) can reconstruct from \needref{ViT}\needref{CLIP /
-OpenCLIP pretraining}\needref{SD3 / rectified flow MMDiT}. Each image yields
-$16 \times 80$ latents, pooled and flattened to the 1280-D vision embedding
-(Figure~\ref{fig:vision}). We deliberately do not
-retrain anything here: the question is whether a vision embedding learned for
+submission}, trained on $\sim$80k EBSD-derived microstructures. The encoder is
+a ViT-H/14 trunk \needref{ViT, Dosovitskiy et al.} initialized from
+natural-image CLIP weights \needref{CLIP / OpenCLIP pretraining}, its lower
+half frozen and its upper 16 blocks fine-tuned, whose patch tokens are read out
+by a learned multi-query attention pooler \needref{attentional pooling /
+Perceiver-style latent queries, Jaegle et al.} into 16 spatial latent tokens.
+A frozen Stable
+Diffusion 3.5 MMDiT decoder arm \needref{SD3 / rectified flow MMDiT},
+conditioned on those tokens through a small \textsc{LatentToTokens} adaptor and
+a pooled projection, is trained jointly with the encoder
+to reconstruct the micrograph, so the latent is shaped by a composite of
+generative and alignment terms \needref{diffusion models, Ho et
+al.}\needref{flow matching, Lipman et al.}:
+\begin{equation}
+  \mathcal{L} \;=\; \lambda_{\mathrm{diff}}\,\mathcal{L}_{\mathrm{diff}}
+              + \lambda_{\mathrm{rec}}\,\mathcal{L}_{\mathrm{rec}}
+              + \lambda_{\mathrm{con}}\,\mathcal{L}_{\mathrm{con}}
+              + \lambda_{\mathrm{vic}}\,\mathcal{L}_{\mathrm{vic}}
+              + \lambda_{\mathrm{freq}}\,\mathcal{L}_{\mathrm{freq}},
+  \label{eq:vision-loss}
+\end{equation}
+where $\mathcal{L}_{\mathrm{diff}} = \lVert v_\theta(x_t, t, z) - (\epsilon -
+x_0)\rVert_2^2$ is the rectified-flow velocity loss on the noised latent $x_t$
+conditioned on the bottleneck $z$; $\mathcal{L}_{\mathrm{rec}} =
+\mathbb{E}_t[(1{-}t)^2 \lVert \hat x_0 - x_0 \rVert_2^2]$ is a
+timestep-weighted clean-latent reconstruction; $\mathcal{L}_{\mathrm{con}}$ is
+an InfoNCE contrastive term over augmentation twins of $z$ \needref{InfoNCE,
+contrastive learning}; $\mathcal{L}_{\mathrm{vic}}$ is a VICReg
+variance-covariance regulariser that keeps the bottleneck from collapsing
+\needref{VICReg, Bardes et al.}; and $\mathcal{L}_{\mathrm{freq}}$ is an
+FFT log-amplitude pixel loss with a radial high-frequency mask. The $16
+\times 80$ latent tokens of each image are flattened to the 1280-D vision
+embedding (Figure~\ref{fig:vision}). We deliberately do not retrain anything
+here: the question is whether a vision embedding shaped for
 \emph{generation and reconstruction} transfers to \emph{recipe inference}.
 Architecture and training detail are in the companion paper; what matters here
 is only that this is the strongest generative representation of these
@@ -239,15 +265,34 @@ microstructures currently available to us.
   \label{fig:vision}
 \end{figure}
 
-\paragraph{Grain-graph embedding (128-D).} The third branch builds a grain
-adjacency graph per image (grains as nodes, shared boundaries as edges, node
-features from grain geometry and orientation, edge features from boundary
-length and misorientation) and encodes it with a four-layer GATv2 network
-followed by attention pooling \needref{GATv2, Brody et al.}\needref{graph
-neural networks for microstructure representation}. The encoder is trained with
-the flow-matching objective of the companion pipeline and then frozen; per
-fold we reuse the cached 128-D embeddings (Appendix~\ref{app:gnn} gives the
-architecture figure).
+\paragraph{Grain-graph embedding (128-D).}
+\label{sec:gnn}
+The third branch builds a grain
+adjacency graph per image and encodes it with a graph attention network.
+Figure~\ref{fig:gnn} shows the four stages. Each segmented micrograph becomes
+a graph whose nodes are grains and whose edges are shared boundaries
+\needref{grain adjacency graph / network for polycrystal microstructure}.
+Node features cover grain geometry and orientation (area, aspect ratio,
+Bunge-Euler angles, centroid, bounding box); edge features are shared-boundary
+length and misorientation angle \needref{misorientation / grain boundary
+character}. A linear projection to 128-D is followed by four GATv2 attention
+blocks (4 heads, edge dimension 2, LayerNorm + GELU + residual)
+\needref{GATv2, Brody et al.} \needref{GAT, Velickovic et
+al.}\needref{attention, Vaswani et al.}, and attention pooling with 8 learned
+seed queries produces 8 microstructure tokens of 128-D per image, mean-pooled
+to the 128-D embedding used in the benchmark. The encoder is trained with the
+flow-matching objective of the companion pipeline and then frozen; per fold we
+reuse the cached embeddings.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig3_gnn.png}
+  \caption{Grain-graph encoder. Stage 1: segmented microstructure. Stage 2:
+  grain adjacency graph, roughly 500 grains per image. Stage 3: four GATv2
+  blocks with residual connections. Stage 4: attention pooling to 8
+  microstructure tokens of 128-D.}
+  \label{fig:gnn}
+\end{figure}
 
 \section{Heads that match the label space}
 \label{sec:heads}
@@ -259,20 +304,27 @@ that exploit this structure against strong continuous baselines.
 
 \paragraph{Task A: composition as lattice classification.} Three heads.
 (i) \textbf{kNN retrieval}: soft voting over the nearest training images in
-the representation, the natural retrieval baseline on a small lattice.
+the representation, the natural retrieval baseline on a small lattice
+\needref{k-nearest neighbors}
+\needref{metric learning / retrieval for fine-grained identification}.
 (ii) \textbf{Condition-balanced fusion}: a 14-way CatBoost classifier and the
 kNN vote, each with equal total training weight per condition, blended 50:50
-\needref{CatBoost}\needref{gradient boosting}.
+\needref{CatBoost, Prokhorenkova et al.}\needref{gradient boosting, Friedman}
+\needref{XGBoost, Chen \& Guestrin}.
 (iii) \textbf{OOF-constrained reranker}: the fusion is the \emph{owner}; on the
 conventional branch, five per-descriptor-block logistic classifiers on
-condition-mean features act as a complementary \emph{auxiliary}, and the final
+condition-mean features act as a complementary \emph{auxiliary}
+\needref{logistic regression / linear classifier}, and the final
 posterior is a convex blend
 $p = w\, p_{\mathrm{owner}} + (1-w)\, p_{\mathrm{aux}}$.
 The weight $w$ is selected on training out-of-fold predictions only, and a
 candidate $w$ is eligible only if it does not degrade all-element WAPE or the
-false-positive rate relative to the owner. On the vision and gnn branches, which
+false-positive rate relative to the owner \needref{stacked generalization /
+stacking, Wolpert}\needref{out-of-fold prediction for ensemble selection}. On
+the vision and gnn branches, which
 have no descriptor blocks, an FT-Transformer classifier plays the auxiliary
-role \needref{FT-Transformer, Gorishniy et al.}.
+role \needref{FT-Transformer, Gorishniy et al.}\needref{transformers for
+tabular data survey}.
 
 \paragraph{Guard metrics.} The deployment question behind Task A is the
 \emph{levels} of the elements in a known alloy family, so the headline metric
@@ -290,18 +342,22 @@ WAPE values while predicting 12-37\% false-positive elements
 in log space). (ii) \textbf{Gaussian process}: condition-pooled features,
 PCA-32, anisotropic RBF kernel, lognormal treatment of $\vext$ with the
 smearing correction \needref{Gaussian processes, Rasmussen \&
-Williams}\needref{smearing estimate, Duan 1983}.
+Williams}\needref{smearing estimate, Duan 1983}\needref{PCA, principal
+component analysis}\needref{ARD / automatic relevance determination}.
 (iii) \textbf{Joint-grid GP}: a correlated GP over the joint latent
 $(\Text, \log \vext)$ with an intrinsic task-correlation model, whose posterior
 at a query is decoded by minimum-risk selection over the discrete grid of
-observed training pairs rather than read off continuously; for velocity, a
+observed training pairs rather than read off continuously \needref{Bayesian
+decision theory / minimum-risk decoding}; for velocity, a
 log-space GP is blended with an ordinal classifier over observed velocity
 levels, the blend selected on training out-of-fold predictions under safety
-constraints that forbid degrading the pure-GP fallback. Features are an
+constraints that forbid degrading the pure-GP fallback \needref{ordinal
+classification via cumulative link / Frank \& Hall}\needref{conformal /
+distribution-free uncertainty, optional}. Features are an
 RBF-sampled condition-distribution embedding blended with the known-composition
 kernel \needref{intrinsic coregionalization model / multi-task
-GP}\needref{random Fourier features, Rahimi \& Recht}\needref{ordinal
-classification via cumulative link / Frank \& Hall}.
+GP}\needref{random Fourier features, Rahimi \& Recht}\needref{distribution
+regression / kernel mean embedding, optional}.
 
 \section{Results}
 \label{sec:results}
@@ -357,7 +413,7 @@ catalogue than as a continuum.
 
 \begin{table}[t]
   \caption{Task B, process given known composition. 5-fold cross-validation,
-  mean over held-out condition groups (std in Appendix
+  mean over held-out condition groups (std in
   Table~\ref{tab:app_process}). MAE in °C ($\Text$) or mm/s ($\vext$). Best
   value per representation block in bold.}
   \label{tab:process}
@@ -402,6 +458,77 @@ observed pairs; the plain ARD GP on gnn is the best-calibrated head (coverage
 story: the winning heads are point-accurate, and their uncertainty statements
 should not be trusted beyond that.
 
+\paragraph{Per-fold detail.}
+\label{sec:perfold}
+Tables~\ref{tab:app_composition} and \ref{tab:app_process} report every fold,
+not just the mean, so the dispersion behind the headlines is visible: the
+conventional reranker leads on all five folds, and the vision/gnn rows show
+why the fold mean is the honest summary (single folds range from 28 to 76\%
+WAPE on vision). The complete selection audit (selected reranker weights and
+velocity decoders per fold) is in the supplementary CSV
+\texttt{cv\_selection\_audit.csv}, and all tables are rebuildable end-to-end
+with \texttt{scripts/run/run\_cv.py} and \texttt{aggregate\_cv.py} from the
+stored raw per-fold predictions.
+
+\begin{table}[t]
+  \caption{Task A per fold: WAPE (\%) / alloy top-1 for each of the five
+  held-out condition groups.}
+  \label{tab:app_composition}
+  \centering\footnotesize
+  \begin{tabularx}{\linewidth}{@{}llXXXXX@{}}
+    \toprule
+    repr. & head & fold 1 & fold 2 & fold 3 & fold 4 & fold 5 \\
+    \midrule
+    \multirow{3}{*}{conv.}
+      & kNN & 38.1/0.35 & 20.0/0.63 & 26.6/0.50 & 28.2/0.57 & 37.2/0.43 \\
+      & balanced fusion & 15.0/0.60 & 9.5/0.74 & 14.8/0.59 & 20.3/0.61 & 24.6/0.52 \\
+      & OOF reranker & 9.5/0.65 & 11.4/0.68 & 13.0/0.64 & 13.6/0.70 & 20.4/0.57 \\
+    \midrule
+    \multirow{3}{*}{vision}
+      & kNN & 39.8/0.30 & 44.7/0.42 & 75.9/0.18 & 72.9/0.26 & 52.7/0.30 \\
+      & balanced fusion & 31.9/0.40 & 47.0/0.32 & 28.0/0.32 & 42.9/0.22 & 73.8/0.13 \\
+      & OOF reranker & 31.9/0.40 & 31.2/0.37 & 28.0/0.32 & 42.9/0.22 & 73.8/0.13 \\
+    \midrule
+    \multirow{3}{*}{gnn}
+      & kNN & 30.5/0.40 & 35.7/0.42 & 48.7/0.23 & 49.2/0.22 & 59.7/0.13 \\
+      & balanced fusion & 31.9/0.35 & 43.9/0.32 & 46.4/0.27 & 45.4/0.22 & 54.1/0.17 \\
+      & OOF reranker & 31.9/0.35 & 43.9/0.32 & 45.4/0.27 & 45.4/0.22 & 54.1/0.17 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[t]
+  \caption{Task B, full 5-fold statistics (mean $\pm$ std).}
+  \label{tab:app_process}
+  \centering\small
+  \begin{tabularx}{\linewidth}{@{}lllXXX@{}}
+    \toprule
+    repr. & head & target & MAE & MAPE (\%) & R$^2$ \\
+    \midrule
+    conv. & trees & $\Text$ & 41.6 & $11.9 \pm 2.3$ & 0.349 \\
+    conv. & ARD GP & $\Text$ & 52.1 & $15.2 \pm 2.0$ & 0.039 \\
+    conv. & joint-grid GP & $\Text$ & 38.1 & $10.9 \pm 1.1$ & 0.326 \\
+    conv. & trees & $\vext$ & 1.34 & $64.5 \pm 15.5$ & 0.281 \\
+    conv. & ARD GP & $\vext$ & 1.71 & $104.7 \pm 40.9$ & $-$0.240 \\
+    conv. & joint-grid GP & $\vext$ & 1.05 & $49.9 \pm 14.5$ & 0.535 \\
+    \midrule
+    vision & trees & $\Text$ & 39.2 & $11.4 \pm 1.9$ & 0.391 \\
+    vision & ARD GP & $\Text$ & 72.1 & $19.9 \pm 3.4$ & $-$0.813 \\
+    vision & joint-grid GP & $\Text$ & 35.2 & $10.5 \pm 1.4$ & 0.367 \\
+    vision & trees & $\vext$ & 1.22 & $55.9 \pm 10.7$ & 0.409 \\
+    vision & ARD GP & $\vext$ & 1.76 & $120.5 \pm 57.2$ & $-$0.200 \\
+    vision & joint-grid GP & $\vext$ & 1.12 & $50.0 \pm 12.2$ & 0.447 \\
+    \midrule
+    gnn & trees & $\Text$ & 36.5 & $10.7 \pm 2.2$ & 0.443 \\
+    gnn & ARD GP & $\Text$ & 49.5 & $14.7 \pm 3.1$ & 0.084 \\
+    gnn & joint-grid GP & $\Text$ & 36.6 & $10.8 \pm 1.9$ & 0.357 \\
+    gnn & trees & $\vext$ & 1.11 & $56.0 \pm 16.8$ & 0.525 \\
+    gnn & ARD GP & $\vext$ & 1.44 & $94.5 \pm 38.8$ & 0.012 \\
+    gnn & joint-grid GP & $\vext$ & 1.12 & $53.3 \pm 11.6$ & 0.473 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
 \section{What this means for messy real data}
 \label{sec:discussion}
 
@@ -443,74 +570,8 @@ first question at 13.6\% WAPE, and a catalogue-decoding Gaussian process
 answers the second at 50\% velocity MAPE. The recipe was never a continuous
 object; the heads that know that win.
 
-\appendix
-
-\section{Grain-graph encoder detail}
-\label{app:gnn}
-
-Figure~\ref{fig:gnn} details the third descriptor branch. Each segmented
-micrograph becomes a grain adjacency graph (node features: area, aspect ratio,
-Bunge-Euler angles, centroid, bounding box; edge features: shared-boundary
-length and misorientation). A linear projection to 128-D is followed by four
-GATv2 blocks (4 heads, edge dimension 2, LayerNorm + GELU + residual), and
-attention pooling with 8 learned seed queries produces 8 tokens of 128-D per
-image, mean-pooled to the 128-D embedding used in the benchmark.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig3_gnn.png}
-  \caption{Grain-graph encoder. Stage 1: segmented microstructure. Stage 2:
-  grain adjacency graph, roughly 500 grains per image. Stage 3: four GATv2
-  blocks with residual connections. Stage 4: attention pooling to 8
-  microstructure tokens of 128-D.}
-  \label{fig:gnn}
-\end{figure}
-
-\section{Per-fold tables and selection audit}
-\label{app:folds}
-
-Table~\ref{tab:app_process} reports the full 5-fold process metrics including
-standard deviations; per-fold composition rows and the complete selection audit
-(selected reranker weights and velocity decoders per fold) are provided in the
-supplementary CSVs (\texttt{composition\_heads\_cv.csv},
-\texttt{process\_heads\_cv.csv}, \texttt{cv\_selection\_audit.csv}) and are
-rebuildable end-to-end with \texttt{scripts/run/run\_cv.py} and
-\texttt{aggregate\_cv.py}.
-
-\begin{table}[h]
-  \caption{Task B, full 5-fold statistics (mean $\pm$ std).}
-  \label{tab:app_process}
-  \centering\small
-  \begin{tabularx}{\linewidth}{@{}lllXXX@{}}
-    \toprule
-    repr. & head & target & MAE & MAPE (\%) & R$^2$ \\
-    \midrule
-    conv. & trees & $\Text$ & 41.6 & $11.9 \pm 2.3$ & 0.349 \\
-    conv. & ARD GP & $\Text$ & 52.1 & $15.2 \pm 2.0$ & 0.039 \\
-    conv. & joint-grid GP & $\Text$ & 38.1 & $10.9 \pm 1.1$ & 0.326 \\
-    conv. & trees & $\vext$ & 1.34 & $64.5 \pm 15.5$ & 0.281 \\
-    conv. & ARD GP & $\vext$ & 1.71 & $104.7 \pm 40.9$ & $-$0.240 \\
-    conv. & joint-grid GP & $\vext$ & 1.05 & $49.9 \pm 14.5$ & 0.535 \\
-    \midrule
-    vision & trees & $\Text$ & 39.2 & $11.4 \pm 1.9$ & 0.391 \\
-    vision & ARD GP & $\Text$ & 72.1 & $19.9 \pm 3.4$ & $-$0.813 \\
-    vision & joint-grid GP & $\Text$ & 35.2 & $10.5 \pm 1.4$ & 0.367 \\
-    vision & trees & $\vext$ & 1.22 & $55.9 \pm 10.7$ & 0.409 \\
-    vision & ARD GP & $\vext$ & 1.76 & $120.5 \pm 57.2$ & $-$0.200 \\
-    vision & joint-grid GP & $\vext$ & 1.12 & $50.0 \pm 12.2$ & 0.447 \\
-    \midrule
-    gnn & trees & $\Text$ & 36.5 & $10.7 \pm 2.2$ & 0.443 \\
-    gnn & ARD GP & $\Text$ & 49.5 & $14.7 \pm 3.1$ & 0.084 \\
-    gnn & joint-grid GP & $\Text$ & 36.6 & $10.8 \pm 1.9$ & 0.357 \\
-    gnn & trees & $\vext$ & 1.11 & $56.0 \pm 16.8$ & 0.525 \\
-    gnn & ARD GP & $\vext$ & 1.44 & $94.5 \pm 38.8$ & 0.012 \\
-    gnn & joint-grid GP & $\vext$ & 1.12 & $53.3 \pm 11.6$ & 0.473 \\
-    \bottomrule
-  \end{tabularx}
-\end{table}
-
 \section{Reproducibility}
-\label{app:repro}
+\label{sec:repro}
 
 The benchmark runs as \texttt{python scripts/run/run\_cv.py} (all five folds,
 three representations, both tasks) followed by \texttt{python
