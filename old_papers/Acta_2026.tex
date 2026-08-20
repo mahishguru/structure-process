@@ -1,0 +1,861 @@
+%% 
+%% Copyright 2007-2024 Elsevier Ltd
+%% 
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.3 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+%% Template article for Elsevier's document class `elsarticle'
+%% with harvard style bibliographic references
+
+\PassOptionsToPackage{square,comma,numbers,sort&compress}{natbib}
+
+\documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times,authoryear]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn,authoryear]{elsarticle}
+%% \documentclass[final,3p,times,authoryear]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn,authoryear]{elsarticle}
+%% \documentclass[final,5p,times,authoryear]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn,authoryear]{elsarticle}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+%% The amsmath package provides various useful equation environments.
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{colortbl}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{pifont} % For check and cross marks
+\usepackage{subcaption}
+\usepackage{upgreek}
+\usepackage{float}
+\usepackage{placeins} 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,        % Enable colored links
+    linkcolor=blue,         % Color for internal links (e.g., sections, figures)
+    citecolor=red,          % Color for citations
+    urlcolor=magenta,       % Color for URLs
+    filecolor=cyan          % Color for file links
+}
+
+\usepackage[table]{xcolor} % Include xcolor for coloring
+% Define a custom dark green color
+\definecolor{darkgreen}{RGB}{0,128,0} % Adjust RGB values for your desired shade
+% Command for bold dark green tick
+\newcommand{\bigtick}{\textbf{\textcolor{darkgreen}{\checkmark}}}
+
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{tabularray}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{bm}
+
+\captionsetup[table]{labelsep=space, labelfont=bf, textfont=normalfont, justification=justified}
+
+\renewcommand{\figurename}{Fig.} 
+\newcommand{\figref}[1]{\hyperref[#1]{Fig.~\ref*{#1}}}
+\newcommand{\tabref}[1]{\hyperref[#1]{Table~\ref*{#1}}}
+\newcommand{\refneeded}[1]{\textcolor{red}{[REF: #1]}} % red placeholder: describes the citation still to be added
+
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+\journal{Acta Materialia}
+
+\begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \affiliation for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \affiliation{organization={},
+%%            addressline={}, 
+%%            city={},
+%%            postcode={}, 
+%%            state={},
+%%            country={}}
+%% \fntext[label3]{}
+
+\title{Physics-augmented generative-AI based inverse design of microstructure and texture in extruded magnesium alloys for tailored mechanical response}
+
+\author[label1]{Mahish K. Guru}
+\author[label1]{Jan Bohlen}
+\author[label1,label3]{Roland C. Aydin}
+\author[label1,label2]{Noomane Ben Khalifa}
+
+\affiliation[label1]{organization={Institute of Material and Process Design, Helmholtz-Zentrum Hereon},%Department and Organization
+            % addressline={}, 
+            city={Geesthacht},
+            % postcode={21502}, 
+            % state={},
+            country={Germany}}
+\affiliation[label2]{organization={Institute for Production Technology and Systems, Leuphana Universität Lüneburg},%Department and Organization
+            % addressline={}, 
+            city={Lüneburg},
+            % postcode={}, 
+           % state={State One},
+            country={Germany}}            
+\affiliation[label3]{organization={Institute of Continuum and Materials Mechanics, Hamburg University of Technology (TUHH)},%Department and Organization
+            % addressline={}, 
+            city={Hamburg},
+            % postcode={}, 
+            % state={},
+            country={Germany}}
+
+%% Abstract
+\begin{abstract}
+%% DRAFT abstract -- refine numbers once all results are final.
+Extruded magnesium alloys derive their anisotropic mechanical response from the joint action of grain morphology and crystallographic texture set during extrusion, yet prescribing the microstructure and texture that realise a target response remains an open problem. Building on our previous forward structure--property pipeline, which learned to predict yield strength $\sigma_y$ and strain-hardening exponent $n$ from microstructure and texture descriptors, we present its inverse dual: a physics-augmented generative framework that maps target mechanical responses $(\sigma_y, n, \sigma_u)$ back to candidate microstructure and texture states for extruded Mg. An experimentally grounded data-augmentation pipeline expands $119$ measured orientation-distribution-function and grain-statistics conditions into $101{,}000$ physically admissible representative volume elements, with explicit vicinity and realism guarantees. A hexagonal-close-packed-aware orientation codec bridges DREAM.3D and RGB image spaces with sub-degree round-trip error, allowing a generative encoder--decoder to learn a unified microstructure+texture manifold. A crystal-plasticity oracle (DAMASK) supplies the property evaluation and physical-realism constraints, and an active-learning latent optimiser steers generation toward user-specified targets under a strict simulation budget. We demonstrate closed-loop inverse design on AZ31 and Mg--5Gd for both a toughness-weighted and a target-driven objective, deliver per-alloy target-achievability maps, and show that the inverse optimiser manipulates the same structure--property levers, texture sharpness and grain aspect ratio, that our forward SHAP analysis flagged as dominant. {\color{red}[Quantitative headline results to be inserted once final.]}
+\end{abstract}
+
+%% Graphical abstract (TODO: add final asset)
+%\begin{graphicalabstract}
+%\includegraphics[width=\textwidth]{Figures/GraphicalAbstract.png}
+%\end{graphicalabstract}
+
+%% Research highlights
+\begin{highlights}
+\item Physics-augmented generative AI inversely designs microstructure and HCP texture in extruded Mg.
+\item About 119 measured ODF/grain conditions are physically augmented to $\sim$101k crystal-plasticity-ready RVEs.
+\item A crystal-plasticity oracle with active-learning latent search hits target yield, hardening, and strength.
+\item Per-alloy target-achievability maps delimit what is realisable in AZ31 versus Mg--5Gd.
+\item Inverse design rediscovers the texture and aspect-ratio levers our forward SHAP analysis flagged.
+\end{highlights}
+
+%% Keywords
+\begin{keyword}
+Magnesium alloys \sep Extrusion \sep Crystallographic texture \sep Crystal plasticity \sep Inverse design \sep Generative model
+\end{keyword}
+
+\end{frontmatter}
+
+%% Add \usepackage{lineno} before \begin{document} and uncomment
+%% following line to enable line numbers
+%% \linenumbers
+
+%% main text
+%%
+
+\section{Introduction}
+\label{sec:intro}
+
+Magnesium is the lightest of all structural metals: with a density of approximately $1.74$\,g\,cm$^{-3}$ it is roughly one third lighter than aluminium and less than a quarter as dense as steel, while offering a specific stiffness and specific strength competitive with both \cite{Mg-lightweighting-review,Joost-Krajewski-2017}. This density advantage maps directly onto the dominant decarbonisation lever in transport, where vehicle mass reduction lowers fuel burn and tail-pipe or life-cycle CO$_2$, so that Mg alloys are actively pursued for automotive body-in-white and powertrain parts, aerospace secondary structures, and portable-electronics housings \cite{Mg-lightweighting-review,Joost-Krajewski-2017,Kim_2013}. Despite this promise, the wrought-Mg market remains a small fraction of that of aluminium, and the gap is governed less by cost than by an intrinsic crystallographic limitation \cite{Agnew_book,Grimes}.
+
+The origin of that limitation is the hexagonal close-packed (HCP) lattice of Mg, with a $c/a$ ratio of about $1.624$, marginally below the ideal $1.633$ \cite{Agnew-Review-Mg-2006}. At room temperature, plastic flow is carried overwhelmingly by basal $\langle a\rangle$ slip on $\{0001\}\langle 11\bar{2}0\rangle$, which supplies only two independent slip systems, whereas the von Mises criterion requires five independent systems to accommodate an arbitrary homogeneous shape change in a polycrystal \cite{Tariq2026,Britton}. The critical resolved shear stress (CRSS) for non-basal prismatic and pyramidal $\langle c+a\rangle$ slip exceeds that of basal slip by roughly one to two orders of magnitude at ambient temperature, so the geometric deficit is only partially relieved by $\{10\bar{1}2\}$ extension twinning, which itself is polar and crystallographically directional \cite{Chapuis-Driver-2011,Agnew-Review-Mg-2006, WANG2019155}. The consequence is the pair of barriers that have long throttled wrought-Mg adoption: poor room-temperature formability and pronounced anisotropy and tension--compression asymmetry of yielding and hardening, which together restrict cold formability and cap the tensile yield strength of most commercial wrought Mg alloys below roughly $300$\,MPa \cite{AZ31-extrusion-texture,Mg-yield-anisotropy-comparative,Agnew-Review-Mg-2006,WANG2019155}. Because the deformation modes of Mg are so strongly orientation dependent, the crystallographic texture, rather than grain size alone, becomes the dominant handle on the mechanical envelope of wrought Mg \cite{Mg-yield-anisotropy-comparative,Agnew-Review-Mg-2006, Guru2025}. 
+
+Extrusion is the central thermomechanical route for producing wrought-Mg profiles, and it is attractive precisely because it sets two structural state variables simultaneously: it refines the grain size through dynamic recrystallisation (DRX) and it imprints a strong fibre texture aligned with the extrusion direction (ED) \cite{AZ31-extrusion-texture}. Grain refinement contributes through a Hall--Petch response whose slope in Mg ($k_y \approx 250$--$320$\,MPa\,$\upmu$m$^{1/2}$) is several times larger than in aluminium, so that refinement is an effective strengthener; yet the same refinement, by promoting non-basal slip and suppressing twinning, also modifies ductility and asymmetry, meaning grain size and texture cannot be treated as independent levers \cite{Mg-HallPetch-Review,GrainSize-Mg-RandomTexture,GrainSize-Mg-Texture-Interaction}. It is this coupling, that a single processing operation moves grain morphology and texture together, and that the resulting basal-pole distribution governs the activation of basal slip, non-basal slip, and twinning, which makes extruded Mg a textbook processing--structure--property--performance (PSPP) system and the natural setting for the present study \cite{Guru2025}.
+
+To make the PSPP argument concrete and to expose the full range of texture control, this work is anchored on two contrasting hero alloys: the rare-earth-free workhorse AZ31 and the rare-earth-containing Mg--5Gd. AZ31 (nominally Mg--3Al--1Zn) is by a wide margin the most widely used commercial wrought-Mg alloy, valued for its balance of specific strength, formability, weldability, availability, and cost \cite{Mg-lightweighting-review}. During hot extrusion it undergoes extensive DRX and develops a characteristic strong basal fibre texture, with basal $(0001)$ planes lying approximately parallel to ED and a $\langle 10\bar{1}0\rangle$ fibre along the extrusion axis; reported basal-pole intensities commonly reach several, and up to of order ten, multiples of a random distribution (MRD) \cite{AZ31-extrusion-texture, Agnew-Review-Mg-2006,BOHLEN20072101}. This sharp texture, combined with the polar nature of $\{10\bar{1}2\}$ extension twinning, produces a pronounced tension--compression yield asymmetry: because extension twinning is favourably oriented under ED compression but not under ED tension, the compressive yield strength along ED can fall well below the tensile value, giving the sigmoidal, concave-up hardening signature associated with twin-dominated flow \cite{AZ31-TC-asymmetry,Agnew-Review-Mg-2006,BARNETT20071,KHAN2011688}. Numerous studies have linked this anisotropy directly to texture sharpness and twin activity and have shown that even moderate changes in the basal-pole distribution reshape the yield locus and the work-hardening response, establishing texture as a stronger lever than grain size for tailoring AZ31 \cite{AZ31-TC-asymmetry,Mg-yield-anisotropy-comparative}. From an application standpoint, AZ31 is deployed as lightweight extruded profiles and sheet in automotive and aerospace structures and in electronics housings, so that its well-characterised, twin-dominated basal texture is the natural rare-earth-free baseline that any inverse-design framework for extruded Mg must first reproduce and then deliberately manipulate \cite{Mg-lightweighting-review,Guru2025}. The second hero, Mg--5Gd, sits at the opposite end of the texture-control spectrum. Gadolinium is a rare-earth solute that weakens the strong basal texture of conventional Mg and promotes the rare-earth (RE) texture component, in which basal poles tilt away from ED and spread toward the transverse direction \cite{PENG20121064,Mg-RE-texture-weakening}. This solute-driven weakening is well documented across extruded Mg, from cerium, neodymium, and neodymium--calcium additions to non-rare-earth solutes such as silver \cite{BOHLEN20107092,Nienaber2019,WIESE2021112}, and it lowers the CRSS contrast between basal and non-basal slip so that deformation becomes more homogeneous and slip-dominated. Relative to AZ31, Mg--5Gd therefore shows higher ductility and markedly reduced tension--compression asymmetry, generally at some cost in yield strength, and its weaker texture and biocompatibility also make Mg--Gd alloys attractive for lightweight structural and biodegradable-implant applications \cite{Mg-RE-texture-weakening,Mg-yield-anisotropy-comparative,Mg-Zn-Gd-biodegradable}. AZ31 and Mg--5Gd thus bracket the texture-control spectrum, strongly basal-textured and twin-dominated versus weak- or RE-textured, slip-dominated, and more isotropic, which makes the pair an ideal test bed for texture-targeted inverse design \cite{AZ31-TC-asymmetry,Mg-Zn-Gd-DRX-RE-texture,Guru2025}.
+
+Quantitative forward modelling of the structure--property (S--P) link in Mg has advanced along two complementary tracks. The first is descriptor-based statistical learning, in which microstructure and texture are encoded by physically motivated features, $n$-point spatial correlations and convolutional Gram matrices for morphology, and generalised spherical harmonics (GSH) expansions of the orientation distribution function (ODF) for texture, and then compressed by principal component analysis, Isomap, or autoencoders before a non-linear regressor (gradient-boosted trees, Gaussian processes, or neural networks) predicts scalar properties \cite{Guru2025,Kalidindi-MKS-2015}. This descriptor-and-regression paradigm grew out of the broader materials-informatics literature on reduced-order PSP linkages, which has been demonstrated for additively manufactured stainless steel, high-contrast elastic composites, and $\alpha$-titanium polycrystals, typically validated on simulated or hybrid datasets \cite{Saunders-316L-AM-2019,FernandezZelaia-ElasticComposites-2019,Paulson-alphaTi-2017}. Our own published pipeline for extruded Mg sits squarely in this track and is the forward counterpart of the present paper: trained purely on experimentally grounded ODF and grain-statistics descriptors, it predicts the strain-hardening exponent $n$ and yield strength $\sigma_y$ with mean absolute percentage errors of about $6.7\%$ and $7.0\%$ respectively, and its SHAP analysis consistently ranks texture descriptors and grain aspect ratio as the dominant levers on anisotropy and hardening \cite{Guru2025}. The second track is physically based crystal plasticity. Crystal-plasticity finite-element and spectral solvers, exemplified by DAMASK, predict the full anisotropic stress--strain response of a textured Mg representative volume element (RVE) from first-principles kinematics, resolving the competition between basal, prismatic, and pyramidal slip and between extension and contraction twinning, and capturing texture evolution under load \cite{Roters-DAMASK-2019,Micromech-HCP-Mg,Graff-Mg-CP}. Phenomenological power-law and physically based hardening laws, together with twinning models such as twin-volume-fraction / pseudo-slip schemes, have been calibrated for Mg alloys to reproduce tension--compression asymmetry and sigmoidal hardening, and reduced-order surrogates of these solvers have been built to accelerate design sweeps \cite{Agnew-Review-Mg-2006,Micromech-HCP-Mg}. Across both tracks the trajectory is clear: the forward map from a given microstructure and texture to its mechanical response is increasingly well learned and physically trustworthy.
+
+The present work is conceived explicitly as the \emph{inverse} dual of that forward pipeline. Where the predecessor learned the forward map (microstructure and texture descriptors $\rightarrow \sigma_y, n$) and used SHAP to identify which descriptors, principally basal-texture sharpness and grain aspect ratio, control the response, here the task is inverted: to prescribe a microstructure and texture state that realises a user-specified property tuple $(\sigma_y, n, \sigma_u)$, with $\sigma_u$ the ultimate tensile strength, and to verify that the optimiser manipulates exactly those predecessor-identified levers. This forward$\rightarrow$inverse duality is more than rhetorical. The inverse problem is fundamentally harder and ill-posed: the map from structure to property is many-to-one, so a target response admits a manifold of candidate microstructures; the admissible set is constrained by crystallographic and processing realisability; and the objective landscape over raw microstructure space is non-convex and expensive to evaluate \cite{GENERALE2024119877}. Predicting properties from a given microstructure is therefore no longer the binding bottleneck; systematically \emph{designing} microstructure and HCP texture to meet a target response, under realistic physics and processing constraints, is {\color{red}\cite{Kusampudi-Diehl-2023,CoPiLOT2026}}.
+
+Generative modelling has begun to make the prescribing problem tractable in adjacent materials systems by replacing hand-crafted descriptors with a learned latent manifold that can be searched directly \cite{gomez2018}. In dual-phase steels, Kusampudi and co-workers coupled a variational autoencoder with Bayesian optimisation to learn a microstructure latent space from images, trained forward surrogates for damage initiation and yield strength, and inverted the surrogates in latent space to find microstructures with target yield stress and reduced damage susceptibility, the closest published analogue to the present aims \cite{Kusampudi-Diehl-2023,Kusampudi-thesis-2024}. In parallel, generative adversarial networks and, more recently, diffusion and flow-matching models have been used to synthesise statistically realistic microstructures and to build navigable latent spaces for property optimisation in metallic, composite, and porous systems, while architected and metamaterial design has used generative models to inverse-design unit cells for target effective properties \cite{Yang-GAN-microstructure-2018,cang2018,Metamaterial-InvDesign-2025,Metamaterial-InvDesign-2023,HENKES2022115497}. At the atomic scale, diffusion-based crystal generators such as CDVAE, DiffCSP, and MatterGen have shown that rich generative priors can capture complex crystal structures and be conditioned directly on target properties, signalling the broader maturation of property-conditioned generative design \cite{Generative-crystal-review,CDVAE-2022,MatterGen-2024}~\refneeded{DiffCSP (Jiao et al.)}.
+
+Viewed through a PSPP lens, however, existing generative inverse-design work leaves a specific gap for extruded Mg. First, most frameworks either omit crystal-plasticity and crystallographic-texture physics or embed them only indirectly through a data-driven surrogate, so the latent space is not guaranteed to contain mechanically meaningful, convergent microstructures; explicit coupling to an HCP crystal-plasticity oracle is rare \cite{Kusampudi-Diehl-2023,Roters-DAMASK-2019,Generative-crystal-review}. Second, the great majority of microstructure inverse-design studies treat grain \emph{morphology} only and operate on synthetic Voronoi tessellations or on cubic (FCC/BCC) phases, so their latent spaces never inherit the constraints of real, extrusion-induced HCP textures, and crystallographic texture is seldom itself a design variable \cite{MIRZAEE2025120704,VLASSIS2023116126}. Third, such studies are seldom grounded in a large, \emph{experimentally} measured wrought-Mg dataset and are seldom closed-loop validated against a physics oracle for HCP metals. To our knowledge, no prior framework inversely designs \emph{both} microstructure and HCP texture for extruded Mg under simultaneous $\sigma_y$, $n$, and $\sigma_u$ targets, with physics-aware data augmentation that provably stays in the vicinity of measured states and with explicit per-alloy achievability maps {\color{red}\cite{CoPiLOT2026,Guru2025}}.
+
+This paper introduces a physics-augmented generative inverse-design framework tailored to extruded Mg, with AZ31 and Mg--5Gd as the central test-bed pair. A generative encoder--decoder learns a unified microstructure-plus-texture representation from a large, experimentally grounded dataset of RVEs, built by physically augmenting on the order of $10^2$ measured ODF and grain-statistics conditions across $17$ extruded-Mg alloy classes into of order $10^5$ admissible RVEs, with explicit vicinity and realism guarantees so that no non-physical microstructure enters training. An HCP-aware orientation codec bridges DREAM.3D orientation fields and RGB image space with sub-degree round-trip disorientation, below the Read--Shockley grain-boundary threshold, allowing generic image-based generative models to operate on crystallographic data \cite{groeber2014,readshockley1950}. Crystal plasticity (DAMASK) supplies the property oracle and the physical-realism constraints, and an active-learning latent optimiser steers sampling within the learned manifold toward user-prescribed targets under a strict simulation budget \cite{Roters-DAMASK-2019,CoPiLOT2026}. We then demonstrate closed-loop inverse design on both alloys under two objective classes, a toughness-weighted objective balancing strength and strain hardening, and a target-driven objective that hits specified $(\sigma_y, n, \sigma_u)$ tuples, and we delineate per-alloy target-achievability maps {\color{red}\cite{CoPiLOT2026}}. A companion methodology paper (Co-PiLOT) provides the general latent-optimisation machinery and its algorithmic analysis; the present paper contributes the materials-grounded extruded-Mg dataset, the validated PSPP pipeline, and the alloy-specific design insight, and it reports texture fidelity using materials-meaningful metrics (texture index $J$, ODF/orientation earth-mover distance, and grain-statistics distributions) rather than saturating per-pixel disorientation.
+
+The specific contributions of this work are:
+\begin{itemize}
+  \item A physics-augmented generative inverse-design framework for extruded Mg that maps target mechanical responses $(\sigma_y, n, \sigma_u)$ to candidate microstructure-plus-texture states within a learned manifold of physically admissible RVEs.
+  \item An experimentally grounded data-augmentation pipeline that expands measured ODF and grain-statistics conditions into a large set of physically admissible RVEs, with explicit vicinity and realism guarantees, so that no non-physical microstructure enters the training set.
+  \item A unified microstructure-plus-texture representation, comprising an HCP-aware orientation codec and a generative encoder--decoder, that bridges DREAM.3D and RGB representations with sub-degree round-trip fidelity, enabling generic image-based generative models to operate on crystallographic data.
+  \item Closed-loop inverse-design case studies on AZ31 and Mg--5Gd for both toughness-weighted and target-driven objectives, together with target-achievability maps delineating, for each alloy, which regions of $(\sigma_y, n, \sigma_u)$ space are reachable under the framework's processing and physics constraints.
+\end{itemize}
+
+%% ============================================================================
+%% TODO: remaining sections (scaffold from skeleton.md). Fill progressively.
+%% ============================================================================
+
+\section{Overall framework}
+\label{sec:framework}
+
+\figref{fig:framework} presents the complete framework once, before any component is detailed: a closed loop that starts and ends in a learned latent space of extruded-Mg microstructures and textures. Reading the figure from the left, a material latent database, built from the experimentally grounded RVE dataset of Section~\ref{sec:augmentation} and spanning the $17$ extruded-Mg alloy classes of this study, anchors the box-constrained latent space $\mathcal{Z}=[-3,3]^{d}$. A latent vector $z\in\mathcal{Z}$ is decoded by the generative decoder $\mathcal{D}$, a flow-matching diffusion transformer trained in Section~\ref{sec:generative}, into a $512\times512$ RGB orientation image of a candidate microstructure. The orientation codec $\Psi$ of Section~\ref{sec:codec} converts this image into a crystallographically valid HCP orientation field on a $300\times300$ DREAM.3D voxel grid \cite{groeber2014}, which the crystal-plasticity oracle $f$ (DAMASK, HCP phenomenological power law; Section~\ref{sec:oracle}) deforms in uniaxial tension along the extrusion direction \cite{Roters-DAMASK-2019}. From the simulated stress--strain curve the property tuple $p=(\sigma_y,\, n,\, K,\, \sigma_u,\, \varepsilon_u)$, with $K$ the Hollomon strength coefficient and $\varepsilon_u$ the uniform strain, is extracted with the same scalar definitions and fitting routine as in our forward structure--property study, so that simulated, designed, and measured properties remain directly comparable throughout \cite{Guru2025}. A scalar objective $J$, either the toughness-weighted $J_{V1}$ or the target-driven $J_{V2}$ of Section~\ref{sec:oracle}, scores the candidate, and the active-learning optimiser $\mathcal{O}$ (MERIDIAN; Section~\ref{sec:meridian}) uses all evaluations accumulated so far to propose the next latent batch $z_{\mathrm{new}}$. The loop iterates until the simulation budget is exhausted or the target response is met. The optimisation machinery itself is developed and benchmarked in the companion methodology paper {\color{red}\cite{CoPiLOT2026}}; Sections~\ref{sec:augmentation}--\ref{sec:meridian} present each block of the loop in materials terms, and Section~\ref{sec:results} reports the closed-loop results.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/Acta_fig_1.drawio.png}
+  \caption{Closed-loop framework for physics-augmented generative inverse design of microstructure and texture in extruded Mg, with five key stages: 1. Latent space $\mathcal{Z}=[-3,3]^{d}$ anchored by a material latent database spanning $17$ extruded-Mg alloy classes, 2. Generative decoder $\mathcal{D}$ (flow-matching diffusion transformer) mapping $z$ to an RGB orientation image, 3. Orientation codec $\Psi$ converting the image to an HCP orientation field on a DREAM.3D grid, 4. Crystal-plasticity oracle (DAMASK, uniaxial tension along the extrusion direction) returning the stress--strain response, from which $p=(\sigma_y, n, K, \sigma_u, \varepsilon_u)$ is extracted and scored by the design objective $J$, and 5. Active-learning optimiser $\mathcal{O}$ (MERIDIAN) proposing the next latent batch $z_{\mathrm{new}}$ until the simulation budget is exhausted or the target response is met.}
+  \label{fig:framework}
+\end{figure}
+
+Stated compactly, the design task is a latent-space program. Let $m=\Psi(\mathcal{D}(z))$ denote the microstructure and texture state realised from the latent code $z$, comprising the grain morphology and the HCP orientation field, and let $f$ map $m$ to the property tuple $p$. Because every candidate is produced by the decoder, it lies by construction on the learned manifold of physically admissible extruded-Mg microstructures, and the search reads
+\begin{equation}
+  z^{\star} \;=\; \arg\max_{z\in\mathcal{Z}}\; J\!\big(f(\Psi(\mathcal{D}(z)))\big)
+  \quad \text{s.t.} \quad g\big(\Psi(\mathcal{D}(z))\big) \le 0,
+  \label{eq:inverse-program}
+\end{equation}
+where $g$ collects the feasibility constraints (crystal-plasticity convergence, grain-count band, texture admissibility) formalised in Section~\ref{sec:oracle}. The program is solved under a strict simulation budget, of order $10^{2}$ oracle calls per design run, because each DAMASK evaluation of a $300\times300$ RVE costs several minutes of wall-clock time. Equation~\eqref{eq:inverse-program} is the inverse dual of the forward problem solved by our predecessor, evaluating $p$ for a given $m$: the inverse direction is ill-posed, since the structure-to-property map is many-to-one and a target response admits a manifold of candidate microstructures \cite{GENERALE2024119877}. The generative decoder is what makes the inversion tractable. It replaces an intractable search over raw orientation fields with a search over a smooth, low-dimensional latent space in which every point decodes to a realisable microstructure \cite{gomez2018,Kusampudi-Diehl-2023}.
+
+The term \emph{physics-augmented} is earned at three specific points of the loop, not by the generative model alone. First, the data foundation: the augmentation pipeline of Section~\ref{sec:augmentation} interpolates, and never extrapolates, the measured ODF and grain-statistics conditions, with explicit vicinity envelopes and realism filters, so the latent manifold is trained exclusively on physically admissible extruded-Mg states. Second, the representation: the orientation codec enforces crystallographic validity by construction, mapping every generated image to a proper HCP orientation field with sub-degree round-trip disorientation, below the Read--Shockley low-angle threshold \cite{readshockley1950}. Third, the evaluation: properties are supplied by a crystal-plasticity oracle rather than a purely data-driven surrogate, and the objective carries feasibility penalties that reject divergent or mechanically meaningless microstructures. Physics therefore bounds what the model can learn, what it can generate, and what the optimiser can select.
+
+Relative to our published forward pipeline \cite{Guru2025}, the present framework inverts and extends the mapping along six axes, stated here so that the two papers read as a forward/inverse pair. (i) \emph{Direction}: the forward paper mapped structure and texture to properties (prediction); this paper maps properties to structure and texture (prescription). (ii) \emph{Structure model}: hand-crafted descriptors ($n$-point correlations, Gram matrices, GSH coefficients) reduced by PCA, Isomap, or autoencoders are replaced by a generative encoder--decoder that learns the microstructure and texture manifold directly. (iii) \emph{Property model}: data-driven regressors fitted to experiment are replaced by a crystal-plasticity oracle placed inside the design loop. (iv) \emph{Data}: the same measured conditions are reused but physically augmented to of order $10^{5}$ RVEs. (v) \emph{Output}: instead of a predicted property value for a given microstructure, the framework returns a target-meeting microstructure and texture state together with a per-alloy achievability map. (vi) \emph{Lever evidence}: where the forward paper read structure--property levers off SHAP feature importances, here the inverse optimiser is shown to rediscover the same levers, texture sharpness and grain aspect ratio, closing the loop between the two studies (Section~\ref{sec:results}).
+
+\section{Data foundation and physics-aware augmentation}
+\label{sec:augmentation}
+
+\subsection{Experimental dataset}
+\label{sec:dataset}
+
+The data foundation of this work is the experimental extruded-Mg database compiled and validated in our forward structure--property study \cite{Guru2025}. The database aggregates published extrusion campaigns in which the extrusion velocity $v_{\mathrm{ext}}$ and extrusion temperature $T_{\mathrm{ext}}$ were systematically varied, and for which three data modalities are jointly available per processing condition: optical micrographs (OM, with EBSD where available) of the longitudinal section, crystallographic texture as X-ray diffraction (XRD) pole figures from which the orientation distribution function (ODF) is computed, and uniaxial tensile stress--strain curves along the extrusion direction. The alloys span the texture-control spectrum introduced in Section~\ref{sec:intro}: the RE-free wrought alloys AZ31 (as-extruded and heat-treated) and ME21, the Zn-based systems Z1, ZX10, and ZNd10 (with heat-treated variants), and the Mg--Gd family Mg--2Gd, Mg--5Gd, and Mg--10Gd with 0.5 and 1\,wt.\% Mn micro-additions \refneeded{dataset provenance: AZ31 extrusion thesis (Nienaber 2023)}~\refneeded{Zn-based Mg alloys Z1/ZX10/ZNd10 extrusion study (Cano-Castillo 2020)}\cite{Nienaber2019}~\refneeded{ME21 extrusion study (Kurz)}~\refneeded{Mg-2/5/10Gd extrusion study (Harmuth)}~\refneeded{Mg-Gd-Mn extrusion study (cryst12081036)}. \tabref{tab:matdata} summarises the alloy classes, processing windows, available characterisation modalities, and measured property ranges; the two hero alloys of this study, AZ31 and Mg--5Gd, are highlighted.
+
+\begin{table}[!t]
+\centering
+\caption{Experimental material database: Mg-alloy classes with extrusion process parameters, available microstructure and texture characterisation, and measured tensile property ranges (adapted from our forward study \cite{Guru2025}). The hero alloys AZ31 and Mg--5Gd are highlighted in grey.}
+\label{tab:matdata}
+\renewcommand{\arraystretch}{1.25}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l c c c c c c c}
+\toprule
+Alloy & \begin{tabular}{c}$v_{\mathrm{ext}}$\\$(\mathrm{mm/s})$\end{tabular} & \begin{tabular}{c}$T_{\mathrm{ext}}$\\$(^{\circ}\mathrm{C})$\end{tabular} & Microstructure & Texture & \begin{tabular}{c}$\sigma_{y}$\\$(\mathrm{MPa})$\end{tabular} & \begin{tabular}{c}$\sigma_{u}$\\$(\mathrm{MPa})$\end{tabular} & $n$ \\
+\midrule
+\rowcolor{gray!15}
+AZ31             & $0.6, 2.4$ & $200$--$500$ & OM, EBSD & XRD, EBSD & $143$--$184$ & $240$--$278$ & $0.13$--$0.23$ \\
+AZ31 (HT)        & $0.6, 2.4$ & $200$--$500$ & OM, EBSD & XRD, EBSD & $140$--$180$ & $245$--$265$ & $0.14$--$0.23$ \\
+ME21             & $0.75$--$7.5$ & $300$--$450$ & OM & XRD & $154$--$237$ & $228$--$270$ & $0.09$--$0.19$ \\
+Mg--2Gd          & $0.5$--$2$ & $350$--$450$ & OM & XRD & $87$--$208$  & $179$--$226$ & $0.10$--$0.31$ \\
+Mg--2Gd--0.5Mn   & $0.5$--$2$ & $350$--$450$ & OM & XRD & $104$--$184$ & $180$--$216$ & $0.13$--$0.23$ \\
+Mg--2Gd--1Mn     & $0.5$--$2$ & $350$--$450$ & OM & XRD & $105$--$183$ & $188$--$221$ & $0.13$--$0.23$ \\
+\rowcolor{gray!15}
+Mg--5Gd          & $0.5$--$2$ & $350$--$450$ & OM & XRD & $91$--$193$  & $240$--$278$ & $0.12$--$0.28$ \\
+Mg--5Gd--0.5Mn   & $0.5$--$2$ & $350$--$450$ & OM & XRD & $109$--$173$ & $198$--$225$ & $0.16$--$0.23$ \\
+Mg--5Gd--1Mn     & $0.5$--$2$ & $350$--$450$ & OM & XRD & $114$--$187$ & $206$--$237$ & $0.15$--$0.22$ \\
+Mg--10Gd         & $0.5$--$2$ & $350$--$450$ & OM & XRD & $132$--$232$ & $242$--$296$ & $0.16$--$0.22$ \\
+Mg--10Gd--0.5Mn  & $0.5$--$2$ & $350$--$450$ & OM & XRD & $138$--$212$ & $248$--$286$ & $0.17$--$0.20$ \\
+Mg--10Gd--1Mn    & $0.5$--$2$ & $350$--$450$ & OM & XRD & $154$--$232$ & $262$--$296$ & $0.16$--$0.19$ \\
+Z1               & $2$--$7.5$ & $250$--$400$ & OM, EBSD & XRD, EBSD & $125$--$149$ & $216$--$235$ & $0.19$--$0.23$ \\
+ZNd10            & $2$--$7.5$ & $250$--$400$ & OM, EBSD & XRD, EBSD & $79$--$282$  & $203$--$287$ & $0.08$--$0.33$ \\
+ZNd10 (HT)       & $2.4$      & $350$       & OM, EBSD & XRD, EBSD & $72$         & $197$        & $0.32$ \\
+ZX10             & $2$--$7.5$ & $250$--$400$ & OM, EBSD & XRD, EBSD & $77$--$132$  & $194$--$225$ & $0.23$--$0.34$ \\
+ZX10 (HT)        & $0.6, 2.4$ & $300$       & OM, EBSD & XRD, EBSD & $62$--$69$   & $184$--$189$ & $0.36$--$0.37$ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+The structure representation extracted from this database is deliberately identical to the descriptor machinery of the forward paper: textures are represented as ODFs computed from the XRD pole figures, and grain morphology is characterised by the grain-size and aspect-ratio statistics obtained from segmented micrographs \cite{Guru2025}. The same experimentally validated representation that previously served as the \emph{input} to property prediction now serves as the \emph{seed} for generative synthesis, so the inverse pipeline inherits the experimental grounding of its forward predecessor by construction.
+
+The database, however, comprises only $119$ processing conditions across the $17$ alloy classes, between $2$ and $18$ conditions per class. This is ample for descriptor-based regression but far too few to train a generative model of microstructure: a diffusion-based decoder requires on the order of $10^{4}$--$10^{5}$ training images to learn a usable manifold \refneeded{data requirements of diffusion/generative image models}. The remainder of this section therefore describes a physics-aware augmentation strategy that expands the $119$ measured conditions into $101{,}000$ synthetic RVEs while guaranteeing, by explicit interpolation-only construction and statistical gating, that no synthetic microstructure leaves the vicinity of a measurement. \figref{fig:datagen} gives the overview: the two experimental information streams, grain morphology from micrographs and texture from ODFs, are oversampled independently in compact statistical parameter spaces (panels b and c) and recombined by microstructure synthesis in DREAM.3D-NX \cite{groeber2014} into voxelised RVEs (panel a).
+
+\begin{figure}[!t]
+  \centering
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_2a.png}
+    \caption{}
+    \label{fig:datagen-arch}
+  \end{subfigure}
+  \\[2pt]
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_2b.png}
+    \caption{}
+    \label{fig:datagen-texture}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_2c.png}
+    \caption{}
+    \label{fig:datagen-grains}
+  \end{subfigure}
+  \caption{Synthetic-data-generation concept and architecture. (a) Pipeline overview with four stages: 1. Microstructure, optical micrographs are segmented into grains and reduced to grain statistics; 2. Texture, XRD pole figures yield the ODF, expanded into generalised spherical harmonics; 3. Oversampling of both streams ($\approx 900\times$ expansion) in their respective statistical parameter spaces; 4. RVE generation, DREAM.3D-NX assembles the oversampled grain statistics and textures into 2D synthetic microstructures. (b) Texture stays physical: conceptual GSH--PCA latent map with measured ODFs (stars), oversampled ODFs (dots), bounded per-subcluster covariance ellipses, the Mahalanobis acceptance envelope, and rejected samples (red crosses); every synthetic texture is a bounded interpolation of measurements. (c) Grain statistics stay physical: conceptual copula-parameter map (mean log equivalent diameter vs.\ mean aspect ratio) with measured conditions (stars), kernel-density-estimate (KDE) contours, validity bounds (dashed), accepted synthetic samples (dots), and rejections (red crosses).}
+  \label{fig:datagen}
+\end{figure}
+
+\subsection{Texture oversampling in generalised spherical harmonic space}
+\label{sec:texture-oversampling}
+
+Crystallographic texture is oversampled in the coefficient space of the generalised spherical harmonic (GSH) expansion of the ODF \refneeded{Bunge, Texture Analysis in Materials Science}. For each of the $119$ experimental conditions, the ODF is computed from the measured XRD pole figures in MTEX \refneeded{MTEX toolbox (Hielscher \& Schaeben)} with $5^{\circ}$ angular resolution, ghost correction, and hexagonal $6/mmm$ crystal symmetry, and expanded to harmonic bandwidth $L = 18$. The resulting $9{,}139$ complex coefficients are split into real and imaginary parts, yielding an $18{,}278$-dimensional real vector per condition. Because the ODF is a smooth function on $SO(3)$, this vector space is linear in the ODF itself: any convex combination of GSH coefficient vectors is again a valid, non-negative-projected ODF, which is precisely the property that makes bounded interpolation between measured textures physically meaningful.
+
+The oversampling proceeds in a compact latent space, as sketched in \figref{fig:datagen}(b) and detailed in \figref{fig:texture-flow}. The $18{,}278$-dimensional GSH vectors are standardised and projected by principal component analysis (PCA) onto $110$ components retaining approximately $92\%$ of the variance. Within this latent space, each alloy class is subdivided by K-means into subclusters that resolve the systematic texture variation across the extrusion-parameter window of that class. Synthetic candidates are then generated by four complementary interpolation mechanisms: (i) boundary-focused SMOTE-style interpolation between nearest neighbours, concentrated on the sparse edges of each class distribution in the manner of ADASYN \refneeded{SMOTE (Chawla et al.); ADASYN (He et al.)}; (ii) Dirichlet-weighted barycentric combinations of up to four measured points, which populate the interior of the class convex hull; (iii) per-subcluster Gaussian sampling using Ledoit--Wolf shrinkage covariance estimates \refneeded{Ledoit--Wolf covariance shrinkage}, with the covariance scaled by at most $1.25$ to allow only bounded extrapolation beyond the measured scatter; and (iv) bridge samples interpolated between subcluster centroids of the same class, which connect texture regimes that the extrusion series visits discontinuously.
+
+Every candidate must then pass a three-stage statistical acceptance filter. First, a random-forest classifier trained on the measured (and lightly jittered) latent vectors must assign the candidate to its intended alloy class with confidence of at least $0.60$. Second, a geometric margin criterion requires the candidate to lie closer to its own class centroid than to any other class centroid by a factor of at least $1.05$, preventing class inter-mixing in latent space. Third, the candidate must fall inside the Mahalanobis envelope of its nearest subcluster, thresholded at the $99$th percentile of the measured within-subcluster distances scaled by $1.3$; this is the acceptance ellipse drawn conceptually in \figref{fig:datagen}(b), and it is the guarantee that no accepted texture strays far from a measurement. Accepted latent vectors are mapped back through the inverse PCA to full GSH coefficient vectors and reconstructed as ODFs, from which $100{,}000$ discrete orientations are sampled and written in the DREAM.3D angle-file format (spread $\sigma = 1^{\circ}$, uniform weights) for the RVE synthesis of Section~\ref{sec:rve-synthesis}.
+
+With a target of $7{,}500$ synthetic textures per class, the pipeline expands the $119$ measured conditions into $105{,}736$ synthetic ODFs across the $17$ classes, an expansion factor of nearly $900\times$ per measured condition. Well-populated classes such as AZ31, ME21, Z1, ZX10, ZNd10, and the binary Mg--Gd alloys reach the full target; the sparsest classes, the heat-treated ZX10 and ZNd10 variants with only two measured conditions each, saturate at their retention floor of $750$ samples and are excluded from the final RVE dataset. \figref{fig:texture-coverage} shows the resulting latent-space coverage: for the hero classes Mg--5Gd (a) and ZX10 (b), the synthetic samples densely fill the region spanned by the measured conditions without escaping it, and across all $17$ classes (c) the synthetic clouds remain compact and non-overlapping, preserving the class structure of the experimental database.
+
+We emphasise what this construction does and does not claim. The synthetic textures are not predictions of what a new extrusion experiment would produce; they are statistically plausible intermediates between measured textures of the same alloy class. Because every accepted sample is a bounded combination of measurements that passes a class-consistency and proximity gate, the augmented texture set enlarges the density of the design space without enlarging its physical extent. This interpolation-only discipline is what later allows the generative model of Section~\ref{sec:generative} to be trained on synthetic data yet remain anchored to experiment.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/Fig_3a.png}
+  \caption{Texture oversampling workflow. Measured ODFs are expanded into $9{,}139$ complex GSH coefficients ($18{,}278$-dimensional real vectors), projected by PCA onto a $110$-dimensional latent space ($\approx 92\%$ variance), and subdivided per class by K-means. Synthetic candidates from SMOTE/ADASYN edge interpolation, Dirichlet barycentric combination, bounded Ledoit--Wolf Gaussian sampling, and inter-subcluster bridges must pass a three-stage filter (random-forest class confidence $\geq 0.60$, centroid-margin ratio $\geq 1.05$, subcluster Mahalanobis envelope at the $99$th percentile $\times 1.3$) before inverse-PCA reconstruction to synthetic ODFs in DREAM.3D angle-file format.}
+  \label{fig:texture-flow}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_4a.png}
+    \caption{}
+    \label{fig:texture-coverage-mg5gd}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_4b.png}
+    \caption{}
+    \label{fig:texture-coverage-zx10}
+  \end{subfigure}
+  \\[2pt]
+  \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_4c.png}
+    \caption{}
+    \label{fig:texture-coverage-all}
+  \end{subfigure}
+  \caption{Latent-space coverage of the texture oversampling in the first two GSH--PCA components. (a) Mg--5Gd and (b) ZX10: measured conditions (stars) and accepted synthetic samples (dots); the synthetic cloud densely interpolates the measured scatter without extrapolating beyond it. (c) All $17$ alloy classes: the synthetic distributions remain compact and class-separated, preserving the structure of the experimental database at ${\approx}900\times$ higher sampling density.}
+  \label{fig:texture-coverage}
+\end{figure}
+
+\subsection{Grain-statistics oversampling with a Gaussian copula model}
+\label{sec:grain-oversampling}
+
+Grain morphology is oversampled in a five-dimensional statistical parameter space, sketched in \figref{fig:datagen}(c) and detailed in \figref{fig:grain-flow}. For each experimental condition, the grains segmented from the optical micrographs are reduced to two per-grain descriptors: the equivalent spherical diameter $d = 2\sqrt{A/\pi}$ computed from the segmented area, and the aspect ratio $\mathrm{AR} = b/a \in (0,1)$ of the fitted ellipse. Consistent with classical grain-growth statistics, $\ln d$ is modelled as normal, $\ln d \sim \mathcal{N}(\mu, \sigma^2)$ \refneeded{lognormal grain-size distribution}, and the bounded aspect ratio as a Beta distribution, $\mathrm{AR} \sim \mathrm{Beta}(\alpha, \beta)$. The dependence between size and shape, elongated grains in extruded microstructures tend to be the larger ones, is captured by a Gaussian copula \refneeded{Gaussian copula (Nelsen / Sklar)} with correlation $\rho$ estimated between the normal scores of the two marginals. Each measured condition is thereby compressed to a single point $(\mu, \sigma, \alpha, \beta, \rho)$ in copula-parameter space, the representation in which \figref{fig:grain-coverage} is drawn.
+
+Oversampling then mirrors the texture stream. For each alloy class, a five-dimensional Gaussian kernel density estimate is fitted to the measured parameter points and sampled with rejection of invalid draws ($\sigma > 0$, $\alpha, \beta > 0$, $\rho \in [-1, 1]$); classes with fewer than six measured conditions fall back to a regularised multivariate normal. The number of grain-statistics samples per class is matched one-to-one with the accepted texture samples of Section~\ref{sec:texture-oversampling}, so that each synthetic RVE receives an independent, class-consistent draw of both texture and morphology. Each sampled parameter set is expanded by copula inversion into an explicit population of $100{,}000$ grains, which is binned by equivalent diameter ($1\,\upmu\mathrm{m}$ bins spanning $\pm 3\sigma$ in log-diameter) with a per-bin Beta fit of the aspect-ratio distribution, exactly the size-resolved shape statistics that DREAM.3D's StatsGenerator consumes.
+
+A final physical gate controls the grain count of the resulting RVE. For a fixed RVE volume $V_{\mathrm{RVE}}$, the expected number of grains follows from the lognormal moments as
+\begin{equation}
+N_{\mathrm{grains}} \approx \frac{V_{\mathrm{RVE}}}{\tfrac{\pi}{6}\, e^{\,3\mu + 4.5\sigma^{2}}},
+\label{eq:graincount}
+\end{equation}
+with $V_{\mathrm{RVE}} = 7.2 \times 10^{5}\,\upmu\mathrm{m}^{3}$ for the $300 \times 300 \times 1$ voxel domain at $2\,\upmu\mathrm{m}$ resolution used throughout this work. Samples are accepted only if the predicted count lies in the band $250 \leq N_{\mathrm{grains}} \leq 1000$, equivalent to $7.23 \leq 3\mu + 4.5\sigma^{2} \leq 8.66$, which guarantees that every RVE contains enough grains for meaningful polycrystal statistics yet remains resolvable at the fixed voxel size; the prediction of Eq.~\eqref{eq:graincount} matches the realised DREAM.3D grain counts with a median error below $5\%$. This band appears as the dashed validity bounds in \figref{fig:datagen}(c). \figref{fig:grain-coverage} confirms the same interpolation-only behaviour as in texture space: for AZ31 (a) and ME21 (b) the synthetic copula parameters fill the measured scatter densely, and across all classes (c) the synthetic clouds remain confined to the experimentally observed morphology regimes.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/fig_3b.png}
+  \caption{Grain-statistics oversampling workflow. Segmented micrograph grains are reduced to equivalent spherical diameter and aspect ratio, compressed per condition into five copula parameters $(\mu, \sigma, \alpha, \beta, \rho)$, and oversampled per class by a five-dimensional Gaussian KDE with validity rejection, one-to-one with the texture samples. Each accepted parameter set is expanded into $100{,}000$ grains, binned into size-resolved Beta aspect-ratio statistics, gated by the predicted grain-count band $250$--$1000$ (Eq.~\eqref{eq:graincount}), and passed to DREAM.3D for RVE synthesis.}
+  \label{fig:grain-flow}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_5a.png}
+    \caption{}
+    \label{fig:grain-coverage-az31}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_5b.png}
+    \caption{}
+    \label{fig:grain-coverage-me21}
+  \end{subfigure}
+  \\[2pt]
+  \begin{subfigure}[b]{0.75\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_5c.png}
+    \caption{}
+    \label{fig:grain-coverage-all}
+  \end{subfigure}
+  \caption{Copula-parameter coverage of the grain-statistics oversampling, shown in the $(\mu_{\ln \mathrm{ESD}}, \sigma_{\ln \mathrm{ESD}})$ plane. (a) AZ31 and (b) ME21: measured conditions (stars) and synthetic samples (dots) drawn from the per-class KDE. (c) All alloy classes: synthetic morphology parameters remain confined to the experimentally observed regimes while densifying them to the sample counts of the texture stream.}
+  \label{fig:grain-coverage}
+\end{figure}
+
+\subsection{RVE synthesis and validation of the augmented dataset}
+\label{sec:rve-synthesis}
+
+Each accepted pair of synthetic texture and grain statistics is assembled into a voxelised RVE with DREAM.3D-NX \cite{groeber2014}. The pipeline instantiates a $300 \times 300 \times 1$ voxel domain at $2\,\upmu\mathrm{m}$ resolution, packs primary-phase grains according to the size-resolved statistics of Section~\ref{sec:grain-oversampling}, and assigns crystallographic orientations with the MatchCrystallography filter driven by the synthetic ODF angle file. Two synthesis parameters proved critical and were fixed by systematic validation. First, the orientation spread of the discretised ODF must be $\sigma = 1^{\circ}$: halving it to $\sigma = 0.5^{\circ}$ collapses the assigned orientations onto a single dominant component (maximum pole-figure intensity of $863$ multiples of random distribution and a texture index of $307$, versus experimental values of order $4$ and $2$). Second, the MatchCrystallography iteration budget was raised to $5 \times 10^{5}$, five times the default, which is required for the assigned orientation set to converge to the target ODF at the grain counts used here.
+
+\begin{table}[!t]
+\centering
+\caption{Composition of the augmented dataset: measured processing conditions, accepted synthetic ODFs, and final RVE counts per alloy class. The two heat-treated classes with only two measured conditions saturate at the retention floor of $750$ texture samples and are excluded from the RVE dataset. The hero classes AZ31 and Mg--5Gd (grey) include $508$ and $507$ horizontally mirrored copies, respectively, added to reach the curated total of $101{,}000$ RVEs.}
+\label{tab:dataset}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l c c c}
+\toprule
+Alloy class & Measured conditions & Synthetic ODFs & Final RVEs \\
+\midrule
+\rowcolor{gray!15}
+AZ31            & $8$  & $7{,}500$ & $8{,}008$ \\
+AZ31 (HT)       & $8$  & $7{,}500$ & $7{,}500$ \\
+ME21            & $18$ & $7{,}500$ & $7{,}500$ \\
+Mg--2Gd         & $9$  & $7{,}500$ & $6{,}986$ \\
+Mg--2Gd--0.5Mn  & $4$  & $6{,}009$ & $6{,}009$ \\
+Mg--2Gd--1Mn    & $4$  & $5{,}964$ & $5{,}964$ \\
+\rowcolor{gray!15}
+Mg--5Gd         & $8$  & $7{,}500$ & $6{,}676$ \\
+Mg--5Gd--0.5Mn  & $4$  & $5{,}825$ & $4{,}861$ \\
+Mg--5Gd--1Mn    & $4$  & $6{,}072$ & $5{,}202$ \\
+Mg--10Gd        & $9$  & $7{,}500$ & $7{,}500$ \\
+Mg--10Gd--0.5Mn & $4$  & $6{,}585$ & $6{,}585$ \\
+Mg--10Gd--1Mn   & $4$  & $6{,}281$ & $6{,}281$ \\
+Z1              & $9$  & $7{,}500$ & $6{,}978$ \\
+ZNd10           & $11$ & $7{,}500$ & $7{,}450$ \\
+ZNd10 (HT)      & $2$  & $750$     & -- \\
+ZX10            & $11$ & $7{,}500$ & $7{,}500$ \\
+ZX10 (HT)       & $2$  & $750$     & -- \\
+\midrule
+Total           & $119$ & $105{,}736$ & $101{,}000$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\tabref{tab:dataset} summarises the resulting dataset. The $105{,}736$ accepted synthetic ODFs, paired with grain statistics and passed through the grain-count gate of Eq.~\eqref{eq:graincount} and the RVE synthesis, yield $101{,}000$ voxelised RVEs across $15$ alloy classes, which are split $90\%/10\%$ into $90{,}900$ training and $10{,}100$ held-out test microstructures for the generative model of Section~\ref{sec:generative}. Per-class attrition between the synthetic-ODF and final-RVE columns reflects rejections at the grain-count band; the two smallest heat-treated classes are dropped entirely, as $750$ samples from two measured conditions provide neither the diversity nor the volume to support generative training.
+
+The synthesised RVEs are validated on both structural streams, morphology and crystallography. \tabref{tab:rve-stats} compares the grain statistics realised by the DREAM.3D packing against the experimental micrograph statistics for the two hero alloys. Mean equivalent spherical diameters are reproduced to within $8\%$ for AZ31 ($10.9$ versus $10.1\,\upmu$m) and $20\%$ for Mg--5Gd ($14.7$ versus $12.2\,\upmu$m), and mean and median aspect ratios agree to within $0.05$, with the packed grains marginally larger and more elongated than the measured ones, a known bias of ellipsoid packing at fixed voxel resolution \cite{groeber2014}. The morphology prescribed by the copula stream of Section~\ref{sec:grain-oversampling} therefore survives the synthesis step essentially intact.
+
+\begin{table}[!t]
+\centering
+\caption{Morphological validation of the RVE synthesis: grain statistics of the generated RVEs against the experimental micrograph statistics for the two hero alloys (ESD: equivalent spherical diameter; aspect ratio $b/a \in (0,1]$, smaller values denote more elongated grains).}
+\label{tab:rve-stats}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l cc cc cc}
+\toprule
+ & \multicolumn{2}{c}{Mean ESD ($\upmu$m)} & \multicolumn{2}{c}{Mean aspect ratio} & \multicolumn{2}{c}{Median aspect ratio} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Alloy & Exp. & RVE & Exp. & RVE & Exp. & RVE \\
+\midrule
+AZ31    & $10.1$ & $10.9$ & $0.77$ & $0.72$ & $0.80$ & $0.75$ \\
+Mg--5Gd & $12.2$ & $14.7$ & $0.78$ & $0.73$ & $0.81$ & $0.78$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The decisive validation is crystallographic: does an RVE synthesised from an \emph{oversampled} texture still carry the alloy-characteristic texture of its class? \figref{fig:pf-validation} compares $\{10\bar{1}0\}$, $\{0002\}$, and $\{11\bar{2}0\}$ pole figures on a shared intensity scale across four stages of the pipeline: the experimentally measured ODF, the RVE reconstructed from it by DREAM.3D, and two independently oversampled synthetic ODFs from the same class. All four rows reproduce the characteristic extrusion texture, with pole-figure maxima remaining at experimentally typical intensities (${\leq}4$ multiples of random distribution) and no spurious components introduced by either the GSH interpolation or the MatchCrystallography assignment. The synthetic textures differ from the measurement in exactly the manner intended: modest redistributions of intensity within the same fibre, corresponding to plausible intermediate processing conditions, rather than qualitatively new textures. % TODO(user): fig_6.png currently shows one alloy class; add the Mg--5Gd counterpart panel (RE-texture case) discussed in the skeleton.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/fig_6.png}
+  \caption{Pole-figure validation of the augmentation pipeline. $\{10\bar{1}0\}$, $\{0002\}$, and $\{11\bar{2}0\}$ pole figures on a shared intensity scale (multiples of random distribution) for four stages: the experimental ODF, the DREAM.3D RVE reconstructed from it, and two independently oversampled synthetic ODFs of the same alloy class. The characteristic extrusion texture is preserved at every stage; synthetic textures redistribute intensity within the experimentally observed fibre without introducing new components.}
+  \label{fig:pf-validation}
+\end{figure}
+
+The augmented dataset thus provides what the experimental database alone could not: a training corpus of $10^{5}$ microstructures that is dense enough for diffusion-based generative modelling, yet in which every sample is traceable to bounded interpolation between measurements, class-consistent by statistical gating, and crystallographically validated at the pole-figure level. Before this corpus can be consumed by an image-based generative model, however, each voxelised RVE must be converted into an image representation that preserves its crystallography exactly; this lossless orientation codec is the subject of the next section.
+
+\section{Orientation codec: DREAM.3D to RGB round-trip}
+\label{sec:codec}
+
+The augmented dataset of Section~\ref{sec:augmentation} consists of voxelised orientation fields, whereas the generative models of Section~\ref{sec:generative} operate on RGB images, and the crystal-plasticity oracle of Section~\ref{sec:oracle} again expects a crystallographic orientation field. The orientation codec is the bridge between these two worlds: an invertible map between HCP orientation fields and RGB images that lets a generic, pretrained image-domain generative model act as a microstructure prior while every generated candidate remains convertible into a DAMASK-ready polycrystal. The codec was introduced with the companion methodology paper {\color{red}\cite{CoPiLOT2026}}; here we summarise its construction in materials terms and report its measured fidelity, because every microstructure in this study, whether from the augmentation pipeline or from the generative decoder, passes through it in both directions.
+
+\subsection{Why a dedicated codec}
+\label{sec:codec-why}
+
+Naively mapping Bunge--Euler orientations $(\varphi_1, \Phi, \varphi_2)$ onto RGB triples corrupts the data in three distinct ways. First, \emph{periodic wrap-around}: orientations at $359^{\circ}$ and $1^{\circ}$ are physically nearly identical but numerically maximally distant, so an image model sees an artificial cliff at every $0/2\pi$ crossing and responds with ringing artefacts \refneeded{continuous rotation representations for neural networks (Zhou et al.)}. Second, \emph{fundamental-zone folding}: folding each grain independently into the HCP fundamental zone can map physically adjacent grains with only $2^{\circ}$ of misorientation to opposite regions of quaternion space, creating high-frequency colour edges that carry no physical information and that diffusion models blur catastrophically. Third, \emph{square-root instability}: discarding the quaternion scalar component and recovering it as $q_w = \sqrt{1 - \|q_{xyz}\|^2}$ fails with NaNs as soon as generative noise pushes the radicand negative. The codec resolves all three by construction, through a five-step encode and a closed-form, fully vectorised decode (Algorithm~\ref{alg:codec}).
+
+\subsection{Encoding: orientation field to RGB}
+\label{sec:codec-encode}
+
+Each per-grain orientation is first converted from Bunge--Euler angles to a unit quaternion $q \in S^3$ under the HCP point group $D_6$ ($622$), whose $12$ symmetry operators $\mathcal{S}_{\mathrm{HCP}}$ define crystallographic equivalence. Instead of folding to a fundamental zone, the encoder performs \emph{continuous unfolding}: a breadth-first traversal of the grain-adjacency graph, rooted at the largest grain, replaces each grain's quaternion by the symmetry equivalent (and sign) closest to its already-visited parent,
+\begin{equation}
+q_{g} \;\leftarrow\; \arg\max_{s_k \in \mathcal{S}_{\mathrm{HCP}},\; \sigma = \pm 1} \; \sigma \left\langle q_{g} \cdot s_k,\; q_{\mathrm{parent}(g)} \right\rangle ,
+\label{eq:bfs}
+\end{equation}
+at a cost of $24$ inner products per grain-boundary edge; the symmetry operator multiplies the crystal-to-sample orientation on the right, so the physical orientation of every grain, and hence the texture, is untouched. After this pass, colour distance between adjacent grains is proportional to their true misorientation, and the encoded image is a smooth, low-frequency colour field of exactly the kind pretrained image backbones model well.
+
+The unfolded field is then centred to a \emph{class-level anchor} $\bar{q}_c$: the $L_2$-optimal Markley mean \refneeded{Markley quaternion averaging} of $50$ file-level mean quaternions per alloy class, precomputed once and stored alongside the dataset. Centring by $q \leftarrow \bar{q}_c^{-1} q$ concentrates the orientation distribution near the identity, away from the $q_w = 0$ equator where the quaternion double-cover sign flip would reintroduce discontinuities. A class-level rather than per-sample anchor is essential: a generated image arrives with no per-sample metadata, so the decode must be possible from the class label alone. The centred quaternion (with $q_w \geq 0$) is stereographically projected and quantised,
+\begin{equation}
+s = \frac{q_{xyz}}{1 + q_w} \in [-1,1]^3 ,
+\qquad
+q_w = \frac{1 - \|s\|^2}{1 + \|s\|^2} , \quad
+q_{xyz} = \frac{2\,s}{1 + \|s\|^2} ,
+\label{eq:stereo}
+\end{equation}
+where the right-hand pair is the closed-form inverse used at decode time. Quantisation to $b$ bits per channel rounds each stereographic coordinate to a grid of step $\Delta = 2/(2^{b}-1)$. Near the identity, where the centring concentrates the data, a stereographic perturbation $\delta s$ maps to a rotation-angle error $\delta\theta \approx 2\,\|\delta s\|$, so the worst-case (three-channel diagonal) quantisation error is bounded to first order by
+\begin{equation}
+  \delta\theta_{\max} \;\approx\; 2\sqrt{3}\,\frac{\Delta}{2} \;=\; \frac{2\sqrt{3}}{2^{b}-1} \;\approx\;
+  \begin{cases}
+    0.78^{\circ} & (b = 8,\ \text{PNG}),\\
+    0.003^{\circ} & (b = 16,\ \text{TIFF}),
+  \end{cases}
+  \label{eq:quant}
+\end{equation}
+and $8$-bit is retained for generation because pretrained vision backbones expect $8$-bit RGB, and its error floor is immaterial at the grain scale (Section~\ref{sec:codec-fidelity}).
+
+\subsection{Decoding: RGB to DAMASK-ready RVE}
+\label{sec:codec-decode}
+
+The decode inverts each step in closed form. Dequantised colours are mapped back to quaternions through the \emph{rational} inverse stereographic projection in Eq.~\eqref{eq:stereo}: it involves no square root, so no amount of generative noise can produce a NaN, and it remains numerically stable on all of $\mathbb{R}^3$. The class anchor is re-applied, $q \leftarrow \bar{q}_c \cdot q$, and the result is folded into the HCP fundamental zone by a single vectorised pass,
+\begin{equation}
+  q \;\leftarrow\; q \cdot s_{k^{*}} , \qquad
+  k^{*} = \arg\max_{k \,:\, s_k \in \mathcal{S}_{\mathrm{HCP}}} \big[\, q \cdot s_k \,\big]_w ,
+  \label{eq:fold}
+\end{equation}
+which selects, among the $12$ crystallographically equivalent descriptions of each orientation, the one with the smallest rotation angle $\theta = 2\arccos q_w$, i.e.\ the standard fundamental-zone representative that DREAM.3D expects, before conversion back to Euler angles. Because a generated image carries no grain-label map, the decoder is \emph{self-segmenting}: grains are recovered as $4$-connected components of pixels whose maximum channel difference is at most $\tau$ ($\tau = 1$ at $8$-bit), each grain is assigned its per-pixel median orientation, and the writer emits a complete DREAM.3D file, per-voxel Euler angles, feature identifiers and phases, per-grain orientations and volumes, and the crystal-structure ensemble metadata, that DAMASK loads directly \cite{groeber2014,Roters-DAMASK-2019}. The full oracle chain of Sections~\ref{sec:oracle} and~\ref{sec:meridian} therefore composes as $z \rightarrow \mathrm{RGB} \rightarrow \mathrm{DREAM.3D} \rightarrow \mathrm{DAMASK}$ without human intervention.
+
+\begin{algorithm}[t]
+\caption{Orientation codec round-trip (DREAM.3D $\leftrightarrow$ RGB).}
+\label{alg:codec}
+\begin{algorithmic}[1]
+\Statex \textbf{Encode} (DREAM.3D $\rightarrow$ RGB)
+\Require Euler-angle field $\bm{\phi}$ over grains $\mathcal{G}$; grain-adjacency graph $A$; class anchor $\bar{q}_c$
+\State $q \gets \textproc{EulerToQuaternion}(\bm{\phi})$ \Comment{12 HCP ($D_6$/622) symmetry operators}
+\State $q \gets \textproc{AnchoredBFSUnfold}(q, A, \bar{q}_c)$ \Comment{root at largest grain, aligned to $\bar{q}_c$; Eq.~\eqref{eq:bfs}}
+\State $q \gets \bar{q}_c^{-1} \cdot q$ with $q_w \geq 0$ \Comment{class-level frame centring}
+\State $s \gets q_{xyz}/(1+q_w) \in [-1,1]^3$ \Comment{stereographic projection, Eq.~\eqref{eq:stereo}}
+\State $\mathrm{RGB} \gets \textproc{Quantize}(s)$ \Comment{8-bit PNG or 16-bit TIFF; error bound Eq.~\eqref{eq:quant}}
+\Ensure RGB image
+\Statex
+\Statex \textbf{Decode} (RGB $\rightarrow$ DREAM.3D)
+\Require RGB image; class anchor $\bar{q}_c$
+\State $s \gets \textproc{Dequantize}(\mathrm{RGB})$
+\State $q_w \gets (1-\|s\|^2)/(1+\|s\|^2)$; \; $q_{xyz} \gets 2s/(1+\|s\|^2)$ \Comment{rational inverse: no square root, no NaNs}
+\State $q \gets \bar{q}_c \cdot q$
+\State $q \gets q \cdot s_{k^{*}}$, \; $k^{*} = \arg\max_{k} [\,q \cdot s_k\,]_w$ \Comment{vectorised fundamental-zone folding, Eq.~\eqref{eq:fold}}
+\State $\bm{\phi} \gets \textproc{QuaternionToEuler}(q)$
+\State $\textproc{WriteDream3D}(\textproc{Segment}(\mathrm{RGB}, \tau), \bm{\phi})$ \Comment{4-connected components, tolerance $\tau$; per-grain median orientation}
+\Ensure DREAM.3D file (DAMASK-ready: CellData, Grain Data, CellEnsembleData)
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Round-trip fidelity}
+\label{sec:codec-fidelity}
+
+\tabref{tab:codec} reports the measured round-trip accuracy on three representative alloy classes (ME21, Mg--10Gd, and heat-treated AZ31; $300 \times 300$ RVEs with $257$--$2{,}044$ grains per sample). Grain boundaries and grain-size distributions are preserved essentially exactly in both formats (boundary F1 $\geq 0.9999$, grain-size Pearson $r \geq 0.999$); the only difference between formats is quantisation noise, with a mean round-trip disorientation of $0.61$--$0.69^{\circ}$ at $8$ bits, consistent with the first-order bound above, and below $0.003^{\circ}$ for the $16$-bit TIFF. All errors lie far below the $5^{\circ}$ Read--Shockley low-angle threshold that separates grain-interior scatter from true grain boundaries \cite{readshockley1950}, and below the angular resolution of typical EBSD measurements. The codec is therefore effectively lossless at the scale of any quantity used in this paper: whatever texture-fidelity loss appears downstream is attributable to the generative bottleneck of Section~\ref{sec:generative}, not to the representation, an attribution we rely on when interpreting the reconstruction metrics of Section~\ref{sec:results}.
+
+\begin{table}[!t]
+\centering
+\caption{Orientation-codec round-trip fidelity, measured on three alloy classes (ME21, Mg--10Gd, AZ31 heat-treated; $300 \times 300$ RVEs, $257$--$2{,}044$ grains per sample).}
+\label{tab:codec}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l c c c}
+\toprule
+Metric & PNG ($8$-bit) & TIFF ($16$-bit) & Criterion \\
+\midrule
+Mean round-trip disorientation & $0.61$--$0.69^{\circ}$ & $<0.003^{\circ}$ & $<5^{\circ}$ (Read--Shockley \cite{readshockley1950}) \\
+Maximum round-trip disorientation & $1.30$--$1.37^{\circ}$ & $<0.006^{\circ}$ & $<5^{\circ}$ \\
+Grain-boundary F1 & $\geq 0.9999$ & $\geq 0.9999$ & $\rightarrow 1$ \\
+Grain-size Pearson $r$ & $\geq 0.999$ & $\geq 0.999$ & $\rightarrow 1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{Microstructure generative encoder--decoder}
+\label{sec:generative}
+
+With the dataset of Section~\ref{sec:augmentation} rendered into RGB orientation images by the codec of Section~\ref{sec:codec}, the remaining ingredient of the design loop is the generative model itself: an encoder--decoder that compresses each microstructure image into a low-dimensional latent vector $z$ and decodes any point of the latent space back into a synthesisable orientation image. The architecture, shown in \figref{fig:architecture}, was developed jointly with the companion methodology paper {\color{red}\cite{CoPiLOT2026}}; here we describe it in materials terms, motivate its materials-aware training objective, and summarise the four capacity variants (\tabref{tab:models}) whose reconstruction fidelity is quantified in Section~\ref{sec:results}. The design brief is deliberately asymmetric: the latent space must be small and well-conditioned enough for a Bayesian optimiser to search (Section~\ref{sec:meridian}), while the decoder must be expressive enough to reproduce alloy-characteristic crystallographic texture. Both requirements are met by adapting large pretrained vision models rather than training from scratch \refneeded{transfer / fine-tuning of large pretrained vision (foundation) models}, which our dataset of $90{,}900$ training images could not support at this model scale.
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_7.png}
+  \caption{Generative encoder--decoder architecture. (a) Shared vision encoder: a pretrained ViT-H/14 backbone (lower $16$ transformer blocks frozen, upper $16$ fine-tuned) maps a $512\times512$ orientation image to $1{,}369$ patch tokens; a trained multi-query attention pooler compresses these into $16$ spatial latent tokens of dimension $d_z$ each, giving the bottleneck $z\in\mathbb{R}^{16\cdot d_z}$ with total dimension $512$--$1{,}280$ across variants. (b) Flow-matching diffusion decoder: the latent conditions a frozen Stable Diffusion~3.5 MMDiT backbone through a trained token adapter (AdaLN-Zero cross-attention blocks) and a pooled time-conditioning projection, with low-rank adaptation of the joint-attention and feed-forward projections; a $50$-step Euler ODE integration of the predicted velocity field, followed by the frozen VAE decoder, produces the $512\times512$ output image. The bottom strip lists the terms of the composite training objective of Section~\ref{sec:generative-loss}.}
+  \label{fig:architecture}
+\end{figure}
+
+\subsection{Shared vision encoder and spatial latent bottleneck}
+\label{sec:generative-encoder}
+
+The encoder input is the IPF-style RGB orientation image of Section~\ref{sec:codec}, upsampled from the native $300\times300$ RVE resolution to $512\times512$ by nearest-neighbour interpolation so that grain colours remain piecewise constant and no non-physical orientation mixing is introduced at grain boundaries. The backbone is a ViT-H/14 vision transformer \refneeded{ViT (Dosovitskiy et al.)} pretrained with contrastive language--image supervision on the LAION-2B corpus \refneeded{CLIP (Radford et al.); OpenCLIP/LAION-2B}, comprising $32$ transformer blocks of width $1{,}280$ and $667$M parameters in total. The $14$-pixel patch embedding tiles the input into a $37\times37$ grid of $1{,}369$ patch tokens plus a class token. The backbone is partitioned for fine-tuning: the lower $16$ blocks, which encode generic edge, junction, and shape statistics that transfer directly to polycrystalline colour maps, are frozen, while the upper $16$ blocks, whose pretrained features are specialised towards natural-image semantics of no use here, are fine-tuned to the crystallographic colour statistics of the dataset.
+
+The compression to the bottleneck is performed by a trained multi-query attention pooler ($32.8$M parameters) \refneeded{attentional pooling (e.g., Perceiver, Jaegle et al.; CoCa, Yu et al.)}. Sixteen learned query vectors cross-attend (eight heads) to the full sequence of patch tokens, then self-attend among themselves, so that each query specialises on a coherent spatial--textural aspect of the microstructure rather than on a fixed image region. A final linear projection with GELU activation maps each refined query from width $1{,}280$ to $d_z$, giving a spatial latent of $16$ tokens: $z\in\mathbb{R}^{16\times d_z}$. Four capacity variants are trained, $d_z\in\{32,48,64,80\}$, with total latent dimensions of $512$, $768$, $1{,}024$, and $1{,}280$; the entire remainder of the architecture is identical across variants. Together with the fine-tuned upper blocks, the encoder carries $350$M trainable parameters. The bottleneck is the single most consequential design choice in the framework: it is the compression ratio of roughly $10^{3}$ from image to latent, not any property of the decoder, that renders the inverse problem of Eq.~\eqref{eq:inverse-program} searchable, and the latent-statistics regularisation of Section~\ref{sec:generative-loss} keeps the components of $z$ bounded and decorrelated so that the box-constrained search space $\mathcal{Z}=[-3,3]^{d}$ of Section~\ref{sec:framework} covers the encoded data.
+
+\subsection{Flow-matching diffusion decoder}
+\label{sec:generative-decoders}
+
+All four capacity variants share a single decoder design (FM-DiT): a \emph{frozen} Stable Diffusion~3.5 multimodal diffusion transformer (MMDiT; $2.5$B parameters, held in \texttt{bfloat16}) \refneeded{Stable Diffusion 3 / rectified flow transformers (Esser et al.)} conditioned on the microstructure latent through two trained pathways. First, a token adapter maps the $16$ latent tokens through five AdaLN-Zero self-attention blocks \refneeded{AdaLN-Zero (Peebles \& Xie, DiT)} (inner dimension $512$, eight heads) into the $4{,}096$-dimensional token stream of the MMDiT joint attention, replacing the text-encoder tokens of the original text-to-image model ($17.9$M parameters). Second, a pooled projection maps $z$ into the $2{,}048$-dimensional pooled-embedding pathway that modulates the backbone jointly with the diffusion-time embedding. Because adapter conditioning alone cannot steer all of a frozen backbone, low-rank adaptation \refneeded{LoRA (Hu et al.)} is applied to the joint-attention and feed-forward projections (rank $64$, scaling $\alpha=64$; $94.0$M trainable parameters), enabled only after the fourth epoch so the adapter first learns a stable conditioning before the backbone itself is perturbed. Conditioning is dropped for $10\%$ of training samples in the manner of classifier-free guidance \refneeded{classifier-free guidance (Ho \& Salimans)}. The model is trained with the rectified-flow objective, Eq.~\eqref{eq:fm} of Section~\ref{sec:generative-loss}. Generation integrates the learned velocity field with a $50$-step Euler ODE solver and decodes through the frozen $16$-channel SD3.5 VAE \refneeded{latent diffusion (Rombach et al.)} to a $512\times512$ image. Decoder-side trainable parameters total ${\approx}112$M against the $2.5$B frozen backbone; the four variants of \tabref{tab:models} are therefore identical in every trained component and differ only in the width $d_z$ of the latent bottleneck they must decode from.
+
+\begin{table}[!t]
+  \centering
+  \caption{FM-DiT capacity variants. All variants share every trained component, the encoder of Section~\ref{sec:generative-encoder} ($350$M trainable), the token adapter (${\approx}18$M), the LoRA update (${\approx}94$M, rank $64$), and the frozen SD3.5 MMDiT backbone ($2.5$\,B, rectified flow), and differ only in the per-token latent width $d_z$. The compression ratio is taken with respect to the $512\times512\times3$ input image.}
+  \label{tab:models}
+  \small
+  \begin{tabular}{lcccc}
+    \toprule
+    Model & Per-token width $d_z$ & Bottleneck $z$ & Latent dimension $d$ & Compression ratio \\
+    \midrule
+    FM-DiT-512  & $32$ & $16\times32$ & $512$     & $1536\times$ \\
+    FM-DiT-768  & $48$ & $16\times48$ & $768$     & $1024\times$ \\
+    FM-DiT-1024 & $64$ & $16\times64$ & $1{,}024$ & $768\times$ \\
+    FM-DiT-1280 & $80$ & $16\times80$ & $1{,}280$ & $614\times$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Materials-aware training objective}
+\label{sec:generative-loss}
+
+A generative model trained on photometric losses alone treats an orientation image as a picture; the composite objective summarised in the lower strip of \figref{fig:architecture} makes it treat the image as a crystallographic field. The backbone term is the rectified-flow velocity loss \refneeded{flow matching (Lipman et al.)}: with $x^{(0)}$ the VAE latent of the target orientation image, $x^{(1)} \sim \mathcal{N}(0, I)$ a Gaussian sample, and $x_t = (1-t)\,x^{(0)} + t\,x^{(1)}$ the straight-line path between them, the decoder $v_\theta$ is trained to predict the constant path velocity,
+\begin{equation}
+  \mathcal{L}_{\mathrm{FM}} = \mathbb{E}_{t,\, x^{(0)},\, x^{(1)}}\, \big\| v_\theta(x_t,\, t,\, z) - \big(x^{(1)} - x^{(0)}\big) \big\|_2^2 ,
+  \label{eq:fm}
+\end{equation}
+with diffusion times $t$ drawn logit-normally under the resolution shift of $3.0$. Every prediction also yields a one-step estimate of the clean latent, $\hat{x}^{(0)} = x_t - t\, v_\theta(x_t, t, z)$, and it is through $\hat{x}^{(0)}$, decoded to an image where required, that all remaining supervision attaches to the frozen diffusion backbone. The total objective augments $\mathcal{L}_{\mathrm{FM}}$ with seven weighted terms,
+\begin{equation}
+  \mathcal{L} = \mathcal{L}_{\mathrm{FM}} + \sum_{k}\, \lambda_k\, \mathcal{L}_k ,
+  \qquad
+  k \in \{ \mathrm{rec},\, \mathrm{spec},\, \mathrm{NCE},\, \mathrm{VIC},\, \mathrm{stat},\, \mathrm{ori},\, \mathrm{cls} \} ,
+  \label{eq:loss}
+\end{equation}
+whose components are defined, with $\hat{I}$ the image decoded from $\hat{x}^{(0)}$ and $I$ the target image, as
+\begin{align}
+  \mathcal{L}_{\mathrm{rec}}  &= \mathbb{E}\big[ (1-t)^{2}\, \|\hat{x}^{(0)} - x^{(0)}\|_2^2 \big] , \label{eq:loss-rec}\\
+  \mathcal{L}_{\mathrm{spec}} &= \mathbb{E}\big[\, w_r\, \big| \log(1{+}|\mathcal{F}\hat{I}|) - \log(1{+}|\mathcal{F}I|) \big|\, \big] , \label{eq:loss-spec}\\
+  \mathcal{L}_{\mathrm{NCE}}  &= -\,\mathbb{E}_i \left[ \log \frac{\exp\!\big(\langle \tilde{z}_i, \tilde{z}_i^{\,\prime} \rangle / \tau\big)}{\sum_{j \neq i} \exp\!\big(\langle \tilde{z}_i, \tilde{z}_j \rangle / \tau\big)} \right] , \label{eq:loss-nce}\\
+  \mathcal{L}_{\mathrm{VIC}}  &= \frac{c_v}{d} \sum_{j=1}^{d} \max\!\big(0,\, 1 - \operatorname{std}(z_j)\big) \;+\; \frac{1}{d} \sum_{j \neq k} \operatorname{Cov}(z)_{jk}^{2} , \label{eq:loss-vic}\\
+  \mathcal{L}_{\mathrm{stat}} &= \mathbb{E}\big[ (1-t) \big( \|\mu(\hat{x}^{(0)}) - \mu(x^{(0)})\|_2^2 + \|\Sigma(\hat{x}^{(0)}) - \Sigma(x^{(0)})\|_F^2 \big) \big] , \label{eq:loss-stat}\\
+  \mathcal{L}_{\mathrm{ori}}  &= \textstyle\sum_m \omega_m\, D_m\big( \mathcal{T}_m(\hat{I}),\, \mathcal{T}_m(I) \big) , \label{eq:loss-ori}\\
+  \mathcal{L}_{\mathrm{cls}}  &= \mathrm{CE}\big( h_{\mathrm{cls}}(z),\, c \big) . \label{eq:loss-cls}
+\end{align}
+$\mathcal{L}_{\mathrm{rec}}$, Eq.~\eqref{eq:loss-rec}, reconstructs the clean latent with a weight that trusts the one-step estimate only at low noise ($\lambda_{\mathrm{rec}} = 0.5$ annealed to $0.3$). $\mathcal{L}_{\mathrm{spec}}$, Eq.~\eqref{eq:loss-spec}, compares log-amplitude Fourier spectra under a radial weight $w_r$ that rises from $1$ at zero frequency to $2$ at the Nyquist frequency, penalising blurred grain boundaries ($\lambda_{\mathrm{spec}} = 0.3$, applied after a warm-up). $\mathcal{L}_{\mathrm{NCE}}$, Eq.~\eqref{eq:loss-nce}, is an InfoNCE contrastive term \refneeded{InfoNCE (van den Oord et al.)} on the unit-normalised latents $\tilde{z}$ of each microstructure and its augmented view $\tilde{z}^{\,\prime}$ (temperature $\tau = 0.07$; $\lambda_{\mathrm{NCE}} = 0.3$ annealed to $0.05$). $\mathcal{L}_{\mathrm{VIC}}$, Eq.~\eqref{eq:loss-vic}, is a VICReg variance--covariance regulariser \refneeded{VICReg (Bardes et al.)} ($c_v = 25$; $\lambda_{\mathrm{VIC}} = 0.05$): the hinge term keeps every latent dimension alive at unit scale and the off-diagonal covariance term decorrelates them, the property exploited by the box-constrained search space of Section~\ref{sec:framework}. $\mathcal{L}_{\mathrm{stat}}$, Eq.~\eqref{eq:loss-stat}, matches the per-channel spatial means $\mu$ and the channel covariance $\Sigma$ of the predicted clean latent to those of the target ($\lambda_{\mathrm{stat}} = 0.05$), counteracting the shrinkage of texture strength toward the class mean that conditional diffusion models otherwise exhibit. $\mathcal{L}_{\mathrm{ori}}$, Eq.~\eqref{eq:loss-ori}, compares HCP-symmetrised texture statistics $\mathcal{T}_m$ of the two images under discrepancy measures $D_m$ with internal weights $\omega_m$, and is detailed below. $\mathcal{L}_{\mathrm{cls}}$, Eq.~\eqref{eq:loss-cls}, is the cross-entropy (CE) of an auxiliary head $h_{\mathrm{cls}}$ predicting the alloy class $c$ from $z$.
+
+The distinctly materials-scientific term is the orientation-distribution loss $\mathcal{L}_{\mathrm{ori}}$ of Eq.~\eqref{eq:loss-ori} ($\lambda_{\mathrm{ori}} = 0.5$, warmed up over two epochs and ramped over three). Predicted images are pushed through a differentiable form of the codec inverse of Section~\ref{sec:codec} to per-pixel quaternions, and HCP-symmetrised statistics of the predicted and target orientation sets are compared: kernel-density estimates of the basal and prismatic pole figures (concentration $\kappa=256$), a maximum-mean-discrepancy term \refneeded{MMD (Gretton et al.)} between sampled orientation sets in the fundamental zone ($\kappa=64$), a misorientation-distribution term, an orientation-scatter term, and a matched-pixel anchor on a random pixel subset. An auxiliary texture-class head supplies $\mathcal{L}_{\mathrm{cls}}$ ($\lambda_{\mathrm{cls}} = 0.5$), predicting the alloy class from $z$, sharpening class separation in the latent space. Gradients from the orientation terms are confined to low-noise diffusion times, where the predicted image is well-formed enough for its texture to be meaningful. Training runs for $40$ epochs with AdamW \refneeded{AdamW (Loshchilov \& Hutter)} (learning rate $10^{-4}$, weight decay $0.01$) at an effective batch size of $576$ in \texttt{bfloat16} on four GPUs; full hyperparameters are listed in the Supplementary Information.
+
+The capacity trade-off that emerges is central to how the rest of the paper should be read. With a frozen backbone and a $16$-token bottleneck, the model reproduces the dominant texture components and the distributional statistics of each alloy class faithfully, but plateaus in per-pixel fidelity: two decodes of the same latent agree in texture and grain morphology statistics rather than pixel-by-pixel. This is the intended operating point, a latent space small enough to search over in exchange for statistical rather than literal reconstruction, but it means that standard image metrics understate what the model gets right and overstate what it gets wrong. Section~\ref{sec:results} therefore evaluates the variants with materials-grounded metrics, texture distance, disorientation, and grain-morphology statistics, alongside conventional image metrics.
+
+
+\section{Crystal-plasticity oracle and design objectives}
+\label{sec:oracle}
+
+The property leg of the design loop is supplied by crystal-plasticity simulation rather than by a data-driven surrogate: this is the third point at which the framework of Section~\ref{sec:framework} earns the term physics-augmented. Every candidate latent $z$ is evaluated through the fully automated chain
+\begin{equation}
+  z \;\xrightarrow{\;\mathcal{D}\;}\; \text{RGB image} \;\xrightarrow{\;\Psi\;}\; \text{DREAM.3D RVE} \;\xrightarrow{\;f\;}\; \sigma(\varepsilon) \;\longrightarrow\; p \;\xrightarrow{\;J\;}\; \mathbb{R},
+  \label{eq:oracle-chain}
+\end{equation}
+in which the decoded $512\times512$ image is downsampled to the native $300\times300$ voxel grid by nearest-neighbour interpolation and converted by the codec of Section~\ref{sec:codec} into a DAMASK-ready polycrystal. One preprocessing step differs from the round-trip setting of Section~\ref{sec:codec}: decoder outputs carry organic rather than pixel-sharp grain boundaries, so grains are segmented with the Segment Anything vision-foundation-model mask generator \cite{Kirillov-SAM-2023} instead of the colour-tolerance connected-component rule, which over- or under-segments diffusion outputs. The oracle harness was developed with the companion methodology paper {\color{red}\cite{CoPiLOT2026}}; this section specifies its three materials-facing ingredients: the constitutive model $f$, the property extraction that reduces each simulated curve to the tuple $p$, and the scalar objectives $J$ that encode the design intent.
+
+\subsection{HCP phenomenological power-law model}
+\label{sec:cp-model}
+
+Simulations use the DAMASK grid solver, an FFT-based spectral scheme for periodic RVEs, with the phenomenological power-law constitutive model for HCP crystals \cite{Roters-DAMASK-2019}. Plastic flow follows the standard multiplicative decomposition $\mathbf{F} = \mathbf{F}_e \mathbf{F}_p$, with the plastic velocity gradient summed over all slip and twin systems, $\mathbf{L}_p = \sum_\alpha \dot\gamma^\alpha\, \mathbf{s}^\alpha \otimes \mathbf{m}^\alpha$, and the resolved shear stress $\tau^\alpha$ driving each system. Shear rates obey a power law, separately on slip and twin systems,
+\begin{equation}
+  \dot\gamma^\alpha_{\mathrm{sl}} = \dot\gamma_0^{\mathrm{sl}} \left| \frac{\tau^\alpha}{\xi^\alpha_{\mathrm{sl}}} \right|^{n_{\mathrm{sl}}} \operatorname{sign}(\tau^\alpha),
+  \qquad
+  \dot\gamma^\alpha_{\mathrm{tw}} = \dot\gamma_0^{\mathrm{tw}} \left( \frac{\tau^\alpha}{\xi^\alpha_{\mathrm{tw}}} \right)^{n_{\mathrm{tw}}} \;\; (\tau^\alpha > 0),
+  \label{eq:flowrule}
+\end{equation}
+where twinning is polar and activates only under positive resolved shear, the crystallographic origin of the tension--compression asymmetry of extruded Mg \cite{Chapuis-Driver-2011,Agnew-Review-Mg-2006}. The critical resolved shear stresses $\xi^\alpha$ evolve by self- and latent hardening: slip systems harden toward a saturation stress,
+\begin{equation}
+  \dot\xi^\alpha_{\mathrm{sl}} = h_0^{\mathrm{sl}} \left( 1 - \frac{\xi^\alpha_{\mathrm{sl}}}{\xi^\infty_{\mathrm{sl}}} \right)^{a_{\mathrm{sl}}} \sum_\beta h^{\alpha\beta}\, \big|\dot\gamma^\beta_{\mathrm{sl}}\big|
+  \;+\; f_{\mathrm{sat}}^{\mathrm{sl\text{-}tw}} \sum_\beta h^{\alpha\beta}\, \big|\dot\gamma^\beta_{\mathrm{tw}}\big|,
+  \label{eq:hardening}
+\end{equation}
+and twin systems harden analogously through twin--twin and twin--slip channels with moduli $h_0^{\mathrm{tw\text{-}tw}}$ and $h_0^{\mathrm{tw\text{-}sl}}$. The model resolves the full HCP deformation-mode inventory of Section~\ref{sec:intro}: basal, prismatic, and pyramidal $\langle a\rangle$ slip, pyramidal $\langle c{+}a\rangle$ slip, and both $\{10\bar{1}2\}$ extension and $\{10\bar{1}1\}$ contraction twinning. It is deliberately phenomenological, encoding hardening through scalar moduli rather than dislocation-density or twin-volume-fraction state variables, which keeps a single oracle call tractable while preserving the slip--twin competition that couples texture to the mechanical response.
+
+\tabref{tab:cp} lists the parameter sets for both hero alloys. Both are in-house calibrations of the automated simulation harness, fitted to reproduce the measured tensile envelopes of \tabref{tab:matdata} (AZ31: $\sigma_y = 143$--$184$\,MPa, $\sigma_u = 240$--$278$\,MPa, $n = 0.13$--$0.23$; Mg--5Gd: $\sigma_y = 91$--$193$\,MPa, $\sigma_u = 240$--$278$\,MPa, $n = 0.12$--$0.28$). Relative to AZ31, the Mg--5Gd set raises the critical resolved shear stresses of all deformation modes, consistent with Gd solute strengthening \cite{PENG20121064}, raises both twin activation stresses, reflecting the suppressed twin activity of RE-containing Mg \cite{Mg-RE-texture-weakening}, and lowers the rate-sensitivity exponents; elastic constants and $c/a$ are retained at the Mg values, since dilute Gd leaves the lattice elasticity nearly unchanged. The CP-versus-experiment validation of both parameter sets, on stress--strain curves reconstructed from measured RVEs, is reported in Section~\ref{sec:results}.
+
+\begin{table}[!t]
+\centering
+\caption{Crystal-plasticity (phenopowerlaw) parameters of the two hero alloys, as committed in the simulation harness. Slip families are basal $\langle a\rangle$, prismatic $\langle a\rangle$, pyramidal $\langle a\rangle$, and pyramidal $\langle c{+}a\rangle$; twin families are $\{10\bar{1}2\}$ extension (ext.) and $\{10\bar{1}1\}$ contraction (con.) twinning. Interaction coefficients $h^{\alpha\beta}$ are $1.0$ (self), $1.1$ (latent slip--slip), and $1.2$ (all slip--twin and twin--twin channels) for both alloys. Both sets are in-house calibrations against the measured tensile envelopes of \tabref{tab:matdata}.}
+\label{tab:cp}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l c c}
+\toprule
+Parameter & AZ31 & Mg--5Gd \\
+\midrule
+Elastic $C_{11}, C_{12}, C_{13}, C_{33}, C_{44}$ (GPa) & \multicolumn{2}{c}{$59.3,\ 25.7,\ 21.4,\ 61.2,\ 16.4$} \\
+$c/a$; density $\rho$ (kg\,m$^{-3}$) & \multicolumn{2}{c}{$1.624$; $1{,}740$} \\
+\midrule
+Basal $\langle a\rangle$: $\xi_0$ / $\xi_\infty$ (MPa) & $35$ / $105$ & $60$ / $160$ \\
+Prismatic $\langle a\rangle$: $\xi_0$ / $\xi_\infty$ (MPa) & $70$ / $155$ & $145$ / $320$ \\
+Pyramidal $\langle a\rangle$: $\xi_0$ / $\xi_\infty$ (MPa) & $95$ / $255$ & $375$ / $720$ \\
+Pyramidal $\langle c{+}a\rangle$: $\xi_0$ / $\xi_\infty$ (MPa) & $95$ / $255$ & $375$ / $720$ \\
+Extension twin $\{10\bar{1}2\}$: $\xi_0$ (MPa) & $50$ & $75$ \\
+Contraction twin $\{10\bar{1}1\}$: $\xi_0$ (MPa) & $80$ & $100$ \\
+\midrule
+$h_0^{\mathrm{sl}}$ basal / prism.\ / pyr.\ $\langle a\rangle$ / pyr.\ $\langle c{+}a\rangle$ (MPa) & $850$ / $900$ / $1000$ / $1100$ & $750$ / $1000$ / $1200$ / $1200$ \\
+$h_0^{\mathrm{tw\text{-}tw}}$ ext.\ / con.\ (MPa) & $1200$ / $1500$ & $1450$ / $1450$ \\
+$h_0^{\mathrm{tw\text{-}sl}}$ (MPa) & $1500$ & $1450$ \\
+$\dot\gamma_0^{\mathrm{sl}}$ / $\dot\gamma_0^{\mathrm{tw}}$ (s$^{-1}$) & $3.5\times10^{-4}$ / $10^{-3}$ & $4.5\times10^{-3}$ / $4.5\times10^{-3}$ \\
+$n_{\mathrm{sl}}$ / $n_{\mathrm{tw}}$ & $2$ / $6$ & $3$ / $3$ \\
+$a_{\mathrm{sl}}$; $f_{\mathrm{sat}}^{\mathrm{sl\text{-}tw}}$ & $2.5$; $5$ & $2.5$; $10$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each RVE is deformed in uniaxial tension along the extrusion direction at a quasi-static strain rate of $\dot\varepsilon = 10^{-3}$\,s$^{-1}$ to $25\%$ nominal strain, prescribed as a mixed boundary condition (fixed extension rate along ED, traction-free transverse response) over $1{,}250$ increments with output at every increment. The domain is the $300\times300\times1$ voxel grid at $2\,\upmu$m resolution of Section~\ref{sec:augmentation}, i.e.\ a $600\times600\,\upmu$m$^{2}$ periodic cell. A single evaluation takes approximately six minutes of wall-clock time on eight CPU threads, and candidates are simulated in parallel batches of four; this cost is what imposes the strict budget of order $10^{2}$ oracle calls per design run stated in Section~\ref{sec:framework}. Runs that diverge, produce non-finite stresses, or complete fewer than $50$ converged increments are discarded and logged as infeasible. Two approximations bound the oracle's validity and are revisited in Section~\ref{sec:results}: the constitutive law carries no intrinsic grain-size effect, so Hall--Petch strengthening enters only through the measured statistics embedded in the dataset, and the simulations are isothermal and damage-free, so post-necking behaviour is not modelled. The oracle's stochastic scatter, the run-to-run variation among RVEs synthesised from identical statistics, is quantified alongside the CP-versus-experiment validation in Section~\ref{sec:results} and provides the error bars on all simulated properties.
+
+\subsection{Property extraction}
+\label{sec:property-extraction}
+
+Each converged simulation is reduced to the property tuple $p=(\sigma_y,\, n,\, K,\, \sigma_u,\, \varepsilon_u)$ from the volume-averaged engineering stress--strain curve $\sigma(\varepsilon)$ along the loading axis, using the identical scalar definitions and fitting routine as our forward structure--property study \cite{Guru2025}, so that simulated, designed, and measured properties are directly comparable throughout the paper. The Young's modulus is the linear-regression slope of the initial elastic branch, $E = \mathrm{d}\sigma/\mathrm{d}\varepsilon$ for $\varepsilon < 10^{-3}$, and yield is located by a modulus-deviation criterion,
+\begin{equation}
+  \sigma_y = \sigma(\varepsilon_y), \qquad
+  \varepsilon_y = \min\left\{ \varepsilon \;:\; \left| \frac{\sigma(\varepsilon)/\varepsilon - E}{E} \right| > 0.4 \right\},
+  \label{eq:yield}
+\end{equation}
+the first point at which the secant modulus deviates from $E$ by more than $40\%$. The hardening branch between yield and the ultimate stress is converted to true stress and strain, $\sigma_t = \sigma(1+\varepsilon)$ and $\varepsilon_t = \ln(1+\varepsilon)$, and fitted in logarithmic coordinates by the Hollomon relation \cite{Hollomon1945}
+\begin{equation}
+  \sigma_t = K\,\varepsilon_t^{\,n},
+  \label{eq:hollomon}
+\end{equation}
+yielding the strength coefficient $K$ and hardening exponent $n$ as intercept and slope. The ultimate tensile stress is the curve maximum, $\sigma_u = \max_\varepsilon \sigma$, and the uniform strain is its elastically corrected abscissa,
+\begin{equation}
+  \varepsilon_u = \varepsilon(\sigma_u) - \frac{\sigma_u}{E},
+  \label{eq:uniform}
+\end{equation}
+the plastic strain available before necking. The work density to the ultimate stress, $W_u = \int_0^{\varepsilon(\sigma_u)} \sigma\, \mathrm{d}\varepsilon$, is recorded as the toughness proxy consumed by the design objective below.
+
+\subsection{Design objectives}
+\label{sec:objectives}
+
+The scalar objective $J$ translates a property tuple into design intent, and two complementary forms are used. The first, the toughness-weighted strength objective, pushes along the strength--toughness Pareto front without prescribing a specific property value:
+\begin{equation}
+  J_{V1}(p) = \left( \frac{\sigma_y}{\sigma_y^{\mathrm{ref}}} \right)^{\!\alpha}
+  \left( \frac{\sigma_u\,\varepsilon_u}{T^{\mathrm{ref}}} \right)^{\!\beta}
+  \left( \frac{\sigma_u}{\sigma_u^{\mathrm{ref}}} \right)^{\!\gamma}
+  - \lambda_n \max\!\big(n_{\min} - n,\, 0\big),
+  \label{eq:jv1}
+\end{equation}
+where $\sigma_u \varepsilon_u$ proxies the plastic work to necking, the references non-dimensionalise each factor to order unity (\tabref{tab:objectives}), and the hardening floor $n_{\min}$ rejects strong but brittle solutions, the classic failure mode of strength-only optimisation in Mg \cite{Agnew-Review-Mg-2006}. The second, the target-driven objective, encodes the engineering task of Section~\ref{sec:intro}, hitting a user-specified property tuple $p^\star$:
+\begin{equation}
+  J_{V2}(p;\, p^\star) = - \sqrt{ \sum_{q \,\in\, \{\sigma_y,\, n,\, K,\, \sigma_u\}} w_q \left( \frac{q - q^\star}{|q^\star|} \right)^{\!2} },
+  \label{eq:jv2}
+\end{equation}
+a weighted, unit-free distance in relative-error coordinates whose maximum $J_{V2}=0$ is attained exactly at the target. The weights of \tabref{tab:objectives} emphasise the hardening exponent, the property that our forward study identified as most texture-sensitive \cite{Guru2025}.
+
+Feasibility is enforced ahead of, not inside, the objective. A candidate is rejected before simulation if its decoded image is degenerate (mean per-channel pixel standard deviation below $5$, the blank-decode regime) or if its segmented RVE contains fewer than $40$ grains, and after simulation if DAMASK fails the convergence criterion above. Because the constitutive law is grain-size insensitive, an unconstrained optimiser would otherwise reach any target through a few large, favourably oriented grains or through speckle decodes with thousands of spurious grains; the grain-count band ($40$--$1{,}100$ grains) is therefore additionally imposed as a saturating penalty inside the optimiser's acquisition function (Section~\ref{sec:meridian}). Failed candidates are logged but excluded from the surrogate's training data rather than assigned a constant penalty value, a masking choice applied identically to all optimisers compared in Section~\ref{sec:results}. Full feasibility-gate definitions, the load case, and the post-processing code are provided in the Supplementary Information.
+
+\begin{table}[!t]
+\centering
+\caption{Design-objective settings of the closed-loop design runs: reference values and exponents of the toughness-weighted objective $J_{V1}$ (Eq.~\eqref{eq:jv1}), target tuple and weights of the target-driven objective $J_{V2}$ (Eq.~\eqref{eq:jv2}), and feasibility gates applied to every candidate. A single objective parameterisation, as committed in the optimisation harness, is deployed for all design runs of this work.}
+\label{tab:objectives}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l c}
+\toprule
+ & Quantity & Value \\
+\midrule
+\multirow{4}{*}{$J_{V1}$}
+ & Yield reference $\sigma_y^{\mathrm{ref}}$; exponent $\alpha$ & $250$\,MPa; $1.0$ \\
+ & Toughness reference $T^{\mathrm{ref}}$; exponent $\beta$ & $50$\,MPa; $1.0$ \\
+ & Strength reference $\sigma_u^{\mathrm{ref}}$; exponent $\gamma$ & $315$\,MPa; $0.25$ \\
+ & Hardening floor $n_{\min}$; penalty $\lambda_n$ & $0.10$; $5.0$ \\
+\midrule
+\multirow{4}{*}{$J_{V2}$}
+ & Target $\sigma_y^\star$; weight $w_{\sigma_y}$ & $180$\,MPa; $1.0$ \\
+ & Target $n^\star$; weight $w_n$ & $0.30$; $5.0$ \\
+ & Target $K^\star$; weight $w_K$ & $580$\,MPa; $0.5$ \\
+ & Target $\sigma_u^\star$; weight $w_{\sigma_u}$ & $330$\,MPa; $1.0$ \\
+\midrule
+\multirow{3}{*}{Feasibility}
+ & Image validity: mean per-channel pixel std & $\geq 5$ \\
+ & Grain count (hard floor / acquisition band) & $\geq 40$ / $40$--$1{,}100$ \\
+ & CP convergence: converged increments & $\geq 50$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Active-learning inverse design}
+\label{sec:meridian}
+
+The final block of the loop is the optimiser $\mathcal{O}$ that solves the latent program of Eq.~\eqref{eq:inverse-program}. Three properties of the problem, all inherited from the materials pipeline rather than from the mathematics, disqualify off-the-shelf latent Bayesian optimisation. First, the oracle is expensive: at roughly six minutes per crystal-plasticity evaluation (Section~\ref{sec:oracle}), the entire design run must fit in $160$ oracle calls, $T = 40$ outer rounds of $q = 4$ candidates, warm-started from a cache of $100$ pre-simulated seed latents per alloy. Second, a non-trivial fraction of candidates fail the feasibility gates of Section~\ref{sec:objectives}, so the optimiser must model not only where the objective is high but where an evaluation returns a finite value at all. Third, the encoder places the training data on a thin spherical shell of the latent box ($\|z\| = 22.07 \pm 0.05$ for FM-DiT-512): an isotropic perturbation in $\mathbb{R}^{512}$ almost surely leaves this shell, decodes to a degenerate image, and wastes a simulation. The optimiser deployed here, MERIDIAN (Manifold-Embedded Robust Inverse Design via Iterative Acquisition Networks), was developed with the companion methodology paper {\color{red}\cite{CoPiLOT2026}}; this section states its loop in materials terms (Algorithm~\ref{alg:meridian}) and defines the baseline comparison under which it is benchmarked in Section~\ref{sec:results}.
+
+\subsection{The MERIDIAN loop}
+\label{sec:meridian-loop}
+
+Each outer round refits a deep-kernel surrogate: a small MLP trunk $\phi:\mathbb{R}^{d}\to\mathbb{R}^{16}$ is trained jointly with a logistic feasibility head $g$ on \emph{all} accumulated evaluations, so the decode, codec, and solver failures of Section~\ref{sec:objectives} are retained as signal rather than discarded, and an exact Gaussian process (GP) with an automatic-relevance-determination (ARD) Mat\'ern-$5/2$ kernel is then refit on the feasible subset over the learned features to supply calibrated mean and variance. For the target-driven objective $J_{V2}$ the same trunk feeds heteroscedastic property heads that predict mean and variance of $(\sigma_y, \sigma_u, n, K, N_{\mathrm{grains}})$ in standardised units, injecting the property targets of \tabref{tab:objectives} directly into the acquisition.
+
+Search geometry respects the learned manifold at every step. Anisotropy is read from the active subspace of the surrogate-gradient covariance \refneeded{active subspaces (Constantine)}, truncated at $95\%$ cumulative energy with $8$--$24$ retained directions; for the first three rounds, before the surrogate is trustworthy, that role is played by principal components of the class-conditional latent pool. Around the shell-projected centroid of the five best feasible incumbents, a Sobol cloud of $4{,}096$ candidates is drawn with perturbations scaled by the trust-region edge and the subspace weights on a sparse axis mask, a $15\%$ fraction of isotropic scout moves, and projection onto the adaptive norm shell $\|z\| \in \mu_{\|z\|} \pm 2\sigma_{\|z\|}$ estimated from the feasible data each round, with a $5\%$ off-shell quota retained in case the feasible support genuinely widens. Candidates are scored by a feasibility-gated noisy-expected-improvement acquisition, $\alpha(z) = \mathrm{qLogNEI}(z)\, g(z)$ \refneeded{qLogNEI / BoTorch acquisition (Ament et al.)}, blended for $J_{V2}$ in equal parts with a Monte-Carlo expected improvement (MC-EI) computed through the property heads ($64$ samples), which also carries the saturating grain-count band penalty of Section~\ref{sec:objectives}. The batch itself is chosen from the top-$256$ candidates by a greedy determinantal-point-process (DPP) selection \refneeded{determinantal point processes for batch diversity (Kulesza \& Taskar)} with a hybrid feature-space/latent-space kernel, so that four simulations per round are spent on deliberately diverse microstructures rather than four neighbours of the same optimum; for $J_{V2}$, one batch slot is reserved for a property-gradient seed and one for a jittered polish of the incumbent. The trust-region edge evolves in $[0.05, 1.0]$ from $L_{\mathrm{init}} = 0.6$ under a success/failure cadence (success tolerance $3$, failure tolerance capped at $8$); collapse of the trust region or a plateau of eight non-improving rounds triggers a restart anchored by a surrogate-side Monte-Carlo tree search (MCTS) over the class pool, with at most two plateau restarts per run, and the final eight rounds run as a deliberately local polish phase in which the scout fraction, off-shell quota, and latent-kernel blend are switched off.
+
+\begin{algorithm}[t]
+\caption{MERIDIAN: one outer round of the active-learning design loop ($T = 40$ rounds, batch $q = 4$).}
+\label{alg:meridian}
+\begin{algorithmic}[1]
+\Require box $\mathcal{Z}$, oracle chain $f \circ \Psi \circ \mathcal{D}$, objective $J$, seed cache $\mathcal{E}_0$, class latent pool $\mathcal{P}$
+\State $\mathcal{E} \gets \mathcal{E}_0$; \quad $L \gets L_{\mathrm{init}}$
+\For{$t = 1, \dots, T$}
+  \State fit trunk $\phi$ and feasibility head $g$ on all of $\mathcal{E}$; fit ARD-Mat\'ern GP on feasible subset \Comment{surrogate}
+  \State $w \gets$ active subspace of $\mathbb{E}[\nabla\hat\mu\, \nabla\hat\mu^{\top}]$ if $t > 3$, else PCA of $\mathcal{P}$ \Comment{manifold anisotropy}
+  \State $z_c \gets$ shell-projected centroid of top-$5$ feasible incumbents
+  \State draw $4{,}096$ Sobol candidates about $z_c$, scaled by $L\, w$ on sparse axes; project onto shell $\mu_{\|z\|} \pm 2\sigma_{\|z\|}$
+  \State $\alpha(z) \gets \mathrm{qLogNEI}(z)\, g(z)$; blend with property-head MC-EI for $J_{V2}$ \Comment{acquisition}
+  \State batch $\gets$ greedy DPP over top-$256$ candidates by $\alpha$ \Comment{$q$ diverse proposals}
+  \State evaluate batch through $\mathcal{D} \to \Psi \to \mathrm{DAMASK} \to J$; append to $\mathcal{E}$; update $L$
+  \State \textbf{if} $L < L_{\min}$ or plateau $\geq K_{\mathrm{plat}}$: restart from mini-MCTS over $\mathcal{P}$
+\EndFor
+\State \Return feasible $z^{\star}$ with best $J$ and its microstructure $\Psi(\mathcal{D}(z^{\star}))$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Baselines and fair comparison}
+\label{sec:baselines}
+
+MERIDIAN is benchmarked against three published latent optimisers spanning the main algorithm families, each run on the identical oracle chain, budget, seed cache, and feasibility gates: DANTE \refneeded{DANTE (Wei et al.)}, a deep-surrogate tree search that pairs a multilayer-perceptron (MLP) objective model with distance-weighted upper-confidence-bound (UCB) exploration; TuRBO \refneeded{TuRBO trust-region Bayesian optimisation (Eriksson et al.)}, the standard single-trust-region Gaussian-process method with Thompson-sampling acquisition; and BAxUS \refneeded{BAxUS adaptive-subspace Bayesian optimisation (Papenmeier \& Nardi)}, which fits its Gaussian process in a low-dimensional embedded subspace that grows over the run. Two adaptations keep the baselines competitive on this problem rather than handicapped by it. DANTE's exploration scale is set to $\sigma_{\mathrm{init}} = 0.05$, chosen so that a tree perturbation moves a latent by $\|\delta z\| \approx 1.1$ and therefore stays on the encoded shell; the published default of larger moves decodes to degenerate images. BAxUS is given a manifold-aware embedding, the leading principal components of the seed latent pool at initial subspace dimension $128$ in place of the standard random sparse embedding, and its Gaussian process receives reject feedback, so that codec-floor failures inform the model about bad directions instead of being silently dropped.
+
+Fairness is enforced by two symmetric interventions, applied identically to all four optimisers. First, failed evaluations are masked from every regression surrogate, as defined in Section~\ref{sec:objectives}; MERIDIAN alone additionally retains them through its feasibility head, which is a design feature under test, not an unfair input. Second, the published trust-region failure rule $\tau_{\mathrm{fail}} = \lceil d/q \cdot \alpha_{\mathrm{tol}} \rceil$ evaluates to $192$ at $(d, q) = (512, 4)$, which would render restarts unreachable inside a $160$-evaluation run and silently convert every trust-region method into a one-shot local search; a shared cap $\tau_{\mathrm{fail}} \leq 8$ is therefore imposed on MERIDIAN, TuRBO, and BAxUS alike, with the published cadence otherwise unchanged. No per-alloy, per-objective, or per-decoder retuning is performed after these settings were fixed. \tabref{tab:optimisers} lists the deployed configuration of all four methods side by side; the full per-component ablation of MERIDIAN and all configuration files are provided in the companion paper {\color{red}\cite{CoPiLOT2026}} and the Supplementary Information.
+
+\begin{table}[!t]
+\centering
+\caption{Deployed configuration of the four latent optimisers, as committed in the optimisation harness. All methods share the search box $\mathcal{Z} = [-3,3]^{d}$, batch size $q = 4$, budget $T = 40$ outer rounds ($160$ oracle evaluations), and a warm-start cache of $100$ pre-simulated seed latents.}
+\label{tab:optimisers}
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l l l l l}
+\toprule
+ & MERIDIAN & DANTE & TuRBO & BAxUS \\
+\midrule
+Surrogate & deep-kernel GP: trunk & MLP $[1024, 512, 256]$, & ARD Mat\'ern-$5/2$ GP & ARD Mat\'ern-$5/2$ GP \\
+ & $[512,128]\!\to\!16$, ARD Mat\'ern-$5/2$ & dropout $0.1$ & & in embedded subspace \\
+Feasibility handling & shared-trunk classifier $g$ & masking only & masking only & masking + reject feedback \\
+Manifold prior & active subspace ($8$--$24$ dims, & none & none & PCA-of-seeds embedding, \\
+ & $95\%$ energy) + adaptive shell & & & initial dimension $128$ \\
+Acquisition & qLogNEI $\times$ $g$ (+ property & distance-weighted UCB & Thompson sampling & Thompson sampling \\
+ & MC-EI for $J_{V2}$, $64$ samples) & ($c_0 = 0.1$, $\rho = 0.5$) & & \\
+Candidates per round & $4{,}096$ Sobol & $200$ leaves $\times$ branching $16$ & $5{,}000$ Sobol & $5{,}000$ Sobol \\
+Batch selection & greedy DPP over top-$256$ & top-$q$ predicted & max-posterior & max-posterior \\
+Trust region $L_{\mathrm{init}}$; $[L_{\min}, L_{\max}]$ & $0.6$; $[0.05, 1.0]$, anisotropic & none ($\sigma_{\mathrm{init}} = 0.05$, & $0.8$; $[0.005, 1.6]$ & $0.8$; $[0.005, 1.6]$ \\
+ & & decay $0.995$) & & \\
+Success / failure tolerance & $3$ / factor $0.5$, cap $8$ & -- & $3$ / factor $1.5$, cap $8$ & $3$ / factor $1.5$, cap $8$ \\
+Restart rule & mini-MCTS or class pool; & none & Sobol cold start; & subspace doubling \\
+ & plateau $8$, polish after round $32$ & & plateau $4$ & \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\section{Results and discussion}
+\label{sec:results}
+% TODO: oracle validation (Fig. 8); generative fidelity (Fig. 9, Table 9); latent smoothness (Fig. 10); forward-inverse consistency (Fig. 11); AZ31 and Mg-5Gd case studies (Fig. 12); achievability maps (Fig. 13); discussion.
+
+\section{Conclusions and future scope}
+\label{sec:conclusion}
+% TODO: PSPP-chain contributions; what is now possible; future scope (structure-to-processing inversion, Mg-5Gd CP calibration, experimental validation).
+
+\section*{Acknowledgements}
+% TODO
+
+%% Bibliography
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}

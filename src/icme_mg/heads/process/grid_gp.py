@@ -1,19 +1,26 @@
-"""Condition-distribution joint-grid GP (T_ext) and OOF-constrained
-log-GP/ordinal blend (v_ext): the winning Task B heads.
+"""Condition-distribution joint-grid GP for both Task B targets.
 
 Representation-agnostic: each condition is a bag of representation rows. The
 feature map is a PCA-compressed, RBF-sampled condition-distribution embedding
 blended 50:50 (kernel weight) with the known composition + extrusion-ratio
 kernel.
 
-T_ext: intrinsic-correlation joint GP over (T_ext, log v_ext), decoded by
-minimum-risk over the discrete grid of observed training (T, v) pairs; the
-process space is a small discrete catalogue, not a continuum.
+Both targets share one intrinsic-correlation joint GP over (T_ext, log v_ext)
+and one posterior over the discrete grid of observed training (T, v) pairs;
+the process space is a small discrete catalogue, not a continuum.
 
-v_ext: log-space GP blended with an ordinal classifier over observed velocity
-levels; the (penalty, blend) pair is selected on training OOF predictions
-under safety constraints (MAE and WAPE must not degrade, R2 must not drop vs
-the pure log-GP fallback, which is always eligible at blend=0).
+T_ext: minimum-risk decode over that grid under a joint temperature/velocity
+loss.
+
+v_ext: the same catalogue constraint applied to the other axis. A continuous
+estimate (a bounded log-space GP, optionally blended with an ordinal
+classifier over velocity levels or with the grid posterior median) is snapped
+onto the observed velocity levels, nearest in log space. Extrusion speed is
+set from a short menu of press settings rather than dialled continuously, so
+a value between two settings is never a possible answer; which continuous
+estimate feeds the snap is chosen on training OOF predictions under safety
+constraints (MAE and WAPE must not degrade, R2 must not drop vs the plain
+snapped log-GP, which is always eligible).
 
 Every distribution transform is refitted inside the velocity OOF folds.
 Validation and test select nothing.
@@ -46,6 +53,7 @@ class GridGPConfig:
     inner_folds: int = 5
     penalty_grid: tuple = (0.0, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0)
     blend_grid: tuple = (0.0, 0.1, 0.25, 0.5, 0.75, 1.0)
+    grid_temperature_grid: tuple = (0.5, 1.0, 2.0, 4.0)
     seed: int = 0
 
 
@@ -202,36 +210,65 @@ def predict_joint(model, cross):
     return np.stack(means), np.stack(covariances)
 
 
-def grid_temperature(model, means, covariances, train_bags,
-                     config: GridGPConfig):
-    """Minimum-risk decode over the observed training (T, v) grid."""
+def process_grid(train_bags):
+    """The discrete catalogue of (T, v) pairs actually run, with counts."""
+    return np.unique(np.stack([bag["truth"] for bag in train_bags]),
+                     axis=0, return_counts=True)
+
+
+def grid_posterior(model, means, covariances, grid, counts,
+                   temperature: float):
+    """Posterior over the observed process catalogue for each query.
+
+    `temperature` inflates the latent covariance before the catalogue is
+    scored; it trades a peaked posterior (trusts the GP) against a flat one
+    (falls back on how often each recipe was run).
+    """
     from scipy.special import logsumexp
 
-    grid, counts = np.unique(
-        np.stack([bag["truth"] for bag in train_bags]),
-        axis=0, return_counts=True)
     latent_grid = np.column_stack([grid[:, 0], np.log(grid[:, 1])])
-    prior = (counts + 1.0) / (counts.sum() + len(counts))
-    temperature_scale = np.mean([bag["truth"][0] for bag in train_bags])
-    predictions = []
+    prior = np.log((counts + 1.0) / (counts.sum() + len(counts)))
+    noise = model["noise"] * np.diag(np.square(model["scale"]))
+    posterior = []
     for mean, covariance in zip(means, covariances):
-        covariance = (config.variance_temperature * covariance
-                      + model["noise"] * np.diag(np.square(model["scale"])))
-        covariance += 1e-8 * np.eye(2)
+        covariance = temperature * covariance + noise + 1e-8 * np.eye(2)
         delta = latent_grid - mean
         log_probability = (
             -0.5 * np.einsum(
                 "ij,jk,ik->i", delta, np.linalg.inv(covariance), delta)
-            + np.log(prior))
-        probability = np.exp(log_probability - logsumexp(log_probability))
+            + prior)
+        posterior.append(np.exp(
+            log_probability - logsumexp(log_probability)))
+    return np.stack(posterior)
+
+
+def grid_temperature(probability, grid, temperature_scale: float):
+    """Minimum-risk decode over the observed training (T, v) grid."""
+    predictions = []
+    for row in probability:
         risks = np.asarray([
-            np.sum(probability * (
+            np.sum(row * (
                 np.abs(grid[:, 0] - candidate[0]) / temperature_scale
                 + np.abs(grid[:, 1] - candidate[1]) / grid[:, 1]))
             for candidate in grid
         ])
         predictions.append(grid[np.argmin(risks), 0])
     return np.asarray(predictions)
+
+
+def grid_velocity(probability, grid):
+    """Posterior median velocity over the observed catalogue.
+
+    The median, not the arg max: with 20-30 catalogue entries the arg max is
+    a brittle winner-take-all pick, whereas the median is the minimum-risk
+    point under absolute error and degrades gracefully when the posterior is
+    spread over several plausible recipes.
+    """
+    order = np.argsort(grid[:, 1])
+    velocity = grid[order, 1]
+    cumulative = np.cumsum(probability[:, order], axis=1)
+    index = np.argmax(cumulative >= 0.5 * cumulative[:, -1:], axis=1)
+    return velocity[index]
 
 
 # ------------------------------------------------------------- velocity heads
@@ -302,6 +339,27 @@ def risk_velocity(levels, probabilities, gp, mean_velocity, penalty):
     return levels[np.argmin(posterior + penalty * guard, axis=1)]
 
 
+def snap_levels(values, levels):
+    """Project onto the observed velocity catalogue, nearest in log space.
+
+    Extrusion speed is a press setting chosen from a short menu (11 distinct
+    values across the 107 conditions), so a value between two settings is
+    never right. Log space is the correct metric because the menu is roughly
+    geometric, spanning 0.5 to 7.5 mm/s.
+    """
+    levels = np.asarray(levels, dtype=float)
+    distance = np.abs(np.log(levels)[None, :]
+                      - np.log(np.maximum(values, 1e-8))[:, None])
+    return levels[np.argmin(distance, axis=1)]
+
+
+def _snap_oof(values, level_sets):
+    """Snap each OOF prediction onto the catalogue its own inner fold saw."""
+    return np.asarray([
+        snap_levels(values[index:index + 1], level_sets[index])[0]
+        for index in range(len(values))])
+
+
 def _target_metrics(truth, prediction):
     residual = truth - prediction
     total = np.square(truth - truth.mean()).sum()
@@ -310,20 +368,26 @@ def _target_metrics(truth, prediction):
         "mape": float(np.abs(residual / truth).mean()),
         "wape": float(np.abs(residual).sum() / truth.sum()),
         "r2": float(1 - np.square(residual).sum() / max(total, 1e-12)),
+        "log_mae": float(np.abs(
+            np.log(truth) - np.log(np.maximum(prediction, 1e-8))).mean()),
     }
 
 
 def select_velocity(train_bags, config: GridGPConfig, log):
-    """OOF selection of (penalty, blend) under safety constraints; the pure
-    log-GP fallback at blend=0 is always eligible."""
+    """OOF selection of the velocity decoder under safety constraints; the
+    pure log-GP fallback at blend=0 is always eligible."""
     conditions = [bag["condition"] for bag in train_bags]
     splits, protocol, folds = condition_stratified_splits(
         conditions, config.inner_folds, config.seed)
     truth = np.asarray([bag["truth"][1] for bag in train_bags])
     gp_oof = np.empty(len(train_bags))
+    level_sets = [None] * len(train_bags)
     risk_oof = {
         penalty: np.empty(len(train_bags))
         for penalty in config.penalty_grid}
+    grid_oof = {
+        temperature: np.empty(len(train_bags))
+        for temperature in config.grid_temperature_grid}
     for fold, (fit_index, held_index) in enumerate(splits):
         fitted_bags = [train_bags[index] for index in fit_index]
         held_bags = [train_bags[index] for index in held_index]
@@ -343,24 +407,54 @@ def select_velocity(train_bags, config: GridGPConfig, log):
         probabilities = ordinal_probabilities(
             ordinal, _vector(mapped_held, config.known_weight))
         gp_oof[held_index] = gp
+        levels = np.unique(fit_velocity)
+        for index in held_index:
+            level_sets[index] = levels
         for penalty in config.penalty_grid:
             risk_oof[penalty][held_index] = risk_velocity(
                 ordinal[0], probabilities, gp, fit_velocity.mean(), penalty)
+        # The grid decoder needs the joint GP, so it is refitted here too:
+        # the catalogue seen by the decoder must be the inner-fold catalogue.
+        joint = fit_joint(fit_kernel, fitted_bags, config)
+        means, covariances = predict_joint(joint, cross)
+        grid, counts = process_grid(fitted_bags)
+        for temperature in config.grid_temperature_grid:
+            grid_oof[temperature][held_index] = grid_velocity(
+                grid_posterior(joint, means, covariances, grid, counts,
+                               temperature), grid)
         log(f"    velocity OOF fold {fold + 1}/{len(splits)}")
-    reference = _target_metrics(truth, gp_oof)
-    rows = [{"penalty": 0.0, "blend": 0.0, "safe": True, **reference}]
-    for penalty, risk in risk_oof.items():
+    reference = _target_metrics(truth, _snap_oof(gp_oof, level_sets))
+
+    def evaluate(prediction, **fields):
+        report = _target_metrics(truth, _snap_oof(prediction, level_sets))
+        safe = (report["mae"] <= reference["mae"]
+                and report["wape"] <= reference["wape"]
+                and report["r2"] >= reference["r2"])
+        return {"decoder": "log_gp", "penalty": 0.0, "blend": 0.0,
+                "grid_temperature": None, "safe": safe,
+                **fields, **report}
+
+    rows = [evaluate(gp_oof)]
+    rows[0]["safe"] = True
+    candidates = [
+        ("ordinal", "penalty", penalty, values)
+        for penalty, values in risk_oof.items()]
+    candidates += [
+        ("grid_median", "grid_temperature", temperature, values)
+        for temperature, values in grid_oof.items()]
+    for decoder, key, setting, values in candidates:
         for blend in config.blend_grid:
-            prediction = (1 - blend) * gp_oof + blend * risk
-            report = _target_metrics(truth, prediction)
-            safe = (report["mae"] <= reference["mae"]
-                    and report["wape"] <= reference["wape"]
-                    and report["r2"] >= reference["r2"])
-            rows.append({"penalty": penalty, "blend": blend,
-                         "safe": safe, **report})
+            if blend == 0.0:
+                continue  # identical to the log-GP row above
+            rows.append(evaluate(
+                (1 - blend) * gp_oof + blend * values,
+                decoder=decoder, blend=blend, **{key: setting}))
     eligible = [row for row in rows if row["safe"]]
+    # Ranked in log space, the scale on which this head models velocity: raw
+    # MAPE is dominated by the slowest recipes and is far noisier over the
+    # ~85 training conditions.
     selected = min(eligible, key=lambda row: (
-        row["mape"], row["mae"], row["wape"]))
+        row["log_mae"], row["mae"], row["wape"]))
     return rows, selected, protocol, folds
 
 
@@ -376,8 +470,9 @@ def run_grid_gp(raw_parts, config: GridGPConfig | None = None, log=print):
     log("  grid_gp: velocity decoder OOF selection")
     search_rows, selected, cv_protocol, folds = select_velocity(
         train_bags, config, log)
-    log(f"  grid_gp: selected penalty={selected['penalty']} "
-        f"blend={selected['blend']}")
+    log(f"  grid_gp: selected {selected['decoder']} "
+        f"blend={selected['blend']} penalty={selected['penalty']} "
+        f"grid_temperature={selected['grid_temperature']}")
 
     mapper = fit_mapper(train_bags, config, config.seed)
     mapped = {part: transform(mapper, bags) for part, bags in parts.items()}
@@ -389,6 +484,11 @@ def run_grid_gp(raw_parts, config: GridGPConfig | None = None, log=print):
     ordinal = fit_ordinal(
         _vector(mapped["train"], config.known_weight),
         train_velocity, config, config.seed)
+    grid, counts = process_grid(train_bags)
+    temperature_scale = float(
+        np.mean([bag["truth"][0] for bag in train_bags]))
+    blend = float(selected["blend"])
+    levels = np.unique(train_velocity)
 
     result = {"selected_velocity_decoder": selected,
               "velocity_search": search_rows,
@@ -399,16 +499,22 @@ def run_grid_gp(raw_parts, config: GridGPConfig | None = None, log=print):
         cross = kernel(mapped[part], mapped["train"], mapper,
                        config.known_weight)
         means, covariances = predict_joint(joint, cross)
-        temperature = grid_temperature(
-            joint, means, covariances, train_bags, config)
+        posterior = grid_posterior(joint, means, covariances, grid, counts,
+                                   config.variance_temperature)
+        temperature = grid_temperature(posterior, grid, temperature_scale)
         gp_velocity = predict_log_gp(log_gp, cross)
-        probabilities = ordinal_probabilities(
-            ordinal, _vector(mapped[part], config.known_weight))
-        risk = risk_velocity(
-            ordinal[0], probabilities, gp_velocity,
-            train_velocity.mean(), float(selected["penalty"]))
-        velocity = ((1 - float(selected["blend"])) * gp_velocity
-                    + float(selected["blend"]) * risk)
+        if selected["decoder"] == "grid_median":
+            decoded = grid_velocity(
+                grid_posterior(joint, means, covariances, grid, counts,
+                               float(selected["grid_temperature"])), grid)
+        else:
+            probabilities = ordinal_probabilities(
+                ordinal, _vector(mapped[part], config.known_weight))
+            decoded = risk_velocity(
+                ordinal[0], probabilities, gp_velocity,
+                train_velocity.mean(), float(selected["penalty"]))
+        velocity = snap_levels(
+            (1 - blend) * gp_velocity + blend * decoded, levels)
         # The decoder acts on the variance-tempered covariance; coverage is
         # measured against that same distribution, not the raw posterior.
         tempered = (config.variance_temperature * covariances

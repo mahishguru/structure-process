@@ -131,8 +131,8 @@ def run_process(parts, raw_parts, seed, log):
     gp_conditions, gp_prediction, gp_sigma, gp_uncertainty, gp_median = \
         gp_head.predict_gp_process(gp, X_test, c_test)
     gp_report = condition_level_process_metrics(gp_prediction, gp_conditions)
-    for target in gp_report:
-        gp_report[target].update(gp_uncertainty[target])
+    for target, values in gp_uncertainty.items():
+        gp_report[target].update(values)
 
     log("  grid_gp: fitting joint-grid GP + constrained velocity")
     grid_run = grid_gp_head.run_grid_gp(
@@ -168,7 +168,8 @@ def run_process(parts, raw_parts, seed, log):
     return reports, predictions, audit
 
 
-def run_pair(pipeline: str, split: str, seed: int, out_dir: Path, log):
+def run_pair(pipeline: str, split: str, seed: int, out_dir: Path, log,
+             tasks=("composition", "process")):
     raw_parts = LOADERS[pipeline](split)
     coverage = representation_coverage(split, raw_parts)
     missing = [c for part in ("val", "test")
@@ -182,13 +183,18 @@ def run_pair(pipeline: str, split: str, seed: int, out_dir: Path, log):
             f"{pipeline} representation (frozen cache): {train_missing}")
 
     composition_parts, process_parts = conditioned_inputs(raw_parts)
-    log(f"  task A: composition heads ({len(composition_parts[0][1])} train "
-        f"images, {len(composition_parts[2][1])} test images)")
-    composition, composition_pred, composition_audit = run_composition(
-        composition_parts, raw_parts, pipeline, seed, log)
-    log(f"  task B: process heads")
-    process, process_pred, process_audit = run_process(
-        process_parts, raw_parts, seed, log)
+    composition, composition_pred, composition_audit = {}, {}, {}
+    process, process_pred, process_audit = {}, {}, {}
+    if "composition" in tasks:
+        log(f"  task A: composition heads "
+            f"({len(composition_parts[0][1])} train "
+            f"images, {len(composition_parts[2][1])} test images)")
+        composition, composition_pred, composition_audit = run_composition(
+            composition_parts, raw_parts, pipeline, seed, log)
+    if "process" in tasks:
+        log(f"  task B: process heads")
+        process, process_pred, process_audit = run_process(
+            process_parts, raw_parts, seed, log)
 
     report = {
         "protocol": "condition_grouped_5fold_cv",
@@ -208,11 +214,26 @@ def run_pair(pipeline: str, split: str, seed: int, out_dir: Path, log):
                       "process": process_audit},
     }
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "report.json").write_text(json.dumps(report, indent=2))
+    report_path = out_dir / "report.json"
+    prediction_path = out_dir / "predictions.npz"
+    if set(tasks) != {"composition", "process"} and report_path.exists():
+        # Partial re-run: keep the untouched task exactly as it was written.
+        previous = json.loads(report_path.read_text())
+        stored = dict(np.load(prediction_path, allow_pickle=True))
+        for task, key in (("composition", "composition_heads"),
+                          ("process", "process_heads")):
+            if task in tasks:
+                continue
+            report[key] = previous[key]
+            report["selection"][task] = previous["selection"][task]
+        keep = {k: v for k, v in stored.items()
+                if not any(k.startswith(f"{task}/") for task in tasks)}
+    else:
+        keep = {"image_condition_ids": np.asarray(
+            composition_parts[2][1], dtype=object)}
+    report_path.write_text(json.dumps(report, indent=2))
     np.savez_compressed(
-        out_dir / "predictions.npz",
-        image_condition_ids=np.asarray(
-            composition_parts[2][1], dtype=object),
+        prediction_path, **keep,
         **{f"composition/{k}": v for k, v in composition_pred.items()},
         **{f"process/{k}": v for k, v in process_pred.items()})
     log(f"  wrote {out_dir}/report.json + predictions.npz")
@@ -226,6 +247,9 @@ def main():
     parser.add_argument("--out-root", default="runs/cv")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--skip-existing", action="store_true")
+    parser.add_argument("--tasks", nargs="+", default=["composition",
+                                                       "process"],
+                        choices=["composition", "process"])
     args = parser.parse_args()
 
     for split in args.folds:
@@ -239,7 +263,8 @@ def main():
             started = time.time()
             log = lambda message: print(f"[{split}/{pipeline}] {message}",
                                         flush=True)
-            report = run_pair(pipeline, split, args.seed, out_dir, log)
+            report = run_pair(pipeline, split, args.seed, out_dir, log,
+                              tuple(args.tasks))
             elapsed = (time.time() - started) / 60
             rerank = report["composition_heads"]["oof_constrained_reranker"]
             grid = report["process_heads"]["grid_gp"]
@@ -249,7 +274,8 @@ def main():
                 f"{rerank['element_wape_all']:.3f}, FP "
                 f"{rerank['macro_false_positive_rate']:.3f}) | "
                 f"grid_gp T MAPE {grid['T_ext']['mape']:.3f} v MAPE "
-                f"{grid['v_ext']['mape']:.3f} | {elapsed:.1f} min",
+                f"{grid['v_ext']['mape']:.3f} (log MAE "
+                f"{grid['log_v_ext']['mae']:.3f}) | {elapsed:.1f} min",
                 flush=True)
 
 

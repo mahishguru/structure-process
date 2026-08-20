@@ -1,0 +1,808 @@
+% =====================================================================
+% references.bib -- Acta Materialia 2026 inverse-design manuscript
+% Placeholder keys in {\color{red}\cite{...}} mark citations to verify/finalize.
+% =====================================================================
+
+% Predecessor (our published forward S-P pipeline) -- PLACEHOLDER, finalize details
+@article{Guru2025,
+  author  = {Guru, Mahish K. and Bohlen, Jan and Aydin, Roland C. and Ben Khalifa, Noomane},
+  title   = {Machine learning pipeline for structure-property modeling in Mg-alloys using microstructure and texture descriptors},
+  journal = {Acta Materialia},
+  year    = {2025},
+  note    = {Predecessor forward structure-property paper; finalize volume/pages/DOI}
+}
+
+% Companion methodology paper -- PLACEHOLDER, finalize details
+@inproceedings{CoPiLOT2026,
+  author    = {Guru, Mahish K. and others},
+  title     = {Co-PiLOT: Constrained Physics-Informed Latent Optimization for Target-Driven Inverse Design},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  note      = {Companion methodology paper; finalize citation}
+}
+
+% Kusampudi & Diehl generative inverse design (closest analog)
+@article{Kusampudi-Diehl-2023,
+title = {Inverse design of dual-phase steel microstructures using generative machine learning model and Bayesian optimization},
+journal = {International Journal of Plasticity},
+volume = {171},
+pages = {103776},
+year = {2023},
+issn = {0749-6419},
+doi = {https://doi.org/10.1016/j.ijplas.2023.103776},
+url = {https://www.sciencedirect.com/science/article/pii/S0749641923002607},
+author = {Navyanth Kusampudi and Martin Diehl},
+keywords = {Crystal plasticity, Variational autoencoder, Voronoi tessellation, Random forest},
+abstract = {The design of optimal microstructures requires first, the identification of microstructural features that influence the material’s properties and, then, a search for a combination of these features that give rise to desired properties. For microstructures with complex morphologies, where the number of features is large, deriving these structure–property relationships is a challenging task. To address this challenge, we propose a generative machine learning model that can automatically identify low-dimensional descriptors of microstructural features that can be used to establish structure–property relationships. Based on this model, we present an integrated, data-driven framework for microstructure characterization, reconstruction, and design that is applicable to heterogeneous materials with polycrystalline microstructures. The proposed method is evaluated on a case study of designing dual-phase steel microstructures created with the multi-level Voronoi tessellation method. To this end, we train a variational autoencoder to identify the descriptors from these synthetic dual-phase steel microstructures. Subsequently, we employ Bayesian optimization to search for the optimal combination of the descriptors and generate microstructures with specific yield stress and low susceptibility for damage initiation. The presented results show how microstructure descriptors, determined by the variational autoencoder model, act as design variables for an optimization algorithm that identifies microstructures with desired properties.}
+}
+
+% AZ31 texture and yield asymmetry / twinning
+@article{AZ31-TC-asymmetry,
+author = {J.B. Lin and W.J. Ren and X.Y. Wang and L.F. Ma},
+title = {Tension–compression asymmetry in yield strength and hardening behaviour of as-extruded AZ31 alloy},
+journal = {Materials Science and Technology},
+volume = {32},
+number = {18},
+pages = {1855--1860},
+year = {2016},
+publisher = {Taylor \& Francis},
+doi = {10.1080/02670836.2016.1149293},
+URL = { 
+    
+        https://doi.org/10.1080/02670836.2016.1149293
+},
+eprint = { 
+    
+        https://doi.org/10.1080/02670836.2016.1149293
+}
+,
+    abstract = { The effects of texture and twinning on the yield asymmetry and differential work-hardening behaviour of an as-extruded AZ31 alloy under uniaxial compression and tension are investigated using a viscoplastic self-consistent model. The results show that the yield asymmetry and differential work-hardening behaviour can be attributed to the combined effects of strong fibre texture and the polar nature of twinning. The variation in the relative activity of each deformation mode under compressive deformation is much more complex than that under tension. Under tensile deformation, the major deformation modes are prismatic  and pyramidal  slips, while twinning and basal slip are the major deformation modes under compressive deformation. The presence of extension twins and contraction twins is confirmed by microstructural observations. }
+}
+
+
+% AZ31 extrusion texture and DRX
+@article{AZ31-extrusion-texture,
+title = {Mechanical response and texture evolution of AZ31 alloy at large strains for different strain rates and temperatures},
+journal = {International Journal of Plasticity},
+volume = {27},
+number = {5},
+pages = {688-706},
+year = {2011},
+issn = {0749-6419},
+doi = {https://doi.org/10.1016/j.ijplas.2010.08.009},
+url = {https://www.sciencedirect.com/science/article/pii/S0749641910001142},
+author = {Akhtar S. Khan and Amit Pandey and Thomas Gnäupel-Herold and Raja K. Mishra},
+keywords = {Magnesium (AZ31), Tension/compression/simple shear, Strain rate, Texture, Neutron diffraction/EBSD},
+abstract = {In order to study the behavior of material under finite deformation at various strain rates, the responses of AZ31 Mg sheet are measured under uniaxial (tension and compression) and multiaxial (simple shear) loadings along rolling direction (RD), 45° to rolling direction (DD), 90° to rolling direction (TD), and normal to the sheet (ND) to large strains. The material exhibits positive strain rate sensitivity (SRS) at room and elevated temperatures; the SRS is more pronounced at high temperatures and lower strain rates. The r-value of the material under tensile loading at room temperatures is higher in TD at lower strain rate. Texture measurements on several failed specimens are reported under tension and simple shear after finite plastic deformation of about 20% equivalent strain. The as-received material exhibits a strong fiber with equal fractions of grains having the c-axis slightly tilted away from the sheet normal towards both +RD and −RD. Pole figures obtained after tensile loading along the rolling direction (RD) show that the texture of the material strengthens even at low strains, with c-axis perpendicular to the sheet plane and prism planes lining up in a majority of grains. However, the tensile loading axis along TD does not lead to similar texture strengthening; the c-axis distribution appears to be virtually unchanged from the virgin state. The pole figures obtained after in-plane compression along RD brings the c-axes of the grains parallel to the loading direction. The pole figures after simple shear loading show that the c-axis rotates to lie on the sheet plane consistent with a compression axis 45° away on the sheet plane.}
+}
+
+% Comparative anisotropy / yield asymmetry in wrought Mg (forward S-P context)
+@article{Mg-yield-anisotropy-comparative,
+title = {Reducing yield asymmetry and anisotropy in wrought magnesium alloys – A comparative study},
+journal = {Materials Science and Engineering: A},
+volume = {744},
+pages = {525-537},
+year = {2019},
+issn = {0921-5093},
+doi = {https://doi.org/10.1016/j.msea.2018.12.060},
+url = {https://www.sciencedirect.com/science/article/pii/S0921509318317374},
+author = {A.E. Davis and J.D. Robson and M. Turski},
+keywords = {Magnesium alloys, Deformation, Precipitation, Texture, Mechanical behaviour, Twinning},
+abstract = {Yield asymmetry in wrought magnesium alloys has been shown previously to be reduced by texture weakening and {101̅2} tensile-twin solid-solution strengthening due to rare-earth element (RE) additions. Yield asymmetry can also be reduced by grain-size reduction and precipitation strengthening. In this work these mechanisms were studied in several Mg-Sn-Zn-Al-Na(-Ca) alloys and a Mg-7 wt% Y (W7) alloy to rank their effectiveness. It was shown that texture weakening and tensile-twin solid-solution strengthening were the most effective asymmetry reducing mechanisms but were only achieved in the yttrium containing alloy. For yttrium-free alloys, grain-size reduction and precipitation strengthening must be utilised to overcome asymmetry and anisotropy produced by strong textures. Carefully designed precipitate populations were demonstrated to reduce both asymmetry (in the extrusion direction) and anisotropy. The power of crystal plasticity models, such as the visco-plastic self-consistent model, in aiding this design process has been demonstrated. However, achieving the desired precipitate populations in a practical alloy under realistic processing conditions is difficult. Grain-size reduction is more easily achieved and is effective in reducing asymmetry, but can only combat anisotropy successfully if an alloy is not hindered by an unfavourable wrought texture.}
+}
+
+% Rare-earth texture weakening / RE texture component
+@article{Mg-RE-texture-weakening,
+author = {Griffiths, D.},
+year = {2015},
+month = {01},
+pages = {10-24},
+title = {Explaining texture weakening and improved formability in magnesium rare earth alloys},
+volume = {31},
+journal = {Materials Science and Technology},
+doi = {10.1179/1743284714Y.0000000632}
+}
+
+% DRX and RE texture formation in Mg-Zn-Gd extrusion
+@article{Mg-Zn-Gd-DRX-RE-texture,
+  author  = {Jiang, M. G. and Xu, C. and Yan, H. and Lu, S. H. and Nakata, T. and Lao, C. S. and Chen, R. S. and Kamado, S. and Han, E. H.},
+  title   = {Correlation between dynamic recrystallization and formation of rare earth texture in a Mg-Zn-Gd magnesium alloy during extrusion},
+  journal = {Scientific Reports},
+  year    = {2018},
+  volume  = {8},
+  number  = {1},
+  pages   = {16800},
+  doi     = {10.1038/s41598-018-35170-4},
+  url     = {https://doi.org/10.1038/s41598-018-35170-4},
+  issn    = {2045-2322}
+}
+
+% Mg-Zn-Gd biodegradable implants (in vitro + in vivo)
+@article{Mg-Zn-Gd-biodegradable,
+  author    = {Miao, Hongwei and Zhang, Dandan and Chen, Chenxin and Zhang, Lei and Pei, Jia and Su, Yun and Huang, Hua and Wang, Zhongchang and Kang, Bin and Ding, Wenjiang and Zeng, Hui and Yuan, Guangyin},
+  title     = {Research on Biodegradable Mg--Zn--Gd Alloys for Potential Orthopedic Implants: In Vitro and in Vivo Evaluations},
+  journal   = {ACS Biomaterials Science \& Engineering},
+  year      = {2019},
+  volume    = {5},
+  number    = {3},
+  pages     = {1623--1634},
+  publisher = {American Chemical Society},
+  doi       = {10.1021/acsbiomaterials.8b01563},
+  url       = {https://doi.org/10.1021/acsbiomaterials.8b01563}
+}
+
+% Low-alloy Mg-RE implants (cytotoxicity and degradation)
+@article{Mg-low-RE-biodegradable,
+  author    = {Bian, Dong and Deng, Jiuxu and Li, Nan and Chu, Xiao and Liu, Yang and Li, Wenting and Cai, Hong and Xiu, Peng and Zhang, Yu and Guan, Zhenpeng and Zheng, Yufeng and Kou, Yuhui and Jiang, Baoguo and Chen, Rongshi},
+  title     = {In Vitro and in Vivo Studies on Biomedical Magnesium Low-Alloying with Elements Gadolinium and Zinc for Orthopedic Implant Applications},
+  journal   = {ACS Applied Materials \& Interfaces},
+  year      = {2018},
+  volume    = {10},
+  number    = {5},
+  pages     = {4394--4408},
+  publisher = {American Chemical Society},
+  doi       = {10.1021/acsami.7b15498},
+  url       = {https://doi.org/10.1021/acsami.7b15498},
+  issn      = {1944-8244}
+}
+% Review: biomedical Mg alloys, modulus vs bone, stress shielding
+@article{Mg-bone-modulus-review,
+title = {Biodegradable magnesium alloys for orthopaedic applications: A review on corrosion, biocompatibility and surface modifications},
+journal = {Materials Science and Engineering: C},
+volume = {68},
+pages = {948-963},
+year = {2016},
+issn = {0928-4931},
+doi = {https://doi.org/10.1016/j.msec.2016.06.020},
+url = {https://www.sciencedirect.com/science/article/pii/S0928493116305902},
+author = {Sankalp Agarwal and James Curtin and Brendan Duffy and Swarna Jaiswal},
+keywords = {Biocompatible, Biodegradation, Coating, Corrosion, Mg alloys, Orthopaedic implants},
+abstract = {Magnesium (Mg) and its alloys have been extensively explored as potential biodegradable implant materials for orthopaedic applications (e.g. Fracture fixation). However, the rapid corrosion of Mg based alloys in physiological conditions has delayed their introduction for therapeutic applications to date. The present review focuses on corrosion, biocompatibility and surface modifications of biodegradable Mg alloys for orthopaedic applications. Initially, the corrosion behaviour of Mg alloys and the effect of alloying elements on corrosion and biocompatibility is discussed. Furthermore, the influence of polymeric deposit coatings, namely sol-gel, synthetic aliphatic polyesters and natural polymers on corrosion and biological performance of Mg and its alloy for orthopaedic applications are presented. It was found that inclusion of alloying elements such as Al, Mn, Ca, Zn and rare earth elements provides improved corrosion resistance to Mg alloys. It has been also observed that sol-gel and synthetic aliphatic polyesters based coatings exhibit improved corrosion resistance as compared to natural polymers, which has higher biocompatibility due to their biomimetic nature. It is concluded that, surface modification is a promising approach to improve the performance of Mg-based biomaterials for orthopaedic applications.}
+}
+% General Mg lightweighting and applications review
+@article{Mg-lightweighting-review,
+title = {Recent advances on magnesium alloys for automotive cabin components: Materials, applications, and challenges},
+journal = {Journal of Materials Research and Technology},
+volume = {36},
+pages = {9924-9961},
+year = {2025},
+issn = {2238-7854},
+doi = {https://doi.org/10.1016/j.jmrt.2025.05.105},
+url = {https://www.sciencedirect.com/science/article/pii/S2238785425012608},
+author = {Lei Zhan and Chunhua Kong and Chunyuan Zhao and Xiuhong Cui and Lihua Zhang and Yang Song and Ying Lu and Lan Xia and Kai Ma and Hongyu Yang and Shili Shu and Baixing Dong and Feng Qiu and Qichuan Jiang},
+keywords = {Mg alloys, Automotive cabin, Strengthening, Manufacturing, Joint technology},
+abstract = {Against the backdrop of the rapid advancement of new energy vehicles (NEVs) and in response to the significant demand for extended driving range, the utilization of magnesium (Mg) alloy lightweighting technology to reduce energy consumption has been revisited. The enclosed or semi-enclosed environment of vehicle cabins offers an intrinsic advantage for Mg alloy parts as it obviates the need for extreme corrosion resistance demanded by exposed exterior parts while leveraging the alloy's superior castability to meet the demands for integrated molding of complex structural components within cabins. However, apart from its high material cost, several technical challenges associated with Mg alloy components impede their widespread adoption in automotive cabin parts. For instance, inadequate material properties, limited application experience, constrained forming technologies, unresolved issues related to joining technologies between Mg alloys and dissimilar materials, as well as interfacial corrosion issues, have made automobile manufacturers exercise extreme caution when applying Mg alloys. A comprehensive understanding of Mg alloy properties for automotive cabins, its application history and current status, as well as key technical challenges during application, is crucial for overcoming obstacles and promoting wider adoption of Mg alloys in automotive cabins. Therefore, this article reviews the progress and applications of Mg alloys commonly used in automotive cabins. from the perspectives of materials, component applications, manufacturing processes, and existing challenges, with the expectation that the relevant information can provide references for the development of advanced high-performance aviation Mg alloys in the future.}
+}
+
+% Generative models for crystalline materials (diffusion crystal generation)
+@article{Generative-crystal-review,
+  author  = {De Breuck, Pierre-Paul and Wang, Hai-Chen and Rignanese, Gian-Marco and Botti, Silvana and Marques, Miguel A. L.},
+  title   = {Generative AI for crystal structures: a review},
+  journal = {npj Computational Materials},
+  year    = {2025},
+  volume  = {11},
+  number  = {1},
+  pages   = {370},
+  doi     = {10.1038/s41524-025-01881-2},
+  url     = {https://doi.org/10.1038/s41524-025-01881-2},
+  issn    = {2057-3960}
+}
+
+% Forward + inverse ML structure-property relationships in DP steels
+@phdthesis{Kusampudi-thesis-2024,
+  author  = {Kusampudi, Navyanth},
+  title   = {Machine learning models for forward and inverse structure-property relationships in complex materials: A case study on damage tolerant dual-phase steels},
+  school  = {RWTH Aachen University},
+  year    = {2024}
+}
+
+@article{Joost-Krajewski-2017,
+title = {Towards magnesium alloys for high-volume automotive applications},
+journal = {Scripta Materialia},
+volume = {128},
+pages = {107-112},
+year = {2017},
+issn = {1359-6462},
+doi = {https://doi.org/10.1016/j.scriptamat.2016.07.035},
+url = {https://www.sciencedirect.com/science/article/pii/S1359646216303621},
+author = {William J. Joost and Paul E. Krajewski},
+keywords = {Magnesium, Automotive, Lightweighting},
+abstract = {Reducing vehicle weight is an important approach for increasing fuel economy, addressing regulatory requirements, and meeting consumer needs. Magnesium alloys are among the lightest structural metals and offer tremendous weight saving potential; however, many technical and commercial barriers limit their use in today's cars and trucks. Following a brief review of historical trends in vehicle weight and automotive magnesium, we describe key barriers to wider adoption of magnesium in high-volume vehicle applications. A discussion of manufacturing and processing, in-service performance, and cost requirements identifies specific development needs and opportunities while framing promising paths forward.}
+}
+
+@article{Kim_2013,
+doi = {10.1088/1468-6996/14/1/014205},
+url = {https://doi.org/10.1088/1468-6996/14/1/014205},
+year = {2013},
+month = {mar},
+publisher = {IOP Publishing},
+volume = {14},
+number = {1},
+pages = {014205},
+author = {Kim, Hansoo and Suh, Dong-Woo and Kim, Nack J},
+title = {Fe–Al–Mn–C lightweight structural alloys: a review on the microstructures and mechanical properties},
+journal = {Science and Technology of Advanced Materials},
+abstract = {Adding a large amount of light elements such as aluminum to steels is not a new concept recalling that several Fe–Al–Mn–C alloys were patented in 1950s for replacement of nickel or chromium in corrosion resistance steels. However, the so-called lightweight steels or low-density steels were revisited recently, which is driven by demands from the industry where steel has served as a major structural material. Strengthening without loss of ductility has been a triumph in steel research, but lowering the density of steel by mixing with light elements will be another prospect that may support the competitiveness against emerging alternatives such as magnesium alloys. In this paper, we review recent studies on lightweight steels, emphasizing the concept of alloy design for microstructures and mechanical properties. The influence of alloying elements on the phase constituents, mechanical properties and the change of density is critically reviewed. Deformation mechanisms of various lightweight steels are discussed as well. This paper provides a reason why the success of lightweight steels is strongly dependent on scientific achievements even though alloy development is closely related to industrial applications. Finally, we summarize some of the main directions for future investigations necessary for vitalizing this field of interest.}
+}
+
+@article{Agnew-Review-Mg-2006,
+  author  = {Agnew, S. R. and Duygulu, {\"O}.},
+  title   = {Plastic anisotropy and the role of non-basal slip in magnesium alloy AZ31B},
+  journal = {International Journal of Plasticity},
+  year    = {2005},
+  volume  = {21},
+  pages   = {1161--1193}
+}
+
+@article{Agnew_book,
+author = {Agnew, S.R.},
+year = {2004},
+month = {05},
+pages = {20-21},
+title = {Wrought magnesium: A 21st century outlook},
+volume = {56},
+journal = {JOM: the journal of the Minerals, Metals & Materials Society},
+doi = {10.1007/s11837-004-0120-8}
+}
+
+
+@inbook{Grimes,
+author = {Grimes, Roger and Janik, Vit},
+publisher = {John Wiley & Sons, Ltd},
+isbn = {9781118354179},
+title = {Automotive Applications for Magnesium},
+booktitle = {Encyclopedia of Automotive Engineering},
+chapter = {},
+pages = {1-17},
+doi = {https://doi.org/10.1002/9781118354179.auto273},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118354179.auto273},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781118354179.auto273},
+year = {2014},
+keywords = {castings, high pressure die casting, twin-roll casting, Pidgeon process, life cycle analysis, anisotropy, mechanical properties, global production},
+abstract = {Abstract While magnesium alloys were quite widely used in transport applications in the period from the end of World War II until the mid-1950s, their automotive use then declined virtually to zero. Despite the fact that magnesium is the lightest structural metal and major efforts were made to reduce vehicle mass after the fuel crises of the mid-1970s, the magnesium content remained well under 1\% of the mass of a typical car. However, in the last decade, or so, there has been a huge growth in interest in the possibility of far greater use of magnesium in automobile construction, particularly in the form of high pressure die castings. This has been accompanied by dramatic increase in the volume of magnesium produced and changes in the location of magnesium extraction so that some 85\% is now produced in China. The development efforts to produce sheet material more economically via twin-roll casting, develop superior casting alloys, and achieve a better understanding of their service properties are summarized as are the economic and environmental implications. It is concluded that there are few remaining technical obstacles to greater use but economic and environmental issues remain.}
+}
+
+@article{Tariq2026,
+  author  = {Tariq, Hafiz Muhammad Rehan and Jun, Tea-Sung},
+  title   = {Advances in EBSD-based approaches for quantifying slip activity in deformed Mg alloys},
+  journal = {Applied Microscopy},
+  year    = {2026},
+  volume  = {56},
+  number  = {1},
+  pages   = {4},
+  doi     = {10.1186/s42649-026-00124-y},
+  url     = {https://doi.org/10.1186/s42649-026-00124-y},
+  issn    = {2287-4445}
+}
+
+@article{Britton,
+    author = {Britton, T. B. and Dunne, F. P. E. and Wilkinson, A. J.},
+    title = {On the mechanistic basis of deformation at the microscale in hexagonal close-packed metals},
+    journal = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
+    volume = {471},
+    number = {2178},
+    pages = {20140881},
+    year = {2015},
+    month = {06},
+    abstract = {This is an overview of micromechanical deformation mechanisms in hexagonal close-packed metals. We start with an in-depth discussion of single-crystal behaviour concerning crystallographic slip, plastic anisotropy and deformation twinning. We move on to discuss some complexities involved in polycrystalline deformation and modelling approaches, focusing on rate effects in titanium alloys that are thought to play a significant role in dwell fatigue. We finish our review with a brief commentary on current understanding and state-of-the-art techniques, and outline some key areas where further study is recommended.},
+    issn = {1364-5021},
+    doi = {10.1098/rspa.2014.0881},
+    url = {https://doi.org/10.1098/rspa.2014.0881},
+    eprint = {https://royalsocietypublishing.org/rspa/article-pdf/doi/10.1098/rspa.2014.0881/630259/rspa.2014.0881.pdf},
+}
+
+
+@article{Chapuis-Driver-2011,
+title = {Temperature dependency of slip and twinning in plane strain compressed magnesium single crystals},
+journal = {Acta Materialia},
+volume = {59},
+number = {5},
+pages = {1986-1994},
+year = {2011},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2010.11.064},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645410008190},
+author = {Adrien Chapuis and Julian H. Driver},
+keywords = {Magnesium crystals, Twinning, Slip, CRSS, Channel-die},
+abstract = {This study aims to characterize the critical resolved shear stresses (CRSSs) of slip and twinning in magnesium crystals, as a function of temperature, under conditions of imposed strains. Several crystal orientations have been deformed by plane strain compression in a channel die from room temperature to 450°C. The deformed microstructure and microtextures are characterized by systematic electron backscatter diffraction orientation maps giving unequivocal primary and secondary twin determinations. In parallel, a crystal plasticity code based on the CRSS and the Schmid law is used to compare model predictions with the active slip and twinning systems and the flow stress. It is shown that tensile twinning and basal slip are only slightly temperature-dependent but that the other systems (compressive twinning, prismatic and pyramidal II (c+a) slip) possess CRSS values which decrease substantially with temperature.}
+}
+@article{WANG2019155,
+title = {Effect of solute content and temperature on the deformation mechanisms and critical resolved shear stress in Mg-Al and Mg-Zn alloys},
+journal = {Acta Materialia},
+volume = {170},
+pages = {155-165},
+year = {2019},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2019.03.027},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645419301703},
+author = {J.-Y. Wang and N. Li and R. Alizadeh and M.A. Monclús and Y.W. Cui and J.M. Molina-Aldareguía and J. LLorca},
+keywords = {Mg alloys, Solution hardening, Basal slip, Micropillar compression, Diffusion couples},
+abstract = {The influence of solute atoms (Al and Zn) on the deformation mechanisms and the critical resolved shear stress for basal slip in Mg alloys at 298 K and 373 K was ascertained by micropillar compression tests in combination with high-throughput processing techniques based on the diffusion couples. It was found that the presence of solute atoms enhances the size effect at 298 K as well as the localization of deformation in slip bands, which is associated with large strain bursts in the resolved shear stress (τRSS)-strain (ε) curves. Deformation in pure Mg and Mg alloys was more homogeneous at 373 K and the influence of the micropillar size on the critical resolved shear stress was much smaller. In this latter case, it was possible to determine the effect of solute content on the critical resolved shear stress for basal slip in Mg-Al and Mg-Zn alloys.}
+}
+
+@article{Mg-HallPetch-Review,
+title = {Influence of grain size and texture on Hall–Petch relationship for a magnesium alloy},
+journal = {Scripta Materialia},
+volume = {65},
+number = {11},
+pages = {994-997},
+year = {2011},
+issn = {1359-6462},
+doi = {https://doi.org/10.1016/j.scriptamat.2011.08.028},
+url = {https://www.sciencedirect.com/science/article/pii/S1359646211005057},
+author = {W. Yuan and S.K. Panigrahi and J.-Q. Su and R.S. Mishra},
+keywords = {Texture, Hall–Petch relationship, Magnesium alloy, Friction stir processing},
+abstract = {Friction stir processing was applied to a magnesium alloy to generate various grain sizes with the same intense basal texture. Subsequent tensile deformation along two orthogonal directions by easy activation or inhibition of basal slip follows the Hall–Petch relationship between yield stress and grain size in both directions. The Hall–Petch parameters are texture dependent. Easy activation of basal slip introduces lower values, while inhibition of basal slip leads to higher values. The Hall–Petch parameters are interpreted by texture and microstructural factors.}
+}
+
+@article{GrainSize-Mg-RandomTexture,
+  title={Grain Size Dependence of Yield Strength in Randomly Textured Mg-Al-Zn Alloy},
+  author={Y. N. Wang and J. C. Huang},
+  journal={MATERIALS TRANSACTIONS},
+  volume={48},
+  number={2},
+  pages={184-188},
+  year={2007},
+  doi={10.2320/matertrans.48.184}
+}
+
+@article{GrainSize-Mg-Texture-Interaction,
+title = {A crystal plasticity investigation of grain size-texture interaction in magnesium alloys},
+journal = {Acta Materialia},
+volume = {208},
+pages = {116743},
+year = {2021},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2021.116743},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645421001233},
+author = {Babak Ravaji and Shailendra P. Joshi},
+keywords = {Hexagonal close-packed (HCP) materials, Magnesium (Mg) alloys, Grain-size effect, Textural variability, Crystal Plasticity},
+abstract = {This work investigates the microstructure-property linkages in magnesium (Mg) with an emphasis on understanding interaction effects between the grain size, texture, and loading orientation. A single crystal plasticity framework endowed with experimentally informed micro Hall-Petch type relations for the activation thresholds for slip and twinning is adopted to resolve polycrystalline microstructures over a broad texture-grain size space. The macroscopic trends from the simulations corroborate with experiments. The synergistic effects of microstructural engineering on the micromechanical characteristics are mapped, which reveal their role in the emergent macroscopic behaviors. The simulations predict reduced extension twinning with grain size refinement even though the micro Hall-Petch coefficient for twinning is smaller than that for the non-basal slip modes. While grain refinement and textural weakening generally reduce the net plastic anisotropy and tension-compression asymmetry, the degree to which these macroscopic behaviors are tempered depends on the loading orientation. The results offer preliminary insight into the roles that texture and grain size may play in the damage behavior of engineered Mg microstructures.}
+}
+
+@article{BOHLEN20072101,
+title = {The texture and anisotropy of magnesium–zinc–rare earth alloy sheets},
+journal = {Acta Materialia},
+volume = {55},
+number = {6},
+pages = {2101-2112},
+year = {2007},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2006.11.013},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645406008214},
+author = {Jan Bohlen and Marcus R. Nürnberg and Jeremy W. Senn and Dietmar Letzig and Sean R. Agnew},
+keywords = {Magnesium, Crystal plasticity, Solid solution, Recrystallization, Mischmetal},
+abstract = {In this paper, the rolling textures of six magnesium alloys containing different levels of zinc and rare earth (RE, e.g. mischmetal or Y) additions are examined. The overall texture strength and the basal pole intensity aligned with the sheet normal direction is lower for RE-containing alloys than for conventional alloys. The distinct textures generated in this study allow the influence of texture on the mechanical response to be investigated. The anisotropy of the yield and flow strengths is reversed and the planar anisotropy is reduced (r∼1) in comparison to conventional alloys. Both aspects of the anisotropy are related to the fact that the dominant texture components in the Mg–Zn–RE alloys place more grains in favourable orientations for basal slip and tensile twinning, particularly during transverse direction tension. Mg sheets with lower r-values should have improved forming behaviour, at least under straining conditions which call for thinning of the sheet.}
+}
+
+@article{BARNETT20071,
+title = {Twinning and the ductility of magnesium alloys: Part I: “Tension” twins},
+journal = {Materials Science and Engineering: A},
+volume = {464},
+number = {1},
+pages = {1-7},
+year = {2007},
+issn = {0921-5093},
+doi = {https://doi.org/10.1016/j.msea.2006.12.037},
+url = {https://www.sciencedirect.com/science/article/pii/S0921509306026876},
+author = {M.R. Barnett},
+keywords = {Tensile test, Ductility, Work softening, Twinning},
+abstract = {Magnesium and its alloys do not in general undergo the same extended range of plasticity as their competitor structural metals. The present work is part I of a study that examines some of the roles deformation twinning might play in the phenomenon. A series of tensile test results are reported for the common wrought alloy AZ31. These data are employed in conjunction with a simple constitutive model to argue that {1 0 1¯ 2} twinning (which gives extension along the c-axis) can increase the uniform elongation in tensile tests. This effect appears to be similar to that seen in Ti, Zr and Cu–Si and in the so called TWIP phenomenon in steel.}
+}
+
+@article{KHAN2011688,
+title = {Mechanical response and texture evolution of AZ31 alloy at large strains for different strain rates and temperatures},
+journal = {International Journal of Plasticity},
+volume = {27},
+number = {5},
+pages = {688-706},
+year = {2011},
+issn = {0749-6419},
+doi = {https://doi.org/10.1016/j.ijplas.2010.08.009},
+url = {https://www.sciencedirect.com/science/article/pii/S0749641910001142},
+author = {Akhtar S. Khan and Amit Pandey and Thomas Gnäupel-Herold and Raja K. Mishra},
+keywords = {Magnesium (AZ31), Tension/compression/simple shear, Strain rate, Texture, Neutron diffraction/EBSD},
+abstract = {In order to study the behavior of material under finite deformation at various strain rates, the responses of AZ31 Mg sheet are measured under uniaxial (tension and compression) and multiaxial (simple shear) loadings along rolling direction (RD), 45° to rolling direction (DD), 90° to rolling direction (TD), and normal to the sheet (ND) to large strains. The material exhibits positive strain rate sensitivity (SRS) at room and elevated temperatures; the SRS is more pronounced at high temperatures and lower strain rates. The r-value of the material under tensile loading at room temperatures is higher in TD at lower strain rate. Texture measurements on several failed specimens are reported under tension and simple shear after finite plastic deformation of about 20% equivalent strain. The as-received material exhibits a strong fiber with equal fractions of grains having the c-axis slightly tilted away from the sheet normal towards both +RD and −RD. Pole figures obtained after tensile loading along the rolling direction (RD) show that the texture of the material strengthens even at low strains, with c-axis perpendicular to the sheet plane and prism planes lining up in a majority of grains. However, the tensile loading axis along TD does not lead to similar texture strengthening; the c-axis distribution appears to be virtually unchanged from the virgin state. The pole figures obtained after in-plane compression along RD brings the c-axes of the grains parallel to the loading direction. The pole figures after simple shear loading show that the c-axis rotates to lie on the sheet plane consistent with a compression axis 45° away on the sheet plane.}
+}
+
+@article{PENG20121064,
+title = {Gadolinium solubility and precipitate identification in Mg-Gd binary alloy},
+journal = {Journal of Rare Earths},
+volume = {30},
+number = {10},
+pages = {1064-1068},
+year = {2012},
+issn = {1002-0721},
+doi = {https://doi.org/10.1016/S1002-0721(12)60179-3},
+url = {https://www.sciencedirect.com/science/article/pii/S1002072112601793},
+author = {Qiuming PENG and Ning MA and Hui LI},
+keywords = {Mg alloys, microstructure, precipitate, annealing, rare earths},
+abstract = {Gadolinium (Gd) solubility in magnesium (Mg) matrix and precipitate composition in Mg-Gd binary alloys were investigated. The alloys containing different Gd contents (10 wt.%-35 wt.%) were employed to identify Gd solubility after annealing at different temperatures. It was confirmed that the maximum Gd solubility was 22.8 wt.% at 550 °C based on the regression analysis method. Mg5+xGd (0<x<2) and Mg3Gd precipitates coexisted in all investigated alloys owing to the strong component segregation during solidification. The fraction of Mg5+xGd (0<x<2) was decreased with the increment of annealing temperature and time. In contrast, Mg3Gd precipitate could not be eliminated even when being annealed at 550 °C. This thermal stable precipitate played a significant role in mechanical properties. Therefore, it is very necessary to consider the effect of Mg3Gd precipitate on properties of Mg-Gd based alloys in future.}
+}
+
+
+@article{BOHLEN20107092,
+title = {Effect of rare earth elements on the microstructure and texture development in magnesium–manganese alloys during extrusion},
+journal = {Materials Science and Engineering: A},
+volume = {527},
+number = {26},
+pages = {7092-7098},
+year = {2010},
+issn = {0921-5093},
+doi = {https://doi.org/10.1016/j.msea.2010.07.081},
+url = {https://www.sciencedirect.com/science/article/pii/S0921509310008336},
+author = {Jan Bohlen and Sangbong Yi and Dietmar Letzig and Karl Ulrich Kainer},
+keywords = {Magnesium alloys, Extrusion, X-ray diffraction, EBSD, Mechanical characterisation, Recrystallisation},
+abstract = {Single additions of the rare earth (RE) elements cerium, yttrium or neodymium have been made to magnesium–manganese alloys in order to investigate their influence on the microstructure and texture formed during indirect extrusion and the resulting mechanical properties. Whereas the binary Mg–Mn alloy M1 exhibits a 〈10.0〉 or 〈10.0〉–〈11.0〉 fibre texture depending on the extrusion rate, the RE-containing alloys exhibit weaker recrystallisation textures and the formation of a new texture component. The preferential growth of grains having 〈11.0〉 parallel to the extrusion direction was hindered in these alloys. For the rare earth elements used in this work it appears that Nd is a much stronger texture modifier compared to Ce or Y in Mg–Mn alloys. The weaker texture leads to increased ductility, lower yield and ultimate stresses, but a decrease in the asymmetric yield behaviour of the extruded bars.}
+}
+
+@ARTICLE{Nienaber2019,
+    
+AUTHOR={Nienaber, Maria  and Kainer, Karl Ulrich  and Letzig, Dietmar  and Bohlen, Jan },
+           
+TITLE={Processing Effects on the Formability of Extruded Flat Products of Magnesium Alloys},
+          
+JOURNAL={Frontiers in Materials},
+          
+VOLUME={Volume 6 - 2019},
+  
+YEAR={2019},
+  
+URL={https://www.frontiersin.org/journals/materials/articles/10.3389/fmats.2019.00253},
+  
+DOI={10.3389/fmats.2019.00253},
+  
+ISSN={2296-8016},
+  
+ABSTRACT={The development of microstructure and texture during flat product extrusion of magnesium alloys differs significantly from those of rolled sheets. It has especially been shown that the range of microstructures and textures is broad in the case of extrusion which allows significant variations of the resulting textures. 
+Three wrought magnesium-zinc alloys with texture modifying elements Nd (ZN10), Ca (ZX10) and Al (AZ31) have been used to extrude flat band profiles with varied processing parameters. This allowed a distinct variation of grain sizes and textures of the extrudates. The impact on the mechanical properties and the forming behaviour (Erichsen values IE) is revealed and discussed with respect to the microstructure and texture. It can be shown that a weak alignment of basal planes is preferred for enhanced formability over a distinct alignment of basal planes even if oriented preferentially for basal slip.}}
+
+
+@article{WIESE2021112,
+title = {Alloying effect of silver in magnesium on the development of microstructure and mechanical properties by indirect extrusion},
+journal = {Journal of Magnesium and Alloys},
+volume = {9},
+number = {1},
+pages = {112-122},
+year = {2021},
+issn = {2213-9567},
+doi = {https://doi.org/10.1016/j.jma.2020.08.001},
+url = {https://www.sciencedirect.com/science/article/pii/S2213956720301353},
+author = {Björn Wiese and Regine Willumeit-Römer and Dietmar Letzig and Jan Bohlen},
+keywords = {Mg-Ag-alloys, Lattice parameters, Indirect extrusion, Microstructure, Mechanical properties},
+abstract = {The effect of Ag in solid solution on the microstructure, texture and the deformation behaviour of indirectly extruded Mg was investigated. Ag as a solid solution strengthener affects the behaviour during extrusion, resulting in enhanced deformation related heating and corresponding coarser grained microstructures. No substantial effect on the texture development is revealed. The mechanical properties simultaneously increase in stress and strain levels with increasing Ag content, especially in tension as a result of the changing impact of the slip modes which can be associated with a decrease of the lattice parameters as well as the c/a ratio of the hcp lattice structure. In compression tests with twin dominated flow, the impact is much smaller on the compressive yield stress but higher with respect to the twinning related strain hardening rate. Solid solution strength functions for Fleischer and Labusch were determined, also confirming the anisotropic behaviour of the extruded Mg alloys.}
+}
+
+@article{Hadorn2012,
+  author  = {Hadorn, Jason P. and Hantzsche, Kerstin and Yi, Sangbong and Bohlen, Jan and Letzig, Dietmar and Wollmershauser, James A. and Agnew, Sean R.},
+  title   = {Role of Solute in the Texture Modification During Hot Deformation of Mg-Rare Earth Alloys},
+  journal = {Metallurgical and Materials Transactions A},
+  year    = {2012},
+  volume  = {43},
+  number  = {4},
+  pages   = {1347--1362},
+  doi     = {10.1007/s11661-011-0923-5},
+  url     = {https://doi.org/10.1007/s11661-011-0923-5},
+  issn    = {1543-1940}
+}
+
+@article{JANG2022585,
+title = {Activation of non-basal <c + a> slip in multicomponent Mg alloys},
+journal = {Journal of Magnesium and Alloys},
+volume = {10},
+number = {2},
+pages = {585-597},
+year = {2022},
+issn = {2213-9567},
+doi = {https://doi.org/10.1016/j.jma.2021.03.007},
+url = {https://www.sciencedirect.com/science/article/pii/S221395672100061X},
+author = {Hyo-Sun Jang and Jong-Kwan Lee and Antonio João Seco Ferreira Tapia and Nack Joon Kim and Byeong-Joo Lee},
+keywords = {Mg–Zn–Ca alloy, Molecular statics simulation, Ductility, Formability},
+abstract = {Activating non-basal <c+a> slip is a key method to improve room temperature ductility and formability of Mg alloys. However, the detailed criterion for activation of the <c+a> slip in multicomponent Mg alloys, which can be utilized in commercial Mg alloys, requires further understanding. The present authors investigated the mechanism and criterion using a molecular statics simulation on dislocation behaviors in multicomponent Mg alloys. We found that if multicomponent Mg alloys have an equivalent dislocation binding intensity to associated binary Mg alloys that are optimized to minimize the critical resolved shear stress anisotropy and thus activate the <c+a> slip, then the critical resolved shear stress anisotropy between slip systems of the multicomponent Mg alloys can also be minimized, resulting in activation of the <c+a> slip. The activation is maximized in multicomponent Mg alloys when alloying a large amount of weak dislocation binding elements. It was confirmed through experiments that the multicomponent Mg alloys satisfying the above criterion show higher room-temperature tensile elongation and formability than other alloys.}
+}
+
+@article{Kalidindi-MKS-2015,
+   author = "Kalidindi, Surya R. and De Graef, Marc",
+   title = "Materials Data Science: Current Status and Future Outlook", 
+   journal= "Annual Review of Materials Research",
+   year = "2015",
+   volume = "45",
+   number = "Volume 45, 2015",
+   pages = "171-193",
+   doi = "https://doi.org/10.1146/annurev-matsci-070214-020844",
+   url = "https://www.annualreviews.org/content/journals/10.1146/annurev-matsci-070214-020844",
+   publisher = "Annual Reviews",
+   issn = "1545-4118",
+   type = "Journal Article",
+   keywords = "materials database",
+   keywords = "process-structure-property linkage",
+   keywords = "materials e-collaboration platform",
+   keywords = "materials data analytics",
+   keywords = "materials data management",
+   abstract = "The field of materials science and engineering is on the cusp of a digital data revolution. After reviewing the nature of data science and Big Data, we discuss the features of materials data that distinguish them from data in other fields. We introduce the concept of process-structure-property (PSP) linkages and illustrate how the determination of PSPs is one of the main objectives of materials data science. Then we review a selection of materials databases, as well as important aspects of materials data management, such as storage hardware, archiving strategies, and data access strategies. We introduce the emerging field of materials data analytics, which focuses on data-driven approaches to extract and curate materials knowledge from available data sets. The critical need for materials e-collaboration platforms is highlighted, and we conclude the article with a number of suggestions regarding the near-term future of the materials data science field.",
+  }
+
+
+@article{Saunders-316L-AM-2019,
+title = {Metal AM process-structure-property relational linkages using Gaussian process surrogates},
+journal = {Additive Manufacturing},
+volume = {62},
+pages = {103398},
+year = {2023},
+issn = {2214-8604},
+doi = {https://doi.org/10.1016/j.addma.2023.103398},
+url = {https://www.sciencedirect.com/science/article/pii/S2214860423000118},
+author = {Robert N. Saunders and Kirubel Teferra and Alaa Elwany and John G. Michopoulos and Dimitris Lagoudas},
+keywords = {Process modeling, Microstructure, Mechanical properties, Stainless steel, Gaussian process},
+abstract = {In metal additive manufacturing (AM), with sufficient understanding of process-structure–property (PSP) relational linkages, the control of build parameters can produce parts with previously unattainable properties. Establishing these PSP linkages involves varying process parameters until a desired microstructure, and corresponding properties, are achieved, either experimentally or computationally. However, both methods can have a high acquisition cost and be difficult to sample repeatedly. This work describes a Gaussian process (GP)-based workflow that is capable of predicting melt pool characteristics, microstructure features, and mechanical properties of previously unseen process parameter combinations. The workflow implements multi-fidelity, multi-output, and functional GPs, trained on a limited set of experiments and simulations in order to make melt pool, microstructure, and mechanical property predictions. The established linkage results in approximately 95% accuracy in predicting mechanical properties for previously unseen set of process parameters propagated through the whole framework. The use of GPs in the workflow limits the number of experiments/simulations needed, yields a nearly negligible cost for acquisition of new predictions, and allows for a Bayesian treatment of the PSP linkages that was not previously feasible.}
+}
+
+@article{FernandezZelaia-ElasticComposites-2019,
+title = {Reduced-order structure-property linkages for polycrystalline microstructures based on 2-point statistics},
+journal = {Acta Materialia},
+volume = {129},
+pages = {428-438},
+year = {2017},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2017.03.009},
+url = {https://www.sciencedirect.com/science/article/pii/S135964541730188X},
+author = {Noah H. Paulson and Matthew W. Priddy and David L. McDowell and Surya R. Kalidindi},
+keywords = {2-Point correlations, Microstructure, Computational model, Crystal plasticity, Reduced-order model},
+abstract = {Computationally efficient structure-property (S-P) linkages (i.e., reduced order models) are a necessary key ingredient in accelerating the rate of development and deployment of structural materials. This need represents a major challenge for polycrystalline materials, which exhibit rich heterogeneous microstructure at multiple structure/length scales, and exhibit a wide range of properties. In this study, a novel framework is described for extracting S-P linkages in polycrystalline microstructures that are obtained using 2-point spatial correlations (also called 2-point statistics) to quantify the material's microstructure, and principal component analysis (PCA) to represent this information in a reduced dimensional space. Additionally, it is demonstrated that the use of generalized spherical harmonics (GSH) as a Fourier basis for functions defined on the orientation space leads to a compact and computationally efficient representation of the desired S-P linkages. In this study, these novel protocols are developed and demonstrated for elastic stiffness and yield strength predictions for α− Ti microstructures using a dataset produced through microscale finite element simulations.}
+}
+
+@article{Paulson-alphaTi-2017,
+title = {Reduced-order structure-property linkages for polycrystalline microstructures based on 2-point statistics},
+journal = {Acta Materialia},
+volume = {129},
+pages = {428-438},
+year = {2017},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2017.03.009},
+url = {https://www.sciencedirect.com/science/article/pii/S135964541730188X},
+author = {Noah H. Paulson and Matthew W. Priddy and David L. McDowell and Surya R. Kalidindi},
+keywords = {2-Point correlations, Microstructure, Computational model, Crystal plasticity, Reduced-order model},
+abstract = {Computationally efficient structure-property (S-P) linkages (i.e., reduced order models) are a necessary key ingredient in accelerating the rate of development and deployment of structural materials. This need represents a major challenge for polycrystalline materials, which exhibit rich heterogeneous microstructure at multiple structure/length scales, and exhibit a wide range of properties. In this study, a novel framework is described for extracting S-P linkages in polycrystalline microstructures that are obtained using 2-point spatial correlations (also called 2-point statistics) to quantify the material's microstructure, and principal component analysis (PCA) to represent this information in a reduced dimensional space. Additionally, it is demonstrated that the use of generalized spherical harmonics (GSH) as a Fourier basis for functions defined on the orientation space leads to a compact and computationally efficient representation of the desired S-P linkages. In this study, these novel protocols are developed and demonstrated for elastic stiffness and yield strength predictions for α− Ti microstructures using a dataset produced through microscale finite element simulations.}
+}
+
+@article{Roters-DAMASK-2019,
+title = {DAMASK – The Düsseldorf Advanced Material Simulation Kit for modeling multi-physics crystal plasticity, thermal, and damage phenomena from the single crystal up to the component scale},
+journal = {Computational Materials Science},
+volume = {158},
+pages = {420-478},
+year = {2019},
+issn = {0927-0256},
+doi = {https://doi.org/10.1016/j.commatsci.2018.04.030},
+url = {https://www.sciencedirect.com/science/article/pii/S0927025618302714},
+author = {F. Roters and M. Diehl and P. Shanthraj and P. Eisenlohr and C. Reuber and S.L. Wong and T. Maiti and A. Ebrahimi and T. Hochrainer and H.-O. Fabritius and S. Nikolov and M. Friák and N. Fujita and N. Grilli and K.G.F. Janssens and N. Jia and P.J.J. Kok and D. Ma and F. Meier and E. Werner and M. Stricker and D. Weygand and D. Raabe},
+keywords = {Crystal plasticity, Simulation, Open source software, Multi-physics},
+abstract = {Crystal Plasticity (CP) modeling is a powerful and well established computational materials science tool to investigate mechanical structure–property relations in crystalline materials. It has been successfully applied to study diverse micromechanical phenomena ranging from strain hardening in single crystals to texture evolution in polycrystalline aggregates. However, when considering the increasingly complex microstructural composition of modern alloys and their exposure to—often harsh—environmental conditions, the focus in materials modeling has shifted towards incorporating more constitutive and internal variable details of the process history and environmental factors into these structure–property relations. Technologically important fields of application of enhanced CP models include phase transformations, hydrogen embrittlement, irradiation damage, fracture, and recrystallization. A number of niche tools, containing multi-physics extensions of the CP method, have been developed to address such topics. Such implementations, while being very useful from a scientific standpoint, are, however, designed for specific applications and substantial efforts are required to extend them into flexible multi-purpose tools for a general end-user community. With the Düsseldorf Advanced Material Simulation Kit (DAMASK) we, therefore, undertake the effort to provide an open, flexible, and easy to use implementation to the scientific community that is highly modular and allows the use and straightforward implementation of different types of constitutive laws and numerical solvers. The internal modular structure of DAMASK follows directly from the hierarchy inherent to the employed continuum description. The highest level handles the partitioning of the prescribed field values on a material point between its underlying microstructural constituents and the subsequent homogenization of the constitutive response of each constituent. The response of each microstructural constituent is determined, at the intermediate level, from the time integration of the underlying constitutive laws for elasticity, plasticity, damage, phase transformation, and heat generation among other coupled multi-physical processes of interest. Various constitutive laws based on evolving internal state variables can be implemented to provide this response at the lowest level. DAMASK already contains various CP-based models to describe metal plasticity as well as constitutive models to incorporate additional effects such as heat production and transfer, damage evolution, and athermal transformations. Furthermore, the implementation of additional constitutive laws and homogenization schemes, as well as the integration of a wide class of suitable boundary and initial value problem solvers, is inherently considered in its modular design.}
+}
+
+
+@article{Micromech-HCP-Mg,
+title = {Beyond initial twin nucleation in hcp metals: Micromechanical formulation for determining twin spacing during deformation},
+journal = {Acta Materialia},
+volume = {133},
+pages = {134-146},
+year = {2017},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2017.05.013},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645417303907},
+author = {YubRaj Paudel and Christopher D. Barrett and Mark A. Tschopp and Kaan Inal and Haitham {El Kadiri}},
+keywords = {HCP, Magnesium alloys, Twinning, Micromechanics},
+abstract = {Capturing twin nucleation in full-field crystal plasticity is a long-standing problem in materials science modeling. Pronounced efforts have been deployed to understand the nucleation event at the atomic level. Yet, it remains very challenging to appropriately scale up the inherently discrete mechanisms to the continuum scale. However, of significant implications for modeling of hardening and damage is not the embryonic/lamellar nucleation of an individual twin per say, but the spacing of the twins and their concomitant interactions with each other and active defects in the lattice. Thus, knowing when and where the next twin would nucleate or grow is certainly of significant consideration to crystal plasticity and would have been perhaps the primary goal of any model which would capture early site-specific nucleation. In this study, we develop an analytical model based on a micromechanical formulation, which is able to pinpoint where a second twin nucleates in an idealistic scenario in a homogeneous material. The model was probed with a three-point bending boundary value problem and predictions were compared to in-situ bending tests of an AZ31 Mg alloy. The alloy was chosen because it exhibited sharp textures which tend to develop twin patterns similar to single crystals. The analytical expression for the stress field was obtained for an ellipsoidal twin in an isotropic half-space. We show that the twin spacing depends primarily upon the height of the twin band, and the stress relaxation from twinning depends primarily upon the thickness of the twin domain. The solution compared well to experimental results.}
+}
+
+@article{Graff-Mg-CP,
+title = {A combined experimental and crystal plasticity study of grain size effects in magnesium alloys},
+journal = {Journal of Magnesium and Alloys},
+volume = {11},
+number = {12},
+pages = {4445-4467},
+year = {2023},
+issn = {2213-9567},
+doi = {https://doi.org/10.1016/j.jma.2023.05.008},
+url = {https://www.sciencedirect.com/science/article/pii/S221395672300107X},
+author = {Aaditya Lakshmanan and Mohsen Taheri Andani and Mohammadreza Yaghoobi and John Allison and Amit Misra and Veera Sundararaghavan},
+keywords = {Hall-Petch, Crystal plasticity, Grain size, Texture, Magnesium alloys},
+abstract = {This work presents a method to incorporate the micro Hall-Petch equation into the crystal plasticity finite element (CPFE) framework accounting for the microstructural features to understand the coupling between grain size, texture, and loading direction in magnesium alloys. The effect of grain size and texture is accounted for by modifying the slip resistances of individual basal and prismatic systems based on the micro Hall-Petch equation. The modification based on the micro Hall-Petch equation endows every slip system at each microstructural point with a slip system-level grain size and maximum compatibility factor, which are in turn used to modify the slip resistance. While the slip-system level grain size is a measure of the grain size, the maximum compatibility factor encodes the effect of the grain boundary on the slip system resistance modification and is computed based on the Luster-Morris factor. The model is calibrated using experimental stress-strain curves of Mg-4Al samples with three different grain sizes from which the Hall-Petch coefficients are extracted and compared with Hall-Petch coefficients predicted using original parameters from previous work. The predictability of the model is then evaluated for a Mg-4Al sample with different texture and three grain sizes subjected to loading in different directions. The calibrated parameters are then used for some parametric studies to investigate the variation of Hall-Petch slope for different degrees of simulated spread in basal texture, variation of Hall-Petch slope with loading direction relative to basal poles for a microstructure with strong basal texture, and variation of yield strength with change in grain morphology. The proposed approach to incorporate the micro Hall-Petch equation into the CPFE framework provides a foundation to quantitatively model more complicated scenarios of coupling between grain size, texture and loading direction in the plasticity of Mg alloys.}
+}
+
+@article{GENERALE2024119877,
+title = {Inverse stochastic microstructure design},
+journal = {Acta Materialia},
+volume = {271},
+pages = {119877},
+year = {2024},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2024.119877},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645424002301},
+author = {Adam P. Generale and Andreas E. Robertson and Conlain Kelly and Surya R. Kalidindi},
+keywords = {Inverse design, Generative modeling, Uncertainty quantification, Bayesian inference, Computational materials design, Microstructure},
+abstract = {Inverse Microstructure Design problems are ubiquitous in materials science; for example, property-driven microstructure design requires the inversion of a structure–property linkage. However, prior frameworks have struggled to address this problem’s unique combination of challenges: the high dimensionality and stochasticity of microstructures, under sampled initial datasets, and ill-conditioning of the inversion. In this work, we propose a computational framework for Inverse Microstructure Design problems using a Bayesian methodology. We construct this framework from three modular components, enabling flexible extension and re-use. First, we define a low-dimensional, informative microstructure prior by integrating domain knowledge (i.e., statistical continuum mechanics) into a distributional learning scheme. This scheme includes multiple latent representations which address the challenges inherent to representing microstructures. Second, we define a property-specific likelihood using a multi-output Gaussian process regression surrogate model. Finally, we efficiently learn the conditional posterior density for a given target property, and generate samples using deep variational inference. We demonstrate our proposed method for solving stochastic microstructure design problems by identifying woven ceramic matrix composites matching target anisotropic thermal conductivities. Through this example, we analyze the integral role of each component in the inversion framework.}
+}
+
+@article{Yang-GAN-microstructure-2018,
+    author = {Yang, Zijiang and Li, Xiaolin and Catherine Brinson, L. and Choudhary, Alok N. and Chen, Wei and Agrawal, Ankit},
+    title = {Microstructural Materials Design Via Deep Adversarial Learning Methodology},
+    journal = {Journal of Mechanical Design},
+    volume = {140},
+    number = {11},
+    pages = {111416},
+    year = {2018},
+    month = {10},
+    abstract = {Identifying the key microstructure representations is crucial for computational materials design (CMD). However, existing microstructure characterization and reconstruction (MCR) techniques have limitations to be applied for microstructural materials design. Some MCR approaches are not applicable for microstructural materials design because no parameters are available to serve as design variables, while others introduce significant information loss in either microstructure representation and/or dimensionality reduction. In this work, we present a deep adversarial learning methodology that overcomes the limitations of existing MCR techniques. In the proposed methodology, generative adversarial networks (GAN) are trained to learn the mapping between latent variables and microstructures. Thereafter, the low-dimensional latent variables serve as design variables, and a Bayesian optimization framework is applied to obtain microstructures with desired material property. Due to the special design of the network architecture, the proposed methodology is able to identify the latent (design) variables with desired dimensionality, as well as capturing complex material microstructural characteristics. The validity of the proposed methodology is tested numerically on a synthetic microstructure dataset and its effectiveness for microstructural materials design is evaluated through a case study of optimizing optical performance for energy absorption. Additional features, such as scalability and transferability, are also demonstrated in this work. In essence, the proposed methodology provides an end-to-end solution for microstructural materials design, in which GAN reduces information loss and preserves more microstructural characteristics, and the GP-Hedge optimization improves the efficiency of design exploration.},
+    issn = {1050-0472},
+    doi = {10.1115/1.4041371},
+    url = {https://doi.org/10.1115/1.4041371},
+    eprint = {https://asmedigitalcollection.asme.org/mechanicaldesign/article-pdf/140/11/111416/6375275/md_140_11_111416.pdf},
+}
+
+
+@article{Metamaterial-InvDesign-2025,
+  author  = {Abu-Mualla, Mohammad and Huang, Jida},
+  title   = {Inverse design of curved mechanical metamaterials with geometric AI: a generative diffusion operates in compact latent space of cellular structures},
+  journal = {npj Metamaterials},
+  year    = {2025},
+  volume  = {1},
+  number  = {1},
+  pages   = {5},
+  doi     = {10.1038/s44455-025-00005-6},
+  url     = {https://doi.org/10.1038/s44455-025-00005-6},
+  issn    = {3059-3727}
+}
+
+@article{Metamaterial-InvDesign-2023,
+  author  = {Ha, Chan Soo and Yao, Desheng and Xu, Zhenpeng and Liu, Chenang and Liu, Han and Elkins, Daniel and Kile, Matthew and Deshpande, Vikram and Kong, Zhenyu and Bauchy, Mathieu and Zheng, Xiaoyu (Rayne)},
+  title   = {Rapid inverse design of metamaterials based on prescribed mechanical behavior through machine learning},
+  journal = {Nature Communications},
+  year    = {2023},
+  volume  = {14},
+  number  = {1},
+  pages   = {5765},
+  doi     = {10.1038/s41467-023-40854-1},
+  url     = {https://doi.org/10.1038/s41467-023-40854-1},
+  issn    = {2041-1723}
+}
+
+@article{HENKES2022115497,
+title = {Three-dimensional microstructure generation using generative adversarial neural networks in the context of continuum micromechanics},
+journal = {Computer Methods in Applied Mechanics and Engineering},
+volume = {400},
+pages = {115497},
+year = {2022},
+issn = {0045-7825},
+doi = {https://doi.org/10.1016/j.cma.2022.115497},
+url = {https://www.sciencedirect.com/science/article/pii/S0045782522005126},
+author = {Alexander Henkes and Henning Wessels},
+keywords = {Artificial neural networks, Generative adversarial networks, Microstructure generation, Full-field homogenization},
+abstract = {Multiscale simulations are demanding in terms of computational resources. In the context of continuum micromechanics, the multiscale problem arises from the need of inferring macroscopic material parameters from the microscale. If the underlying microstructure is explicitly given by means of μCT-scans, convolutional neural networks can be used to learn the microstructure–property mapping, which is usually obtained from computational homogenization. The CNN approach provides a significant speedup, especially in the context of heterogeneous or functionally graded materials. Another application is uncertainty quantification, where many expansive evaluations are required. However, one bottleneck of this approach is the large number of training microstructures needed. This work closes this gap by proposing a generative adversarial network tailored towards three-dimensional microstructure generation. The lightweight algorithm is able to learn the underlying properties of the material from a single μCT-scan without the need of explicit descriptors. During prediction time, the network can produce unique three-dimensional microstructures with the same properties of the original data in a fraction of seconds and at consistently high quality.}
+}
+
+@misc{CDVAE-2022,
+      title={Crystal Diffusion Variational Autoencoder for Periodic Material Generation}, 
+      author={Tian Xie and Xiang Fu and Octavian-Eugen Ganea and Regina Barzilay and Tommi Jaakkola},
+      year={2022},
+      eprint={2110.06197},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2110.06197}, 
+}
+
+@inproceedings{
+DiffCSP,
+title={Crystal Structure Prediction by Joint Equivariant Diffusion},
+author={Rui Jiao and Wenbing Huang and Peijia Lin and Jiaqi Han and Pin Chen and Yutong Lu and Yang Liu},
+booktitle={Thirty-seventh Conference on Neural Information Processing Systems},
+year={2023},
+url={https://openreview.net/forum?id=DNdN26m2Jk}
+}
+
+@misc{MatterGen-2024,
+  author  = {Zeni, Claudio and Pinsler, Robert and Z{\"u}gner, Daniel and Fowler, Andrew and Horton, Matthew and Fu, Xiang and Wang, Zilong and Shysheya, Aliaksandra and Crabb{\'e}, Jonathan and Ueda, Shoko and Sordillo, Roberto and Sun, Lixin and Smith, Jake and Nguyen, Bichlien and Schulz, Hannes and Lewis, Sarah and Huang, Chin-Wei and Lu, Ziheng and Zhou, Yichi and Yang, Han and Hao, Hongxia and Li, Jielan and Yang, Chunlei and Li, Wenjie and Tomioka, Ryota and Xie, Tian},
+  title   = {A generative model for inorganic materials design},
+  journal = {Nature},
+  year    = {2025},
+  volume  = {639},
+  number  = {8055},
+  pages   = {624--632},
+  doi     = {10.1038/s41586-025-08628-5},
+  url     = {https://doi.org/10.1038/s41586-025-08628-5},
+  issn    = {1476-4687}
+}
+
+@article{MIRZAEE2025120704,
+title = {Inverse design of microstructures using conditional continuous normalizing flows},
+journal = {Acta Materialia},
+volume = {285},
+pages = {120704},
+year = {2025},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2024.120704},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645424010528},
+author = {Hossein Mirzaee and Serveh Kamrava},
+keywords = {Microstructure reconstruction, Inverse design, Porous media, Generative AI, Material design and discovery},
+abstract = {Inverse design is a classical mathematical challenge found in various fields, including materials science, where it is essential for property-driven microstructure design. This problem involves the inversion of structure-property linkages, a task complicated by the high dimensionality and stochastic nature of microstructures. Leveraging the advantages of a low-dimensional and meaningful design representation, we aim to develop an efficient data-driven approach for the inverse design of microstructures. Specifically, we propose PoreFlow, a modular framework utilizing continuous normalizing flows (CNFs) for property-based microstructure generation. Our approach regularizes the CNF latent space by introducing target properties as a feature vector. Demonstrating the conditional generation process in our framework, we highlight its capabilities as an end-to-end, high-throughput solution for materials inverse design applications. Through an example of generating 3D images of porous microstructures, we analyze the mechanism through which specified targets effectively guide the generative process in low-dimensional latent space. The model's performance in reconstructing and generating new samples with targeted properties was assessed using visual comparison and statistical measures such as RMSE and R² scores. During reconstruction, we consistently achieved R² scores above 91.5 for all five target properties, while for generation, R² scores remained consistently higher than 0.92. Notably, our methodology avoids common issues such as unstable training and mode collapse, which often plague generative models such as GANs, even with extensive hyperparameter tuning. This framework offers a robust solution for advancing inverse microstructure design.}
+}
+
+@article{VLASSIS2023116126,
+title = {Denoising diffusion algorithm for inverse design of microstructures with fine-tuned nonlinear material properties},
+journal = {Computer Methods in Applied Mechanics and Engineering},
+volume = {413},
+pages = {116126},
+year = {2023},
+issn = {0045-7825},
+doi = {https://doi.org/10.1016/j.cma.2023.116126},
+url = {https://www.sciencedirect.com/science/article/pii/S0045782523002505},
+author = {Nikolaos N. Vlassis and WaiChing Sun},
+keywords = {Denoising diffusion, Inverse design, Latent space, Fine-tuning material properties},
+abstract = {We introduce a denoising diffusion algorithm to discover microstructures with nonlinear fine-tuned properties. Denoising diffusion probabilistic models are generative models that use diffusion-based dynamics to gradually denoise images and generate realistic synthetic samples. By learning the reverse of a Markov diffusion process, we design an artificial intelligence to efficiently manipulate the topology of microstructures to generate a massive number of prototypes that exhibit constitutive responses sufficiently close to designated nonlinear constitutive behaviors. To identify the subset of microcstructures with sufficiently precise fine-tuned properties, a convolutional neural network surrogate is trained to replace high-fidelity finite element simulations to filter out prototypes outside the admissible range. Results of this study indicate that the denoising diffusion process is capable of creating microstructures of fine-tuned nonlinear material properties within the latent space of the training data. More importantly, this denoising diffusion algorithm can be easily extended to incorporate additional topological and geometric modifications by introducing high-dimensional structures embedded in the latent space. Numerical experiments are conducted on the open-source mechanical MNIST data set (Lejeune, 2020). Consequently, this algorithm is not only capable of performing inverse design of nonlinear effective media, but also learns the nonlinear structure–property map to quantitatively understand the multiscale interplay among the geometry, topology, and their effective macroscopic properties.}
+}
+
+%% ---- Real entries reused from the Co-PiLOT (NeurIPS) references.bib ----
+@article{readshockley1950,
+  title   = {Dislocation Models of Crystal Grain Boundaries},
+  author  = {Read, W. T. and Shockley, W.},
+  journal = {Phys. Rev.},
+  volume  = {78},
+  issue   = {3},
+  pages   = {275--289},
+  year    = {1950},
+  month   = {May},
+  publisher = {American Physical Society},
+  doi     = {10.1103/PhysRev.78.275},
+  url     = {https://link.aps.org/doi/10.1103/PhysRev.78.275}
+}
+
+@article{groeber2014,
+  author  = {Groeber, Michael and Jackson, Michael},
+  year    = {2014},
+  pages   = {5},
+  title   = {DREAM.3D: A Digital Representation Environment for the Analysis of Microstructure in 3D},
+  volume  = {3},
+  journal = {Integrating Materials and Manufacturing Innovation},
+  doi     = {10.1186/2193-9772-3-5}
+}
+
+@article{gomez2018,
+  author    = {G{\'o}mez-Bombarelli, Rafael and Wei, Jennifer N. and Duvenaud, David and Hern{\'a}ndez-Lobato, Jos{\'e} Miguel and S{\'a}nchez-Lengeling, Benjam{\'i}n and Sheberla, Dennis and Aguilera-Iparraguirre, Jorge and Hirzel, Timothy D. and Adams, Ryan P. and Aspuru-Guzik, Al{\'a}n},
+  title     = {Automatic Chemical Design Using a Data-Driven Continuous Representation of Molecules},
+  journal   = {ACS Central Science},
+  year      = {2018},
+  volume    = {4},
+  number    = {2},
+  pages     = {268--276},
+  publisher = {American Chemical Society},
+  doi       = {10.1021/acscentsci.7b00572},
+  url       = {https://doi.org/10.1021/acscentsci.7b00572},
+  issn      = {2374-7943}
+}
+
+@article{cang2018,
+title = {Improving direct physical properties prediction of heterogeneous materials from imaging data via convolutional neural network and a morphology-aware generative model},
+journal = {Computational Materials Science},
+volume = {150},
+pages = {212-221},
+year = {2018},
+issn = {0927-0256},
+doi = {https://doi.org/10.1016/j.commatsci.2018.03.074},
+url = {https://www.sciencedirect.com/science/article/pii/S0927025618302337},
+author = {Ruijin Cang and Hechao Li and Hope Yao and Yang Jiao and Yi Ren},
+keywords = {Structure-property mapping, Integrated computational material engineering, Deep learning, Generative models},
+abstract = {Direct prediction of material properties from microstructures through statistical models has shown to be a potential approach to accelerating computational material design with large design spaces. However, statistical modeling of highly nonlinear mappings defined on high-dimensional microstructure spaces is known to be data-demanding. Thus, the added value of such predictive models diminishes in common cases where material samples (in forms of 2D or 3D microstructures) become costly to acquire either experimentally or computationally. To this end, we propose a generative machine learning model that creates an arbitrary amount of artificial material samples with negligible computation cost, when trained on only a limited amount of authentic samples. The key contribution of this work is the introduction of a morphology constraint to the training of the generative model, that enforces the resultant artificial material samples to have the same morphology distribution as the authentic ones. We show empirically that the proposed model creates artificial samples that better match with the authentic ones in material property distributions than those generated from a state-of-the-art Markov Random Field model, and thus is more effective at improving the prediction performance of a predictive structure-property model.}
+}
+
+@article{ActaMg2014,
+title = {In situ observation of collective grain-scale mechanics in Mg and Mg–rare earth alloys},
+journal = {Acta Materialia},
+volume = {80},
+pages = {77-93},
+year = {2014},
+issn = {1359-6454},
+doi = {https://doi.org/10.1016/j.actamat.2014.07.048},
+url = {https://www.sciencedirect.com/science/article/pii/S1359645414005667},
+author = {F. Wang and S. Sandlöbes and M. Diehl and L. Sharma and F. Roters and D. Raabe},
+keywords = {Magnesium, Shear banding, Deformation twinning, Electron channelling contrast imaging, Crystal plasticity modelling},
+abstract = {The microstructure evolution of pure Mg and two Mg–rare-earth alloys (Mg–3wt.% Dy and Mg–3wt.% Er) was studied during in situ compression tests by electron backscatter diffraction and electron channelling contrast imaging. Strain localization and the formation of an early stage shear band (“pre-shear band”) were observed in pure Mg during compressive deformation below 5% engineering strain. In the experiments percolative grain clusters with prevalent basal slip as a precursor for shear band formation was observed. This collective grain-cluster shear behaviour was analysed in more detail using crystal plasticity simulations, revealing a percolation of intense basal slip activity across grain boundaries as the mechanism for shear band initiation. Plane trace analysis, Schmid factor calculation and deformation transfer analysis at the grain boundaries were performed for the activated twins. It appears that many activated tension twins exhibit pronounced non-Schmid behaviour. Twinning appears to be a process of accommodating local strain rather than a response to macroscopic strain.}
+}

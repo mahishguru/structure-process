@@ -21,8 +21,9 @@ import pandas as pd
 COMPOSITION_SCALAR = (
     "element_wape_present", "element_wape_all", "element_mae_macro",
     "macro_false_positive_rate", "alloy_top1", "alloy_top3", "class_nll")
-PROCESS_TARGETS = ("T_ext", "v_ext")
-PROCESS_SCALAR = ("mae", "mape", "wape", "r2", "nll", "coverage90")
+PROCESS_TARGETS = ("T_ext", "v_ext", "log_v_ext")
+PROCESS_SCALAR = ("mae", "mape", "wape", "r2", "rmse", "fold_error",
+                 "nll", "coverage90")
 
 
 def collect(runs_root: Path):

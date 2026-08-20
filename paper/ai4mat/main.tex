@@ -67,7 +67,8 @@ over the catalogue of observed processing conditions. Under condition-grouped
 handcrafted descriptors with an out-of-fold-constrained reranker identify
 composition with 13.6\% element WAPE and 0.65 alloy top-1, while a correlated
 Gaussian process decoded on the observed process grid predicts extrusion
-velocity best on all three representations (49.9\% MAPE). The vision
+velocity best on all three representations (48.7\% MAPE, a typical
+multiplicative error of 1.53$\times$ in log space). The vision
 embedding, despite its 2.5B-parameter lineage, is the least compatible
 descriptor for this task. Our results argue that on sparse experimental data,
 matching the prediction head to the discrete label structure matters more
@@ -130,8 +131,9 @@ respect or ignore the discrete label structure. The headline findings:
   present-element WAPE and 0.65 alloy top-1; the 1280-D vision
   embedding is three times worse, and the 128-D graph embedding worse still.
   \item \textbf{The process window is a catalogue, not a continuum.} Decoding
-  a correlated Gaussian process over the grid of observed training conditions
-  beats continuous regression on velocity for every representation.
+  a correlated Gaussian process over the grid of observed training conditions,
+  in both temperature and speed, beats continuous regression on velocity for
+  every representation and on every metric we report, raw and log-scale.
   \item \textbf{Selection must be honest to be believed.} The winning head is
   chosen by out-of-fold constraints on all-element WAPE and false-positive
   rate, because the headline metric alone is silently gameable.
@@ -348,12 +350,20 @@ component analysis}\needref{ARD / automatic relevance determination}.
 $(\Text, \log \vext)$ with an intrinsic task-correlation model, whose posterior
 at a query is decoded by minimum-risk selection over the discrete grid of
 observed training pairs rather than read off continuously \needref{Bayesian
-decision theory / minimum-risk decoding}; for velocity, a
-log-space GP is blended with an ordinal classifier over observed velocity
-levels, the blend selected on training out-of-fold predictions under safety
-constraints that forbid degrading the pure-GP fallback \needref{ordinal
+decision theory / minimum-risk decoding}. The same catalogue constraint is
+applied to the velocity axis: extrusion speed is set from a short menu of press
+settings, so a value falling between two settings is never a possible answer,
+and the continuous estimate is snapped onto the observed velocity levels,
+nearest in log space. Which continuous estimate feeds that snap is chosen on
+training out-of-fold predictions: a bounded log-space GP, optionally blended
+with an ordinal classifier over velocity levels or with the posterior median
+over the grid, under safety constraints that forbid degrading the plain snapped
+log-GP fallback \needref{ordinal
 classification via cumulative link / Frank \& Hall}\needref{conformal /
-distribution-free uncertainty, optional}. Features are an
+distribution-free uncertainty, optional}. The selection is ranked in log space,
+the scale on which the head models velocity throughout; raw relative error is
+dominated by the slowest recipes and is far noisier over the roughly 85
+training conditions available to the inner search. Features are an
 RBF-sampled condition-distribution embedding blended with the known-composition
 kernel \needref{intrinsic coregionalization model / multi-task
 GP}\needref{random Fourier features, Rahimi \& Recht}\needref{distribution
@@ -402,42 +412,56 @@ compatible with composition inference.
 \end{table}
 
 \paragraph{Task B: process.} Table~\ref{tab:process} shows the mirror task.
-The joint-grid GP wins velocity on all three representations (MAPE 49.9, 50.0,
-53.3\% against a 136.5\% constant-predictor floor) and temperature on
-conventional and vision; the gnn trees take temperature R$^2$ (0.443). The plain
-continuous GP collapses on velocity (MAPE 95-120\%, R$^2 \leq 0.08$): the
-improvement comes from decoding on the observed grid, not from the GP itself.
+The joint-grid GP wins velocity on every metric and every representation (MAPE
+48.7, 49.6, 51.4\% against a 136.5\% constant-predictor floor) and temperature
+on conventional and vision; the gnn trees take temperature R$^2$ (0.443). The
+plain continuous GP collapses on velocity (MAPE 95-120\%, R$^2 \leq 0.08$):
+the improvement comes from decoding on the observed grid, not from the GP
+itself.
 This is the process-side analogue of the composition lattice: with roughly 70
 training conditions per fold, the process label is better treated as a small
 catalogue than as a continuum.
 
+\paragraph{Velocity is a log-scale quantity.} Extrusion speed spans 0.5 to
+7.5\,mm/s over eleven distinct settings, so raw MAE flatters a head that simply
+predicts near the middle of the range and MAPE punishes it only at the slow end.
+We therefore also report error in log space, where a fixed error means a fixed
+multiplicative factor everywhere on the range. The picture is consistent with
+the raw numbers but sharper: the joint-grid GP reaches a log MAE of 0.42-0.45
+across the three representations, a typical multiplicative error of about
+1.53-1.58$\times$, against 0.63-0.75 (1.88-2.17$\times$) for the continuous GP.
+Only in log space is the continuous GP's failure fully visible, with negative
+R$^2$ on two of three representations: it is not merely imprecise, it is worse
+than predicting the training mean speed.
+
 \begin{table}[t]
   \caption{Task B, process given known composition. 5-fold cross-validation,
   mean over held-out condition groups (std in
-  Table~\ref{tab:app_process}). MAE in °C ($\Text$) or mm/s ($\vext$). Best
+  Table~\ref{tab:app_process}). MAE in °C ($\Text$) or mm/s ($\vext$); log MAE
+  is the velocity error in natural-log space, undefined for $\Text$. Best
   value per representation block in bold.}
   \label{tab:process}
   \centering\small
-  \begin{tabularx}{\linewidth}{@{}lllXXX@{}}
+  \begin{tabularx}{\linewidth}{@{}lllXXXX@{}}
     \toprule
-    repr. & head & target & MAE & MAPE (\%) & R$^2$ \\
+    repr. & head & target & MAE & MAPE (\%) & log MAE & R$^2$ \\
     \midrule
     \multirow{6}{*}{conv.}
-      & trees & $\Text$ & 41.6 & 11.9 & 0.349 \\
-      & ARD GP & $\Text$ & 52.1 & 15.2 & 0.039 \\
-      & joint-grid GP & $\Text$ & \textbf{38.1} & \textbf{10.9} & 0.326 \\
-      \cmidrule(l){2-6}
-      & trees & $\vext$ & 1.34 & 64.5 & 0.281 \\
-      & ARD GP & $\vext$ & 1.71 & 104.7 & $-$0.240 \\
-      & joint-grid GP & $\vext$ & \textbf{1.05} & \textbf{49.9} & \textbf{0.535} \\
+      & trees & $\Text$ & 41.6 & 11.9 & -- & 0.349 \\
+      & ARD GP & $\Text$ & 52.1 & 15.2 & -- & 0.039 \\
+      & joint-grid GP & $\Text$ & \textbf{38.1} & \textbf{10.9} & -- & 0.326 \\
+      \cmidrule(l){2-7}
+      & trees & $\vext$ & 1.34 & 64.5 & 0.580 & 0.280 \\
+      & ARD GP & $\vext$ & 1.71 & 104.7 & 0.751 & $-$0.240 \\
+      & joint-grid GP & $\vext$ & \textbf{0.98} & \textbf{48.7} & \textbf{0.420} & \textbf{0.549} \\
     \midrule
     \multirow{2}{*}{vision}
-      & joint-grid GP & $\Text$ & \textbf{35.2} & \textbf{10.5} & \textbf{0.367} \\
-      & joint-grid GP & $\vext$ & \textbf{1.12} & \textbf{50.0} & \textbf{0.447} \\
+      & joint-grid GP & $\Text$ & \textbf{35.2} & \textbf{10.5} & -- & \textbf{0.367} \\
+      & joint-grid GP & $\vext$ & \textbf{1.10} & \textbf{49.6} & \textbf{0.450} & \textbf{0.414} \\
     \midrule
     \multirow{2}{*}{gnn}
-      & trees & $\Text$ & 36.5 & 10.7 & \textbf{0.443} \\
-      & joint-grid GP & $\vext$ & \textbf{1.12} & \textbf{53.3} & 0.473 \\
+      & trees & $\Text$ & 36.5 & 10.7 & -- & \textbf{0.443} \\
+      & joint-grid GP & $\vext$ & \textbf{1.01} & \textbf{51.4} & \textbf{0.443} & \textbf{0.542} \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -498,33 +522,47 @@ stored raw per-fold predictions.
 \end{table}
 
 \begin{table}[t]
-  \caption{Task B, full 5-fold statistics (mean $\pm$ std).}
+  \caption{Task B, full 5-fold statistics (mean $\pm$ std). $\log\vext$ rows
+  score the same predictions in natural-log space; MAPE and WAPE are omitted
+  there because $\log\vext$ crosses zero inside the observed range, which makes
+  relative error undefined. The multiplicative counterpart of the log MAE,
+  $\exp(\mathrm{MAE})$, is given instead: 1.53 means the typical prediction is
+  off by a factor of 1.53.}
   \label{tab:app_process}
   \centering\small
   \begin{tabularx}{\linewidth}{@{}lllXXX@{}}
     \toprule
-    repr. & head & target & MAE & MAPE (\%) & R$^2$ \\
+    repr. & head & target & MAE & MAPE (\%) or $\exp(\mathrm{MAE})$ & R$^2$ \\
     \midrule
-    conv. & trees & $\Text$ & 41.6 & $11.9 \pm 2.3$ & 0.349 \\
-    conv. & ARD GP & $\Text$ & 52.1 & $15.2 \pm 2.0$ & 0.039 \\
-    conv. & joint-grid GP & $\Text$ & 38.1 & $10.9 \pm 1.1$ & 0.326 \\
-    conv. & trees & $\vext$ & 1.34 & $64.5 \pm 15.5$ & 0.281 \\
-    conv. & ARD GP & $\vext$ & 1.71 & $104.7 \pm 40.9$ & $-$0.240 \\
-    conv. & joint-grid GP & $\vext$ & 1.05 & $49.9 \pm 14.5$ & 0.535 \\
+    conv. & trees & $\Text$ & $41.6 \pm 10.5$ & $11.9 \pm 2.3$ & 0.349 \\
+    conv. & ARD GP & $\Text$ & $52.1 \pm 6.9$ & $15.2 \pm 2.0$ & 0.039 \\
+    conv. & joint-grid GP & $\Text$ & $38.1 \pm 5.6$ & $10.9 \pm 1.1$ & 0.326 \\
+    conv. & trees & $\vext$ & $1.34 \pm 0.33$ & $64.5 \pm 15.6$ & 0.280 \\
+    conv. & ARD GP & $\vext$ & $1.71 \pm 0.21$ & $104.7 \pm 40.9$ & $-$0.240 \\
+    conv. & joint-grid GP & $\vext$ & $0.98 \pm 0.19$ & $48.7 \pm 12.4$ & 0.549 \\
+    conv. & trees & $\log\vext$ & $0.580 \pm 0.069$ & 1.79 & 0.418 \\
+    conv. & ARD GP & $\log\vext$ & $0.751 \pm 0.138$ & 2.14 & $-$0.101 \\
+    conv. & joint-grid GP & $\log\vext$ & $0.420 \pm 0.083$ & 1.53 & 0.632 \\
     \midrule
-    vision & trees & $\Text$ & 39.2 & $11.4 \pm 1.9$ & 0.391 \\
-    vision & ARD GP & $\Text$ & 72.1 & $19.9 \pm 3.4$ & $-$0.813 \\
-    vision & joint-grid GP & $\Text$ & 35.2 & $10.5 \pm 1.4$ & 0.367 \\
-    vision & trees & $\vext$ & 1.22 & $55.9 \pm 10.7$ & 0.409 \\
-    vision & ARD GP & $\vext$ & 1.76 & $120.5 \pm 57.2$ & $-$0.200 \\
-    vision & joint-grid GP & $\vext$ & 1.12 & $50.0 \pm 12.2$ & 0.447 \\
+    vision & trees & $\Text$ & $39.2 \pm 10.1$ & $11.4 \pm 1.9$ & 0.391 \\
+    vision & ARD GP & $\Text$ & $72.1 \pm 18.0$ & $19.9 \pm 3.4$ & $-$0.813 \\
+    vision & joint-grid GP & $\Text$ & $35.2 \pm 7.3$ & $10.5 \pm 1.4$ & 0.367 \\
+    vision & trees & $\vext$ & $1.22 \pm 0.32$ & $55.9 \pm 10.7$ & 0.409 \\
+    vision & ARD GP & $\vext$ & $1.76 \pm 0.53$ & $120.5 \pm 57.2$ & $-$0.200 \\
+    vision & joint-grid GP & $\vext$ & $1.10 \pm 0.24$ & $49.6 \pm 14.5$ & 0.414 \\
+    vision & trees & $\log\vext$ & $0.491 \pm 0.051$ & 1.63 & 0.548 \\
+    vision & ARD GP & $\log\vext$ & $0.742 \pm 0.279$ & 2.17 & $-$0.057 \\
+    vision & joint-grid GP & $\log\vext$ & $0.450 \pm 0.109$ & 1.58 & 0.577 \\
     \midrule
-    gnn & trees & $\Text$ & 36.5 & $10.7 \pm 2.2$ & 0.443 \\
-    gnn & ARD GP & $\Text$ & 49.5 & $14.7 \pm 3.1$ & 0.084 \\
-    gnn & joint-grid GP & $\Text$ & 36.6 & $10.8 \pm 1.9$ & 0.357 \\
-    gnn & trees & $\vext$ & 1.11 & $56.0 \pm 16.8$ & 0.525 \\
-    gnn & ARD GP & $\vext$ & 1.44 & $94.5 \pm 38.8$ & 0.012 \\
-    gnn & joint-grid GP & $\vext$ & 1.12 & $53.3 \pm 11.6$ & 0.473 \\
+    gnn & trees & $\Text$ & $36.5 \pm 10.1$ & $10.7 \pm 2.2$ & 0.443 \\
+    gnn & ARD GP & $\Text$ & $49.5 \pm 8.9$ & $14.7 \pm 3.1$ & 0.084 \\
+    gnn & joint-grid GP & $\Text$ & $36.6 \pm 7.8$ & $10.8 \pm 1.9$ & 0.357 \\
+    gnn & trees & $\vext$ & $1.11 \pm 0.33$ & $56.0 \pm 16.8$ & 0.525 \\
+    gnn & ARD GP & $\vext$ & $1.44 \pm 0.16$ & $94.5 \pm 38.8$ & 0.012 \\
+    gnn & joint-grid GP & $\vext$ & $1.01 \pm 0.26$ & $51.4 \pm 13.9$ & 0.542 \\
+    gnn & trees & $\log\vext$ & $0.475 \pm 0.085$ & 1.61 & 0.557 \\
+    gnn & ARD GP & $\log\vext$ & $0.626 \pm 0.112$ & 1.88 & 0.123 \\
+    gnn & joint-grid GP & $\log\vext$ & $0.443 \pm 0.059$ & 1.56 & 0.568 \\
     \bottomrule
   \end{tabularx}
 \end{table}

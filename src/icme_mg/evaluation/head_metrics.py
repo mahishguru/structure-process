@@ -135,7 +135,31 @@ def condition_level_process_metrics(prediction: np.ndarray, conditions,
             "r2": float(1 - np.square(residual).sum()
                         / max(ss_total, 1e-12)),
         }
+    output["log_v_ext"] = log_velocity_metrics(truth[:, 1], prediction[:, 1])
     return output
+
+
+def log_velocity_metrics(truth: np.ndarray, prediction: np.ndarray) -> dict:
+    """Velocity error in log space, where the extrusion speeds actually live.
+
+    Relative metrics are deliberately absent: log(v_ext) crosses zero inside
+    the observed 0.5-7.5 mm/s range, so MAPE and WAPE are undefined there.
+    `fold_error` = exp(MAE) is the multiplicative counterpart of the log MAE:
+    a value of 1.5 means the typical prediction is off by a factor of 1.5.
+    """
+    truth = np.log(np.maximum(truth, 1e-8))
+    prediction = np.log(np.maximum(prediction, 1e-8))
+    residual = truth - prediction
+    ss_total = np.square(truth - truth.mean()).sum()
+    mae = float(np.abs(residual).mean())
+    return {
+        "mae": mae,
+        "rmse": float(np.sqrt(np.square(residual).mean())),
+        "r2": float(1 - np.square(residual).sum() / max(ss_total, 1e-12)),
+        "fold_error": float(np.exp(mae)),
+        "mape": None,
+        "wape": None,
+    }
 
 
 def gaussian_uncertainty(truth: np.ndarray, mean: np.ndarray,

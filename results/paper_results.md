@@ -14,7 +14,8 @@ structural prior and one winner.
     predictions under all-element WAPE and false-positive guard constraints.
 (2) Process is a discrete catalogue of observed (T_ext, v_ext) pairs. The
     winning head decodes a joint correlated GP over that observed grid
-    (T_ext) and an OOF-constrained log-GP/ordinal blend (v_ext) instead of
+    (T_ext) and an OOF-constrained log-GP/ordinal blend snapped onto the
+    observed velocity levels (v_ext) instead of
     regressing continuously.
 (3) The winning representation is conventional descriptors for composition and
     is split across representations for the process window.
@@ -74,13 +75,63 @@ two targets: a constant train-mean predictor scores 14.5% on T_ext against
 | Gradient-boosted trees | T_ext | 41.6 | 11.9% | 0.349 | 39.2 | 11.4% | 0.391 | 36.5 | 10.7% | 0.443 |
 | Gaussian process (ARD) | T_ext | 52.1 | 15.2% | 0.039 | 72.1 | 19.9% | -0.813 | 49.5 | 14.7% | 0.084 |
 | Joint-grid GP | T_ext | 38.1 | 10.9% | 0.326 | **35.2** | **10.5%** | 0.367 | 36.6 | 10.8% | 0.357 |
-| Gradient-boosted trees | v_ext | 1.34 | 64.5% | 0.281 | 1.22 | 55.9% | 0.409 | 1.11 | 56.0% | 0.525 |
+| Gradient-boosted trees | v_ext | 1.34 | 64.5% | 0.280 | 1.22 | 55.9% | 0.409 | 1.11 | 56.0% | 0.525 |
 | Gaussian process (ARD) | v_ext | 1.71 | 104.7% | -0.240 | 1.76 | 120.5% | -0.200 | 1.44 | 94.5% | 0.012 |
-| Joint-grid GP | v_ext | **1.05** | **49.9%** | **0.535** | **1.12** | **50.0%** | 0.447 | **1.12** | **53.3%** | 0.473 |
+| Joint-grid GP | v_ext | **0.98** | **48.7%** | **0.549** | **1.10** | **49.6%** | **0.414** | **1.01** | **51.4%** | **0.542** |
 
 The joint-grid GP wins v_ext on all three representations and T_ext on
 conventional and vision; the gnn trees edge it on T_ext R2 (0.443). The grid
 decode is what wins the discrete velocity task, exactly as designed.
+
+### Table 3c: Velocity scored in log space
+
+Extrusion speed spans 0.5-7.5 mm/s over eleven distinct press settings, so raw
+MAE flatters a head that predicts near the middle of the range. In log space a
+fixed error is a fixed multiplicative factor everywhere. MAPE and WAPE are
+omitted because log(v_ext) crosses zero inside the observed range. fold =
+exp(MAE) is the multiplicative counterpart: 1.53 means the typical prediction
+is off by a factor of 1.53.
+
+| head | conv MAE | conv fold | conv R2 | vision MAE | vision fold | vision R2 | gnn MAE | gnn fold | gnn R2 |
+|---|---|---|---|---|---|---|---|---|---|
+| Gradient-boosted trees | 0.580 | 1.79 | 0.418 | 0.491 | 1.63 | 0.548 | 0.475 | 1.61 | 0.557 |
+| Gaussian process (ARD) | 0.751 | 2.14 | -0.101 | 0.742 | 2.17 | -0.057 | 0.626 | 1.88 | 0.123 |
+| Joint-grid GP | **0.420** | **1.53** | **0.632** | **0.450** | **1.58** | **0.577** | **0.443** | **1.56** | **0.568** |
+
+Only in log space is the ARD GP's failure fully visible: negative R2 on two of
+three representations, i.e. worse than predicting the training mean speed.
+
+### What changed in the velocity decoder
+
+The velocity axis now carries the same observed-catalogue constraint that the
+temperature axis always had. The continuous estimate is snapped onto the
+observed velocity levels, nearest in log space, because extrusion speed is set
+from a short menu of press settings and a value between two settings is never a
+possible answer. The snap is a fixed modelling decision, not a searched
+hyperparameter; only the continuous estimate that feeds it (log-GP, or a blend
+with the ordinal classifier or the grid posterior median) is chosen on training
+OOF predictions, ranked by log-space MAE rather than raw MAPE. Effect on the
+5-fold means:
+
+| repr | MAE | MAPE | WAPE | R2 | log MAE |
+|---|---|---|---|---|---|
+| conv | 1.050 -> 0.976 | 49.9 -> 48.7 | 42.1 -> 39.4 | 0.535 -> 0.549 | 0.437 -> 0.420 |
+| vision | 1.118 -> 1.099 | 50.0 -> 49.6 | 45.1 -> 44.5 | 0.447 -> 0.414 | 0.465 -> 0.450 |
+| gnn | 1.124 -> 1.012 | 53.3 -> 51.4 | 45.1 -> 40.5 | 0.473 -> 0.542 | 0.474 -> 0.443 |
+
+MAE, MAPE, WAPE and log MAE improve on all three representations, and the
+joint-grid GP now beats the trees on every velocity metric everywhere (before,
+gnn trees held v_ext MAE 1.11 against 1.12). Vision R2 falls, the one
+regression: snapping converts a few near-misses on the fastest recipes into
+larger squared errors, which only R2 penalises.
+
+What did not work, and was rejected: a hard argmin over observed (T, v) pairs
+(improves MAPE, degrades MAE/WAPE/R2 everywhere); an alloy-conditioned
+catalogue prior (the known-composition kernel already carries alloy identity);
+isotonic recalibration (OOF MAE 0.905 against test 1.030, i.e. it wins any OOF
+selection and loses on test); and wider feature-map sweeps over
+pca_components, known_weight and gp_noise (defaults best or tied everywhere,
+including for the 1280-D vision latents).
 
 ## Calibration and uncertainty
 
@@ -96,8 +147,8 @@ decode is what wins the discrete velocity task, exactly as designed.
 
 Conventional descriptors win composition outright (WAPE 13.6% against 41.6%
 vision and 44.2% gnn). The process window splits: vision grid-GP is the sharpest
-on T_ext (35.2 C), conventional grid-GP the best on v_ext (1.05 mm/s, R2
-0.535), and gnn the best-calibrated. This is sharper than the earlier
+on T_ext (35.2 C), conventional grid-GP the best on v_ext (0.98 mm/s, R2
+0.549), and gnn the best-calibrated. This is sharper than the earlier
 "complementary halves" reading: the composition side is decisively conventional.
 
 ## Method notes
