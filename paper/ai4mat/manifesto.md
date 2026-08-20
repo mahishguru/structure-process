@@ -47,8 +47,8 @@ the Messiness of Real Experiments". Our messiness is concrete:
   guard metrics travel with it.
 
 Also touch the "Scaling Laws for Materials Reasoning" session question with a
-direct empirical answer for this task: foundation-model latents (1280-D,
-2.5B-parameter lineage) and learned graph embeddings do not beat 438-D
+direct empirical answer for this task: the vision embedding (1280-D,
+2.5B-parameter lineage) and the learned graph embedding do not beat 438-D
 handcrafted statistics; aligning the prediction head with the discrete label
 structure matters more than scaling the representation.
 
@@ -67,7 +67,7 @@ structure matters more than scaling the representation.
    regression loses.
 5. Descriptor compatibility is the representation finding: handcrafted
    microstructure/texture statistics are the most compatible with recipe
-   inference at this data scale; the generative latent is the least.
+   inference at this data scale; the vision embedding is the least.
 6. Evaluation honesty is a contribution, not a footnote: condition-grouped
    5-fold CV, all-element WAPE and false-positive guards next to the headline
    WAPE, selection on training out-of-fold predictions only.
@@ -77,11 +77,11 @@ structure matters more than scaling the representation.
 - Composition, conventional + OOF-constrained reranker: WAPE 13.6 +/- 4.1%,
   all-WAPE 19.7%, FP 1.1%, top-1 0.646 +/- 0.051. Beats the balanced-fusion
   comparator (16.8 +/- 5.8%, top-1 0.612) on every metric.
-- The reranker only helps on conventional: on genai/gnn the OOF selection
+- The reranker only helps on conventional: on vision/gnn the OOF selection
   picks owner weight 1.0 on 8 of 10 folds, i.e. the learned-representation
   auxiliaries carry no complementary signal.
-- Process, joint-grid GP: v_ext MAPE 49.9 / 50.0 / 53.3% (conv/genai/gnn),
-  best on all three; conv v_ext R2 0.535. T_ext MAE 38.1 C conv, 35.2 C genai.
+- Process, joint-grid GP: v_ext MAPE 49.9 / 50.0 / 53.3% (conv/vision/gnn),
+  best on all three; conv v_ext R2 0.535. T_ext MAE 38.1 C conv, 35.2 C vision.
 - The plain ARD GP collapses on v_ext (MAPE 95-120%, R2 <= 0.08): the grid
   decode, not the GP itself, is the win.
 - Calibration caveat: grid-GP coverage90 is around 0.5, below the 0.90
@@ -93,6 +93,9 @@ structure matters more than scaling the representation.
   paper, not the dense main-track style.
 - No em dashes.
 - Title poses the question.
+- The genai branch is called the "vision embedding" everywhere (prose and
+  table labels); never "genai", "generative latent", or "foundation-model
+  latent" as a branch name.
 - References: red placeholders only, `\needref{topic}` renders
   [REF: topic] in red; the author wires the real bibliography manually.
   Exception: the two self-references (Acta 2025 published, NeurIPS 2026 under
@@ -108,4 +111,5 @@ structure matters more than scaling the representation.
 - paper/ai4mat/manifesto.md (this file)
 - paper/ai4mat/skeleton.md (section plan, page budget, figure map)
 - paper/ai4mat/main.tex (the paper)
-- paper/ai4mat/figures/ (fig1_missing_leg, fig2_pipeline, fig3_gnn)
+- paper/ai4mat/figures/ (fig1_missing_leg, fig2_pipeline, fig3_gnn,
+  fig_vision_embedding)

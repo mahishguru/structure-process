@@ -26,9 +26,9 @@ representation does not help at this data scale.
 |---|---|---:|---|
 | 1 | Introduction | 1.25 | Fig 1 (missing leg). The question. Why provenance matters for automated characterization and QC in self-driving labs. Contributions list (4 bullets). |
 | 2 | Data: sparse by construction | 1.0 | 107 conditions, 14 alloys, 8-element lattice, OM + XRD texture. Sparsity along both axes; family-confounded process sub-grids. Two symmetric tasks A/B with known-other-half conditioning. Leakage audit: image-random split memorizes (100% top-1), condition-grouped 5-fold CV is the protocol. |
-| 3 | Three ways to describe a microstructure | 1.25 | Fig 2 (pipeline). Conventional 438-D statistics (3-point correlations, Gram matrices, size/shape, GSH texture). GenAI 1280-D frozen ViT-H + MMDiT latent (2 paragraphs, pointer to companion paper, no architecture deep-dive). GNN 128-D grain-graph embedding (1 paragraph, Fig 3 detail in appendix). Frame as descriptor compatibility question. |
+| 3 | Three ways to describe a microstructure | 1.25 | Fig 2 (pipeline). Conventional 438-D statistics (3-point correlations, Gram matrices, size/shape, GSH texture). Vision embedding 1280-D, frozen ViT-H + MMDiT latent (2 paragraphs + Fig vision, pointer to companion paper, no architecture deep-dive). GNN 128-D grain-graph embedding (1 paragraph, Fig 3 detail in appendix). Frame as descriptor compatibility question. |
 | 4 | Heads that match the label space | 1.25 | Composition is classification over the 14-alloy lattice: kNN retrieval, condition-balanced CatBoost+kNN fusion, OOF-constrained reranker (blend owner with descriptor-block logistics, weight from training OOF under all-WAPE + FP guards). Process is catalogue decoding: trees and ARD GP baselines, joint correlated GP decoded on the observed (T, v) grid + OOF-constrained ordinal velocity. Metrics: WAPE (present-element), all-WAPE + FP guards, MAE/MAPE/R2, coverage90. |
-| 5 | Results | 1.75 | Table 1 (composition) + Table 2 (process). Finding 1: reranker wins composition on conventional, 13.6% WAPE, and only there. Finding 2: grid decode wins v_ext everywhere, T_ext on conv/genai. Finding 3: representation order is conventional >> genai ~ gnn for composition; process is split. Finding 4: guard metrics expose presence-gaming (one short paragraph, the LMNN/hurdle lesson). Calibration honesty paragraph. |
+| 5 | Results | 1.75 | Table 1 (composition) + Table 2 (process). Finding 1: reranker wins composition on conventional, 13.6% WAPE, and only there. Finding 2: grid decode wins v_ext everywhere, T_ext on conv/vision. Finding 3: representation order is conventional >> vision ~ gnn for composition; process is split. Finding 4: guard metrics expose presence-gaming (one short paragraph, the LMNN/hurdle lesson). Calibration honesty paragraph. |
 | 6 | What this means for messy real data | 0.75 | Scaling answer for this task. Descriptor compatibility as the selection criterion. What a self-driving lab should measure first (cheap OM + XRD already suffice for recipe-level provenance). Limitations: 14 alloys closed set, under-dispersed grid-GP intervals, encoder frozen per fold. |
 | 7 | Conclusion | 0.25 | Restate the question and the answer in two sentences. |
 | A | Appendix | unlim | GNN detail (Fig 3), per-fold tables, selection audit, hyperparameters, leakage diagnostic, full guard-metric table. |
@@ -39,7 +39,8 @@ representation does not help at this data scale.
 |---|---|---|---|
 | 1 | figures/fig1_missing_leg.png | S1, top | The loop with the missing leg; pose the question visually. |
 | 2 | figures/fig2_pipeline.png | S3 | Three descriptor branches into shared heads; lattice classification + GP regression. |
-| 3 | figures/fig3_gnn.png | App A | GNN four-stage detail: graph, GATv2 x4, attention pooling, 8 tokens x 128. |
+| 3 | figures/fig_vision_embedding.png | S3 (vision embedding paragraph) | The vision-embedding branch: ViT-H encoder, MMDiT decoder, 16x80 latents to 1280-D. |
+| 4 | figures/fig3_gnn.png | App A | GNN four-stage detail: graph, GATv2 x4, attention pooling, 8 tokens x 128. |
 
 ## Table map
 
@@ -55,14 +56,14 @@ representation does not help at this data scale.
 
 Composition (WAPE % / top-1):
 - conv: reranker 13.6+/-4.1 / 0.646+/-0.051; fusion 16.8+/-5.8 / 0.612+/-0.078; kNN 30.0+/-7.6 / 0.496+/-0.110
-- genai: reranker 41.6+/-18.9 / 0.287; fusion 44.7+/-18.0 / 0.276; kNN 57.2+/-16.4 / 0.294
+- vision: reranker 41.6+/-18.9 / 0.287; fusion 44.7+/-18.0 / 0.276; kNN 57.2+/-16.4 / 0.294
 - gnn: reranker 44.2+/-8.0 / 0.266; fusion 44.3+/-8.0 / 0.266; kNN 44.8+/-11.7 / 0.279
 - conv reranker guards: all-WAPE 19.7%, FP 1.1%, NLL 1.38
 - fusion guards: all-WAPE 25.4%, FP 1.3%; kNN: 61.7%, FP 10.3%
 
 Process (MAE / MAPE % / R2):
-- T_ext: trees 41.6/11.9/0.349 (conv), 39.2/11.4/0.391 (genai), 36.5/10.7/0.443 (gnn); ARD GP 52.1/15.2/0.039 (conv), 72.1/19.9/-0.813 (genai), 49.5/14.7/0.084 (gnn); grid GP 38.1/10.9/0.326 (conv), 35.2/10.5/0.367 (genai), 36.6/10.8/0.357 (gnn)
-- v_ext: trees 1.34/64.5/0.281 (conv), 1.22/55.9/0.409 (genai), 1.11/56.0/0.525 (gnn); ARD GP 1.71/104.7/-0.240 (conv), 1.76/120.5/-0.200 (genai), 1.44/94.5/0.012 (gnn); grid GP 1.05/49.9/0.535 (conv), 1.12/50.0/0.447 (genai), 1.12/53.3/0.473 (gnn)
+- T_ext: trees 41.6/11.9/0.349 (conv), 39.2/11.4/0.391 (vision), 36.5/10.7/0.443 (gnn); ARD GP 52.1/15.2/0.039 (conv), 72.1/19.9/-0.813 (vision), 49.5/14.7/0.084 (gnn); grid GP 38.1/10.9/0.326 (conv), 35.2/10.5/0.367 (vision), 36.6/10.8/0.357 (gnn)
+- v_ext: trees 1.34/64.5/0.281 (conv), 1.22/55.9/0.409 (vision), 1.11/56.0/0.525 (gnn); ARD GP 1.71/104.7/-0.240 (conv), 1.76/120.5/-0.200 (vision), 1.44/94.5/0.012 (gnn); grid GP 1.05/49.9/0.535 (conv), 1.12/50.0/0.447 (vision), 1.12/53.3/0.473 (gnn)
 - MAPE floors (constant predictor): T_ext 14.5%, v_ext 136.5%
 - coverage90: grid GP conv T 0.52 / v 0.56; gnn ARD GP T 0.69 / v 0.71
 

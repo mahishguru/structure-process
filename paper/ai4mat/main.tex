@@ -57,7 +57,8 @@ dataset, 107 extrusion conditions across 14 alloy classes with optical
 micrographs and X-ray texture measurements, which is sparse along both the
 composition and the process axis. We benchmark three descriptor families that
 span the current practice of metallic microstructure representation:
-handcrafted statistics (438-D), a frozen generative foundation-model latent
+handcrafted statistics (438-D), a frozen vision embedding from a generative
+foundation model
 (1280-D), and a learned grain-graph embedding (128-D). Each representation is
 paired with prediction heads that respect the discrete structure of the label
 spaces: classification over the 14-alloy composition lattice, and decoding
@@ -66,8 +67,8 @@ over the catalogue of observed processing conditions. Under condition-grouped
 handcrafted descriptors with an out-of-fold-constrained reranker identify
 composition with 13.6\% element WAPE and 0.65 alloy top-1, while a correlated
 Gaussian process decoded on the observed process grid predicts extrusion
-velocity best on all three representations (49.9\% MAPE). The generative
-latent, despite its 2.5B-parameter lineage, is the least compatible
+velocity best on all three representations (49.9\% MAPE). The vision
+embedding, despite its 2.5B-parameter lineage, is the least compatible
 descriptor for this task. Our results argue that on sparse experimental data,
 matching the prediction head to the discrete label structure matters more
 than scaling the representation, and that evaluation honesty is itself a
@@ -118,15 +119,16 @@ observed (temperature, velocity) pairs. Both label spaces are discrete, and
 this single observation drives everything that follows.
 
 We benchmark three representation families for metallic microstructure, from
-handcrafted statistics to a frozen generative foundation-model latent to a
+handcrafted statistics to a frozen vision embedding from a generative
+foundation model to a
 learned grain-graph embedding, and pair them with prediction heads that either
 respect or ignore the discrete label structure. The headline findings:
 
 \begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
   \item \textbf{Head structure beats representation scale.} On composition,
   handcrafted descriptors with a lattice-aware reranker reach 13.6\%
-  present-element WAPE and 0.65 alloy top-1; the 1280-D foundation-model
-  latent is three times worse, and the 128-D graph embedding worse still.
+  present-element WAPE and 0.65 alloy top-1; the 1280-D vision
+  embedding is three times worse, and the 128-D graph embedding worse still.
   \item \textbf{The process window is a catalogue, not a continuum.} Decoding
   a correlated Gaussian process over the grid of observed training conditions
   beats continuous regression on velocity for every representation.
@@ -184,7 +186,7 @@ predictions (Section~\ref{sec:heads}).
 
 Figure~\ref{fig:pipeline} shows the three descriptor branches. They span the
 design space a practitioner actually faces, from classical statistics to
-foundation-model latents, and the benchmark asks which of them is
+vision embeddings, and the benchmark asks which of them is
 \emph{compatible} with recipe inference at 107 conditions.
 
 \begin{figure}[t]
@@ -193,7 +195,8 @@ foundation-model latents, and the benchmark asks which of them is
   \caption{Three descriptor branches feed shared prediction heads.
   \textbf{Top (blue):} handcrafted microstructure and texture statistics,
   438-D. \textbf{Middle (orange):} frozen ViT-H encoder with an MMDiT
-  diffusion decoder, 16$\times$80 latents pooled to 1280-D. \textbf{Bottom
+  diffusion decoder, 16$\times$80 latents pooled to a 1280-D vision embedding
+  (Figure~\ref{fig:vision}). \textbf{Bottom
   (green):} grain adjacency graph through a GATv2 encoder with attention
   pooling, 128-D. Right: the shared heads, classification over the alloy
   lattice and Gaussian-process regression over the process window.}
@@ -211,19 +214,30 @@ microstructure from another \needref{2-point / n-point spatial correlation
 statistics for microstructure}\needref{GSH texture representation, e.g.
 Bunge}\needref{Isomap, Tenenbaum et al.}.
 
-\paragraph{Generative latent (1280-D).} The middle branch reuses the frozen
+\paragraph{Vision embedding (1280-D).} The middle branch reuses the frozen
 encoder-decoder of our companion work \needref{companion NeurIPS 2026
 submission}: a ViT-H/14 vision transformer, pretrained on natural images and
 upper-block fine-tuned on $\sim$80k EBSD-derived microstructures, compresses a
 micrograph to a bottleneck that an MMDiT rectified-flow decoder (Stable
 Diffusion 3.5 backbone) can reconstruct from \needref{ViT}\needref{CLIP /
 OpenCLIP pretraining}\needref{SD3 / rectified flow MMDiT}. Each image yields
-$16 \times 80$ latents, pooled and flattened to 1280-D. We deliberately do not
-retrain anything here: the question is whether a latent learned for
+$16 \times 80$ latents, pooled and flattened to the 1280-D vision embedding
+(Figure~\ref{fig:vision}). We deliberately do not
+retrain anything here: the question is whether a vision embedding learned for
 \emph{generation and reconstruction} transfers to \emph{recipe inference}.
 Architecture and training detail are in the companion paper; what matters here
 is only that this is the strongest generative representation of these
 microstructures currently available to us.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figures/fig_vision_embedding.png}
+  \caption{The vision-embedding branch. A micrograph is patchified and encoded
+  by the ViT-H encoder into the latent that the MMDiT decoder is trained to
+  reconstruct from; the $16 \times 80$ latents serve, frozen, as the 1280-D
+  representation for recipe inference.}
+  \label{fig:vision}
+\end{figure}
 
 \paragraph{Grain-graph embedding (128-D).} The third branch builds a grain
 adjacency graph per image (grains as nodes, shared boundaries as edges, node
@@ -256,7 +270,7 @@ posterior is a convex blend
 $p = w\, p_{\mathrm{owner}} + (1-w)\, p_{\mathrm{aux}}$.
 The weight $w$ is selected on training out-of-fold predictions only, and a
 candidate $w$ is eligible only if it does not degrade all-element WAPE or the
-false-positive rate relative to the owner. On the genai and gnn branches, which
+false-positive rate relative to the owner. On the vision and gnn branches, which
 have no descriptor blocks, an FT-Transformer classifier plays the auxiliary
 role \needref{FT-Transformer, Gorishniy et al.}.
 
@@ -298,10 +312,10 @@ classification via cumulative link / Frank \& Hall}.
 \emph{and} the best guard metrics (19.7\% all-WAPE, 1.1\% false positives). The
 descriptor-block auxiliary genuinely complements the owner on this branch. On
 the learned representations the same machinery honestly reports failure: the
-out-of-fold selection chooses owner weight 1.0 on 8 of 10 genai/gnn folds,
+out-of-fold selection chooses owner weight 1.0 on 8 of 10 vision/gnn folds,
 i.e. the auxiliary adds nothing and the head correctly refuses to use it. The
-ordering is stark: conventional 13.6\%, genai 41.6\%, gnn 44.2\% WAPE. The
-1280-D foundation latent, our most expensive representation, is the least
+ordering is stark: conventional 13.6\%, vision 41.6\%, gnn 44.2\% WAPE. The
+1280-D vision embedding, our most expensive representation, is the least
 compatible with composition inference.
 
 \begin{table}[t]
@@ -320,7 +334,7 @@ compatible with composition inference.
       & balanced fusion & $16.8 \pm 5.8$ & 25.4 & 1.3 & $0.612 \pm 0.078$ \\
       & OOF-constrained reranker & $\mathbf{13.6 \pm 4.1}$ & \textbf{19.7} & \textbf{1.1} & $\mathbf{0.646 \pm 0.051}$ \\
     \midrule
-    \multirow{2}{*}{genai}
+    \multirow{2}{*}{vision}
       & balanced fusion & $44.7 \pm 18.0$ & 74.5 & 6.5 & $0.276 \pm 0.104$ \\
       & OOF-constrained reranker & $41.6 \pm 18.9$ & 70.0 & 5.9 & $0.287 \pm 0.111$ \\
     \midrule
@@ -334,7 +348,7 @@ compatible with composition inference.
 \paragraph{Task B: process.} Table~\ref{tab:process} shows the mirror task.
 The joint-grid GP wins velocity on all three representations (MAPE 49.9, 50.0,
 53.3\% against a 136.5\% constant-predictor floor) and temperature on
-conventional and genai; the gnn trees take temperature R$^2$ (0.443). The plain
+conventional and vision; the gnn trees take temperature R$^2$ (0.443). The plain
 continuous GP collapses on velocity (MAPE 95-120\%, R$^2 \leq 0.08$): the
 improvement comes from decoding on the observed grid, not from the GP itself.
 This is the process-side analogue of the composition lattice: with roughly 70
@@ -361,7 +375,7 @@ catalogue than as a continuum.
       & ARD GP & $\vext$ & 1.71 & 104.7 & $-$0.240 \\
       & joint-grid GP & $\vext$ & \textbf{1.05} & \textbf{49.9} & \textbf{0.535} \\
     \midrule
-    \multirow{2}{*}{genai}
+    \multirow{2}{*}{vision}
       & joint-grid GP & $\Text$ & \textbf{35.2} & \textbf{10.5} & \textbf{0.367} \\
       & joint-grid GP & $\vext$ & \textbf{1.12} & \textbf{50.0} & \textbf{0.447} \\
     \midrule
@@ -393,12 +407,12 @@ should not be trusted beyond that.
 
 \paragraph{An answer to the scaling question.} For this task, at this data
 scale, larger learned representations do not yield predictable improvements:
-the 2.5B-parameter-lineage latent loses to 438 handcrafted statistics by a
+the 2.5B-parameter-lineage vision embedding loses to 438 handcrafted statistics by a
 factor of three on composition WAPE. The bottleneck is not model capacity but
 descriptor-task compatibility: recipe-level information lives in grain-size and
 shape distributions, boundary statistics, and texture components that the
-handcrafted pipeline encodes explicitly and the generative latent retains only
-as needed for reconstruction. We expect the gap to narrow as such latents are
+handcrafted pipeline encodes explicitly and the vision embedding retains only
+as needed for reconstruction. We expect the gap to narrow as such embeddings are
 trained on larger and more diverse microstructure corpora, but on today's
 experimental campaigns the domain-designed descriptor is the right prior.
 
@@ -478,12 +492,12 @@ rebuildable end-to-end with \texttt{scripts/run/run\_cv.py} and
     conv. & ARD GP & $\vext$ & 1.71 & $104.7 \pm 40.9$ & $-$0.240 \\
     conv. & joint-grid GP & $\vext$ & 1.05 & $49.9 \pm 14.5$ & 0.535 \\
     \midrule
-    genai & trees & $\Text$ & 39.2 & $11.4 \pm 1.9$ & 0.391 \\
-    genai & ARD GP & $\Text$ & 72.1 & $19.9 \pm 3.4$ & $-$0.813 \\
-    genai & joint-grid GP & $\Text$ & 35.2 & $10.5 \pm 1.4$ & 0.367 \\
-    genai & trees & $\vext$ & 1.22 & $55.9 \pm 10.7$ & 0.409 \\
-    genai & ARD GP & $\vext$ & 1.76 & $120.5 \pm 57.2$ & $-$0.200 \\
-    genai & joint-grid GP & $\vext$ & 1.12 & $50.0 \pm 12.2$ & 0.447 \\
+    vision & trees & $\Text$ & 39.2 & $11.4 \pm 1.9$ & 0.391 \\
+    vision & ARD GP & $\Text$ & 72.1 & $19.9 \pm 3.4$ & $-$0.813 \\
+    vision & joint-grid GP & $\Text$ & 35.2 & $10.5 \pm 1.4$ & 0.367 \\
+    vision & trees & $\vext$ & 1.22 & $55.9 \pm 10.7$ & 0.409 \\
+    vision & ARD GP & $\vext$ & 1.76 & $120.5 \pm 57.2$ & $-$0.200 \\
+    vision & joint-grid GP & $\vext$ & 1.12 & $50.0 \pm 12.2$ & 0.447 \\
     \midrule
     gnn & trees & $\Text$ & 36.5 & $10.7 \pm 2.2$ & 0.443 \\
     gnn & ARD GP & $\Text$ & 49.5 & $14.7 \pm 3.1$ & 0.084 \\
