@@ -166,7 +166,7 @@ Head interface: composition heads consume conditioned parts and produce alloy
 probabilities; process heads consume conditioned parts (trees, gp) or raw parts
 (grid_gp bags) and produce physical-unit (T_ext, v_ext). The reranker is one
 selection machinery with a representation-appropriate auxiliary: descriptor
-blocks for conventional, FT-Transformer for genai/gnn.
+blocks for conventional, FT-Transformer for vision/gnn.
 
 ## 9. Order of work
 

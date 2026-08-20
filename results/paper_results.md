@@ -50,7 +50,7 @@ element wt% + extrusion-ratio one-hot.
 
 ### Table 3a: Composition given known process (WAPE / top-1; guard columns right)
 
-| head | conv WAPE | genai WAPE | gnn WAPE | conv top-1 | genai top-1 | gnn top-1 | conv all-WAPE | conv FP % |
+| head | conv WAPE | vision WAPE | gnn WAPE | conv top-1 | vision top-1 | gnn top-1 | conv all-WAPE | conv FP % |
 |---|---|---|---|---|---|---|---|---|
 | kNN retrieval | 30.0% +/- 7.6 | 57.2% +/- 16.4 | 44.8% +/- 11.7 | 0.496 | 0.294 | 0.279 | 61.7% | 10.3 |
 | Condition-balanced fusion | 16.8% +/- 5.8 | 44.7% +/- 18.0 | 44.3% +/- 8.0 | 0.612 | 0.276 | 0.266 | 25.4% | 1.3 |
@@ -59,7 +59,7 @@ element wt% + extrusion-ratio one-hot.
 all-WAPE and FP % for the other pipelines are in composition_heads_cv.csv. The
 reranker wins on conventional on every metric at once: lower WAPE, lower
 all-WAPE, lower false-positive rate, and higher top-1 than the fusion it must
-beat. On genai and gnn it converges to the fusion (selected owner weight 1.0 on
+beat. On vision and gnn it converges to the fusion (selected owner weight 1.0 on
 8 of 10 folds; the FT-Transformer auxiliary carries no block structure and adds
 nothing), so it neither helps nor hurts there.
 
@@ -69,7 +69,7 @@ T_ext MAE in C, v_ext MAE in mm/s. Compare MAPE down a column, never across the
 two targets: a constant train-mean predictor scores 14.5% on T_ext against
 136.5% on v_ext.
 
-| head | target | conv MAE | conv MAPE | conv R2 | genai MAE | genai MAPE | genai R2 | gnn MAE | gnn MAPE | gnn R2 |
+| head | target | conv MAE | conv MAPE | conv R2 | vision MAE | vision MAPE | vision R2 | gnn MAE | gnn MAPE | gnn R2 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Gradient-boosted trees | T_ext | 41.6 | 11.9% | 0.349 | 39.2 | 11.4% | 0.391 | 36.5 | 10.7% | 0.443 |
 | Gaussian process (ARD) | T_ext | 52.1 | 15.2% | 0.039 | 72.1 | 19.9% | -0.813 | 49.5 | 14.7% | 0.084 |
@@ -79,7 +79,7 @@ two targets: a constant train-mean predictor scores 14.5% on T_ext against
 | Joint-grid GP | v_ext | **1.05** | **49.9%** | **0.535** | **1.12** | **50.0%** | 0.447 | **1.12** | **53.3%** | 0.473 |
 
 The joint-grid GP wins v_ext on all three representations and T_ext on
-conventional and genai; the gnn trees edge it on T_ext R2 (0.443). The grid
+conventional and vision; the gnn trees edge it on T_ext R2 (0.443). The grid
 decode is what wins the discrete velocity task, exactly as designed.
 
 ## Calibration and uncertainty
@@ -95,7 +95,7 @@ decode is what wins the discrete velocity task, exactly as designed.
 ## Representation verdict
 
 Conventional descriptors win composition outright (WAPE 13.6% against 41.6%
-genai and 44.2% gnn). The process window splits: genai grid-GP is the sharpest
+vision and 44.2% gnn). The process window splits: vision grid-GP is the sharpest
 on T_ext (35.2 C), conventional grid-GP the best on v_ext (1.05 mm/s, R2
 0.535), and gnn the best-calibrated. This is sharper than the earlier
 "complementary halves" reading: the composition side is decisively conventional.
