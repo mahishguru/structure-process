@@ -11,11 +11,12 @@ dist/
 venv/
 env/
 
-# Data artifacts (regenerate via scripts/)
-data/
-!data/README.md
+# Data artifacts (regenerate via scripts/); root-level only so package
+# modules named data/ or runs/ elsewhere in the tree stay trackable.
+/data/
+!/data/README.md
 checkpoints/
-runs/
+/runs/
 wandb/
 catboost_info/
 *.pth
