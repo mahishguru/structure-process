@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper below."
+title: "structure-process: inferring alloy composition and process parameters from microstructure and texture"
+repository-code: "https://github.com/mahishguru/structure-process"
+authors:
+  - family-names: Guru
+    given-names: Mahish K.
+preferred-citation:
+  type: conference-paper
+  title: "Which alloy composition, what process parameters? Inferring the recipe from optimized metallic microstructure and texture"
+  authors:
+    - family-names: Guru
+      given-names: Mahish K.
+    - family-names: Bohlen
+      given-names: Jan
+    - family-names: Lemjid
+      given-names: Louam
+    - family-names: Tacke
+      given-names: Marius
+    - family-names: Aydin
+      given-names: Roland
+    - family-names: Ben Khalifa
+      given-names: Noomane
+  collection-title: "NeurIPS 2026 Workshop on AI for Accelerated Materials Design (AI4Mat)"
+  year: 2026
+  url: "https://arxiv.org/abs/2610.08165"
+  identifiers:
+    - type: other
+      value: "arXiv:2610.08165"
+      description: arXiv preprint

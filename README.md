@@ -1,35 +1,78 @@
-# ICME-Mg: Inverse Composition-Process Linkages for Extruded Magnesium Alloys
+# Which alloy composition, what process parameters? Inferring the recipe from optimized metallic microstructure and texture
 
-Joint probabilistic prediction of alloy composition and extrusion process parameters
-from microstructure and texture descriptors. Target venue: NeurIPS AI4Mat workshop.
+[![arXiv](https://img.shields.io/badge/arXiv-2610.08165-b31b1b.svg)](https://arxiv.org/abs/2610.08165)
+[![Workshop](https://img.shields.io/badge/NeurIPS%202026-AI4Mat%20Workshop-4b44ce.svg)](https://arxiv.org/abs/2610.08165)
+
+Code for the paper **"Which alloy composition, what process parameters? Inferring the
+recipe from optimized metallic microstructure and texture"** by Mahish K. Guru,
+Jan Bohlen, Louam Lemjid, Marius Tacke, Roland Aydin and Noomane Ben Khalifa,
+accepted at the **AI4Mat workshop at NeurIPS 2026**.
+
+- Preprint: [arXiv:2610.08165](https://arxiv.org/abs/2610.08165)
+
+The paper asks whether alloy development can be run in reverse: given an optimized
+microstructure and texture, which alloy composition and which extrusion parameters
+produced it? We learn this structure -> composition + process step on 107
+magnesium-alloy extrusion conditions across 14 alloys, each with optical
+micrographs and X-ray texture measurements. Three descriptors are compared:
+
+1. **Conventional**: statistical grain and texture descriptors
+2. **Vision embedding**: latents from a pretrained image encoder (code key: `genai`)
+3. **GNN**: a graph neural network over the grain network
+
+Under 5-fold condition-grouped cross-validation, conventional descriptors identify
+the correct alloy for 65% of held-out conditions (most-frequent-alloy baseline: 17%),
+while the learned embeddings stay below 30%. Process parameters can be recovered
+but with more noise. Adding microstructure roughly halves the extrusion-temperature
+error compared with composition alone. Because the targets are discrete (a
+14-alloy lattice and a catalogue of observed press settings), heads that pick from
+known options beat heads that predict free values.
 
 This project closes the ICME loop opened by two prior works:
 
 1. **Acta Materialia 2025** (forward structure -> property): statistical microstructure
    and texture descriptors + XGBoost/GP/MLP regressors for mechanical properties.
-2. **NeurIPS 2026 submission** (property -> structure, inverse design): ViT-H/14 +
-   FM-DiT generative latent space (Co-PiLOT / Meridian).
+2. **Co-PiLOT** (property -> structure, inverse design): constrained physics-informed
+   latent optimization in a ViT-H/14 + FM-DiT generative latent space
+   ([arXiv:2609.37875](https://arxiv.org/abs/2609.37875)).
 
-Here we learn the remaining linkage: **structure -> composition + process**, as a
-full joint density `p(composition, process | descriptor)` using an autoregressive
-flow-transformer head shared across three descriptor pipelines.
+## Citation
+
+If you use this code or data, please cite:
+
+```bibtex
+@inproceedings{guru2026recipe,
+  title         = {Which alloy composition, what process parameters? Inferring the recipe
+                   from optimized metallic microstructure and texture},
+  author        = {Guru, Mahish K. and Bohlen, Jan and Lemjid, Louam and Tacke, Marius
+                   and Aydin, Roland and Ben Khalifa, Noomane},
+  booktitle     = {NeurIPS 2026 Workshop on AI for Accelerated Materials Design (AI4Mat)},
+  year          = {2026},
+  eprint        = {2610.08165},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2610.08165}
+}
+```
 
 ## Repository layout
 
 ```
-strategy/          Paper story, architecture spec, experiment matrix, data inventory
-configs/           YAML configs (pipelines, head, baselines, paths)
+configs/           YAML configs (pipelines, heads, baselines, paths)
 src/icme_mg/       Python package
   labels/          Label extraction (composition + T + v) -> labels.csv
   pipelines/
     conventional/  Statistical descriptors (GSH, Gram, n-point, grain histograms)
-    genai/         ViT-FMDiT-1280 latent extraction (pretrained encoder)
+    genai/         Vision-embedding latent extraction (pretrained encoder)
     gnn/           Grain-graph construction (DREAM.3D RVEs + experimental) + GNN encoder
-  models/          Flow-transformer head, spline flows, adapters, baselines
-  training/        Trainer, group-aware splits, balanced sampling
-  evaluation/      Metrics, calibration, reports
-scripts/           Entry points (build datasets, train, evaluate)
-paper/             NeurIPS workshop LaTeX skeleton
+  heads/           Composition and process prediction heads
+  models/          Flow head, spline flows, lattice heads, adapters, baselines
+  protocols/       5-fold condition-grouped cross-validation
+  training/        Trainer, splits, datasets
+  evaluation/      Metrics, calibration, head metrics
+scripts/           Entry points (build datasets, train, evaluate, plots)
+  run/             run_cv.py / aggregate_cv.py: the paper's CV benchmark
+results/           Paper results (paper_results.md is the source of truth), tables
 data/              Generated artifacts (gitignored)
 tests/             Unit tests
 ```
@@ -44,48 +87,29 @@ pip install -e ".[dev]"
 # 1. Build labels (composition + process parameters per condition)
 python scripts/build_labels.py --config configs/paths.yaml
 
-# 2. Build one frozen random condition split (seed 0), stratified by alloy
-python scripts/build_splits.py --config configs/paths.yaml
-
-# 3. Assemble descriptor datasets
+# 2. Assemble descriptor datasets
 python scripts/build_conventional.py --config configs/conventional.yaml
 python scripts/extract_genai_latents.py --config configs/genai.yaml   # needs checkpoint
 python scripts/build_graphs.py --config configs/gnn.yaml
 
-# 4. Train
-python scripts/train.py --config configs/flow_head.yaml --pipeline conventional --split random_seed0
-python scripts/train_baselines.py --config configs/baselines.yaml --split random_seed0 --kind xgboost
+# 3. Paper benchmark: 5 folds x 3 representations
+python scripts/run/run_cv.py
 
-# 5. Evaluate / aggregate
-python scripts/evaluate.py --run-dir runs/<run>
-
-# Optional diagnostic only: leaks conditions across train/test by design
-python scripts/random_split_benchmark.py
-
-# Best sparse-data head: condition-balanced fusion + validation-selected
-# correction for the empirical alloy-frequency prior
-python scripts/logit_adjusted_fusion.py
+# 4. Rebuild the paper tables from the per-fold reports
+python scripts/run/aggregate_cv.py
 ```
 
-Run the conditioned composition/process head comparison for Conventional,
-GenAI, and GNN with the single random split:
+## Evaluation protocol
 
-```bash
-setsid env PYTHON=.venv/bin/python \
-  bash scripts/run_cross_pipeline_random_seed0.sh \
-  > runs/cross_pipeline_random_seed0_bootstrap.log 2>&1 < /dev/null &
-```
+All reported numbers use 5-fold condition-grouped cross-validation over 107
+conditions in 14 alloys. Images from one condition never cross folds. Results are
+reported as fold mean +/- std; see `results/paper_results.md`. The earlier
+single-split (`random_seed0`) study is superseded and archived in `results/archive/`.
 
-The resumable chain builds labels and the split, overlaps Conventional dataset
-preparation with GNN encoder training, and then runs the three GPU-heavy head
-benchmarks sequentially. Progress is written to
-`runs/cross_pipeline_random_seed0_chain.log`.
-
-The primary protocol is `random_seed0`: one alloy-stratified random split over
-whole conditions. Images from one condition never cross partitions. There is no
-leave-one-condition-out or leave-one-alloy-out evaluation. A random split over
-individual images remains only as a leakage diagnostic because repeated images
-would place the same condition labels in both training and test sets.
+Each task conditions on the other's known inputs: composition heads see the
+representation plus the known extrusion temperature, log ram speed and extrusion
+ratio; process heads see the representation plus the known element wt% and
+extrusion ratio.
 
 ## Prediction targets
 
