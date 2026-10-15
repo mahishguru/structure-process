@@ -32,8 +32,9 @@ This project closes the ICME loop opened by two prior works:
 
 1. **Acta Materialia 2025** (forward structure -> property): statistical microstructure
    and texture descriptors + XGBoost/GP/MLP regressors for mechanical properties.
-2. **Property -> structure inverse design**: ViT-H/14 + FM-DiT generative latent
-   space (Co-PiLOT / Meridian).
+2. **Co-PiLOT** (property -> structure, inverse design): constrained physics-informed
+   latent optimization in a ViT-H/14 + FM-DiT generative latent space
+   ([arXiv:2609.37875](https://arxiv.org/abs/2609.37875)).
 
 ## Citation
 
